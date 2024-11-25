@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  #map {
+    height: 500px;
+    width: 100%;
+    margin-top: 20px;
+    background-color: #f0f0f0;
+  }
+
+  /* General Control Styles */
+.control-container {
+  background: white;
+  padding: 4px;
+  border-radius: 8px;
+  width: 200px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.control-title {
+  font-size: 18px;
+  margin: 4px 0 4px 0;
+  text-align: center;
+  font-weight: bold;
+}
+
+.control-item {
+  margin-bottom: 4px;
+}
+
+.control-label {
+  font-size: 16px;
+  margin-left: 5px;
+}
+
+.control-input {
+  width: calc(100% - 10px);
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: 16px;
+}
+
+/* Deselect Button Specific Styles */
+.control-button {
+  width: 200px;
+  background: white;
+  padding: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.control-button:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  background: #f0f0f0;
+}
+  
+  #plots {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  
+  .plot-container {
+    width: 32%;
+  }
