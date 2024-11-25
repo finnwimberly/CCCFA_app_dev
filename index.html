@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CCCFA Observations</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <!-- DateRangePicker CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+  <!-- External Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <h1>CCCFA Observations</h1>
+
+  <div class="description">
+    <p>This website synthesizes the joint observation efforts of the CCCFA and WHOI. Since August 2024 the CCCFA has been using WHOI-provided CTDs to monitor ocean temperature, salinity, and density in various areas off the coast of Cape Cod. Below you can select profiles on the map and view the corresponding CTD measurements on the plots below. You can filter profiles by date or overlay visualization of the sea surface temperature (SST) and sea surface salinity (SSS). These "layers" are acquired by through satellite imagery.</p>
+  </div>
+
+  <!-- Map Container -->
+  <div id="map"></div>
+
+  <!-- SST Legend Container -->
+  <div id="sst-legend" style="display: none;">
+    <!-- Plotly or dynamic legend will be rendered here -->
+  </div>
+
+  <!-- SSS Legend Container -->
+  <div id="sss-legend" style="display: none;">
+    <!-- Plotly or dynamic legend will be rendered here -->
+  </div>
+
+  <!-- Plots Container -->
+  <div id="plots">
+    <div id="temp-plot" class="plot-container"></div>
+    <div id="sal-plot" class="plot-container"></div>
+    <div id="dens-plot" class="plot-container"></div>
+  </div>
+
+  <!-- Unit Selector -->
+  <div id="unit-selector" style="text-align: center; font-size: 16px;">
+    <label style="font-weight: bold;">Select Unit System:</label>
+    <input type="radio" id="imperial" name="unit" value="imperial" checked />
+    <label for="imperial">Imperial (°F, fathoms)</label>
+    <input type="radio" id="metric" name="unit" value="metric" />
+    <label for="metric">Metric (°C, meters)</label>
+  </div>
+
+  <!-- Include Required JavaScript Libraries -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+  <!-- Include Custom JavaScript Files -->
+  <script src="scripts/map-setup.js" type="module"></script>
+  <script src="scripts/layers.js" type="module"></script>
+  <script src="scripts/controls.js" type="module"></script>
+  <script src="scripts/plots.js" type="module"></script>
+  <script src="scripts/data-loading.js" type="module"></script>
+  <script src="scripts/utils.js" type="module"></script>
+</body>
+</html>
