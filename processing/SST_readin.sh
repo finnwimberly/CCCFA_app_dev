@@ -3,7 +3,7 @@
 # Script to download SST files from CoastWatch East Coast Node after Aug 1, 2024 (day 213)
 
 # Set the directory where files will be saved
-YOUR_DIRECTORY="/home/finn.wimberly/Documents/CCCFA_app_dev/Project/raw_data/SST/"
+YOUR_DIRECTORY="/vast/clidex/data/obs/CCCFA/raw_data/SST/"
 mkdir -p $YOUR_DIRECTORY
 
 # Get current day of year

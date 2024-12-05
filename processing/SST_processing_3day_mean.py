@@ -23,7 +23,7 @@ import json
 
 
 # Define directories
-base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project'
+base_dir = '/vast/clidex/data/obs/CCCFA'
 raw_data_dir = os.path.join(base_dir, 'raw_data', 'SST')
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 

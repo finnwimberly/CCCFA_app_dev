@@ -23,7 +23,7 @@ import json
 
 
 # Define directories
-base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project'
+base_dir = '/vast/clidex/data/obs/CCCFA'
 raw_data_dir = os.path.join(base_dir, 'raw_data', 'SSS')
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SSS', 'tiles_mirrored')
 
@@ -304,7 +304,7 @@ for filename in os.listdir(temp_files_dir):
 from pathlib import Path
 
 # Define paths
-base_dir = Path('/home/finn.wimberly/Documents/CCCFA_app_dev/Project')
+base_dir = Path('/vast/clidex/data/obs/CCCFA')
 original_tiles_dir = base_dir / 'processed_data' / 'SSS' / 'tiles'
 temp_dir = base_dir / 'processed_data' / 'SSS' / 'temp_files'
 mirrored_tiles_dir = base_dir / 'processed_data' / 'SSS' / 'tiles_mirrored'
@@ -420,7 +420,7 @@ for filename in os.listdir(range_dir):
 
 
 # Define base directory
-base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project'
+base_dir = '/vast/clidex/data/obs/CCCFA'
 
 # Path for the temp_files directory
 temp_files_dir = os.path.join(base_dir, 'processed_data', 'SSS', 'temp_files')
@@ -649,7 +649,7 @@ for filename in os.listdir(temp_files_dir):
 from pathlib import Path
 
 # Define paths
-base_dir = Path('/home/finn.wimberly/Documents/CCCFA_app_dev/Project')
+base_dir = Path('/vast/clidex/data/obs/CCCFA')
 # original_tiles_dir = base_dir / 'processed_data' / 'SSS' / 'tiles'
 temp_dir = base_dir / 'processed_data' / 'SSS' / 'temp_files'
 mirrored_tiles_dir = base_dir / 'processed_data' / 'SSS' / 'tiles_mirrored_local'
