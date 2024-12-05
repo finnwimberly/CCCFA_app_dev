@@ -55,7 +55,7 @@ for profile in df['profile_id_Unnamed: 12_level_1'].unique():
     processed_data[profile] = measurements_df
 
 # Define the directory where you want to save the files
-output_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project/processed_data/CTD_profiles'
+output_dir = '/vast/clidex/data/obs/CCCFA/processed_data/CTD_profiles'
 os.makedirs(output_dir, exist_ok=True)
 
 # Create a list to store metadata entries
