@@ -36,14 +36,18 @@ for folder_name in os.listdir(tiles_dir):
         date_str = folder_name  #.replace('_', '')
         existing_tiles.add(date_str)
 
+
 # Get list of raw data files to process
 raw_files_to_process = []
+date_cutoff = "2024_210"
 
 for filename in os.listdir(raw_data_dir):
-    if filename.endswith('.nc'):  # Adjusted to match .nc files
-        # Extract date from raw file name (e.g., RSS_smap_SSS_L3_8day_running_2024_210_FNL_v06.0.nc -> 2024_210)
-        date_in_filename = '_'.join(filename.split('_')[6:8])  # Extract 2024_210
-        if date_in_filename not in existing_tiles:
+    if filename.endswith('.nc'):  # Match .nc files
+        # Extract date from filename (e.g., 2024_210)
+        date_in_filename = '_'.join(filename.split('_')[6:8])
+        
+        # Process only files after cutoff and not already processed
+        if date_in_filename >= date_cutoff and date_in_filename not in existing_tiles:
             raw_files_to_process.append(filename)
 
 # Output filtered file list
