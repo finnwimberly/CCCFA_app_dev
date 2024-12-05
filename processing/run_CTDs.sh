@@ -15,5 +15,5 @@ python ERDDAP_readin.py
 # Deactivate the environment (optional)
 conda deactivate
 
-echo "Script completed at $(date)" >> /home/finn.wimberly/logs/notebook_run.log
+echo "Script completed at $(date)" >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CTD_profiles.log
 

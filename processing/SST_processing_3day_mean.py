@@ -23,7 +23,7 @@ import json
 
 
 # Define directories
-base_dir = '/vast/clidex/data/obs/CCCFA'
+base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project/data'
 raw_data_dir = os.path.join(base_dir, 'raw_data', 'SST')
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 
@@ -43,7 +43,7 @@ for filename in os.listdir(raw_data_dir):
     if filename.endswith('.nc4') and 'DAILY' not in filename:  # Ensure it's a 3-day file
         # Extract date from raw file name (e.g., ACSPOCW_2024211_3DAY_MULTISAT_SST-NGT_EC_750M.nc4 -> 2024211)
         date_in_filename = filename.split('_')[1]  # Extract 2024211
-        if date_in_filename not in existing_tiles:
+        if date_in_filename not in existing_tiles and int(date_in_filename) >= 2024210:
             raw_files_to_process.append(filename)
 
 # Output filtered file list
@@ -281,7 +281,7 @@ for filename in os.listdir(range_dir):
 
     # Skip if the date doesn't exist in the SST dictionary
     if raw_date_str not in sst:
-        print(f"No data found for {raw_date_str}, skipping...")
+        # print(f"No data found for {raw_date_str}, skipping...")
         continue
 
     # Define max/min values from the SST data
