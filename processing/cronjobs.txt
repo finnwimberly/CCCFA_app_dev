@@ -28,6 +28,8 @@
 0 0 * * * /home/finn.wimberly/mambaforge/bin/podaac-data-subscriber -c SMAP_RSS_L3_SSS_SMI_8DAY-RUNNINGMEAN_V6 -d /vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data/ -m 1440 >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_download.log 2>&1
 #Download raw SST data every night
 0 3 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/SST_readin.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SST_download.log 2>&1
+#Download raw ERRDAP profiles to /vast 1x/week
+0 1 * * 1 /home/finn.wimberly/Documents/CCCFA_app_dev/Project/data/run_update_profs.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/update_ERRDAP_profiles.log
 
 #Generate new SSS tiles from new raw SSS files
 0 4 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_SSS.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_tiles.log 2>&1
