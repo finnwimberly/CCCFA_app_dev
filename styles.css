@@ -252,7 +252,7 @@ body {
   #sst-legend,
   #sss-legend {
     position: absolute; /* Ensures placement relative to the map container */
-    bottom: -45px; /* Adjust as needed */
+    bottom: -30px; /* Adjust as needed */
     left: 25px; /* Adjust as needed */
     z-index: 1000; /* Ensure legends are above other map elements */
     background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
