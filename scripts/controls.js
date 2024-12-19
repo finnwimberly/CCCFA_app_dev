@@ -1,82 +1,177 @@
 import { map } from './map-setup.js';
-import { sstOverlay, sssOverlay, bathymetryLayer } from './layers.js';
+import { sstOverlay, sssOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend } from './layers.js';
 import { initializePlots, removeCTDMeasurements } from './plots.js';
 import { loadProfiles } from './map.js';
 import { state } from './state.js';
 
-// Add Date Range Picker control
 const DateRangeControl = L.Control.extend({
-  onAdd: function () {
-    const div = L.DomUtil.create('div', 'leaflet-control custom-control date-control');
-    div.innerHTML = `
-      <div class="control-container">
-        <h3 class="control-title">Time Control</h3>
-        <div class="control-item">
-          <input type="radio" id="single-date" name="date-mode" value="single">
-          <label for="single-date" class="control-label">Layer Date</label>
-        </div>
-        <div class="control-item">
-          <input type="radio" id="date-range" name="date-mode" value="range" checked>
-          <label for="date-range" class="control-label">Observation Range</label>
-        </div>
-        <div class="control-item">
-          <input type="text" id="daterange" name="daterange" 
-                 value="08/01/2024 - ${moment().format("MM/DD/YYYY")}" 
-                 class="control-input" />
-        </div>
-      </div>`;
-    return div;
-  },
-});
+    onAdd: function () {
+      const div = L.DomUtil.create('div', 'leaflet-control custom-control date-control');
+      div.innerHTML = `
+        <div class="control-container">
+            <h3 class="control-title">Time Control
+                <i id="info-icon" class="fas fa-info-circle" title="Info"></i> <!-- Info Icon -->
+            </h3>
+            <div class="control-item">
+                <input type="radio" id="single-date" name="date-mode" value="single">
+                <label for="single-date" class="control-label">Layer Date</label>
+            </div>
+            <div class="control-item">
+                <input type="radio" id="date-range" name="date-mode" value="range" checked>
+                <label for="date-range" class="control-label">Observation Range</label>
+            </div>
+            <div class="control-item">
+                <input type="text" id="daterange" name="daterange" 
+                    value="08/01/2024 - ${moment().format("MM/DD/YYYY")}" 
+                    class="control-input" />
+            </div>
+            </div>
+      `;
+      return div;
+    },
+  });
 
 map.addControl(new DateRangeControl({ position: 'topright' }));
 
-// Initialize Date Picker
-$(function () {
-  const picker = $('#daterange');
-  let currentMode = 'range';
+const infoModal = `
+  <div id="info-overlay"></div>
+  <div id="info-modal">
+    <span id="info-modal-close">&times;</span>
+    <h4>Layer Selection Color Scheme</h4>
+    <p class="modal-subtitle">
+      In order to see SST or SSS data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
+    </p>
+    <ul>
+      <li><span class="color-block green-block">Green</span> Both SST and SSS layers available</li>
+      <li><span class="color-block blue-block">Blue</span> Only SSS layer available</li>
+      <li><span class="color-block yellow-block">Yellow</span> Only SST layer available</li>
+    </ul>
+    <p class="modal-subtitle">
+      The range over which profile markers are visible can be changed through selecting the "Observation Range" option. Select the start and end date by clicking on the range below. You can select values with the pop-up calendar or by typing in values directly into the text box.
+    </p>
+  </div>
+`;
 
-  // Function to initialize the date picker
-  function initializePicker(mode) {
-    const options = {
-      opens: 'left',
-      maxDate: moment().format("MM/DD/YYYY"),
-    };
+document.body.insertAdjacentHTML('beforeend', infoModal);
 
-    if (mode === 'single') {
-      options.singleDatePicker = true;
-      options.startDate = moment().format("MM/DD/YYYY");
-    } else {
-      options.singleDatePicker = false;
-      options.startDate = '08/01/2024';
-      options.endDate = moment().format("MM/DD/YYYY");
-    }
+// Info Modal Logic
+document.getElementById('info-icon').addEventListener('click', () => {
+  document.getElementById('info-overlay').style.display = 'block';
+  document.getElementById('info-modal').style.display = 'block';
+});
 
-    picker.daterangepicker(options, (start, end) => {
-      if (mode === 'range') {
-        // Load profiles within the selected date range
-        loadProfiles(start, end);
-      } else if (mode === 'single') {
-        const selectedDate = `${start.year()}_${start.dayOfYear().toString().padStart(3, '0')}`;
-        sstOverlay.setUrl(`/processed_data/SST/tiles_3day/${selectedDate}/{z}/{x}/{y}.png`);
-        sssOverlay.setUrl(`/processed_data/SSS/tiles_mirrored/${selectedDate}/{z}/{x}/{y}.png`);
+document.getElementById('info-modal-close').addEventListener('click', () => {
+  document.getElementById('info-overlay').style.display = 'none';
+  document.getElementById('info-modal').style.display = 'none';
+});
 
-        // Update legends for the selected date
-        createSSTLegend(selectedDate);
-        createSSSLegend(selectedDate);
+document.getElementById('info-overlay').addEventListener('click', () => {
+  document.getElementById('info-overlay').style.display = 'none';
+  document.getElementById('info-modal').style.display = 'none';
+});
+
+async function fetchAvailableDates(filePath) {
+    try {
+      const response = await fetch(filePath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${filePath}`);
       }
-    });
+      const text = await response.text();
+      // Parse dates into an array and convert from YYYYDDD to YYYY-MM-DD
+      const dates = text
+        .split('\n')
+        .filter(line => line.trim()) // Remove empty lines
+        .map(dateStr => {
+          const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
+          const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
+          // Convert to YYYY-MM-DD using moment.js
+          return moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
+        });
+      return dates;
+    } catch (error) {
+      console.error(`Error fetching dates: ${error.message}`);
+      return [];
+    }
   }
 
-  // Attach event listeners to date mode radio buttons
-  $('input[name="date-mode"]').change(function () {
-    currentMode = $(this).val();
-    initializePicker(currentMode);
+$(function () {
+    const picker = $('#daterange');
+    let currentMode = 'range';
+  
+    const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
+    const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
+  
+    Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
+      .then(([sstDates, sssDates]) => {
+        // console.log('SST available dates:', sstDates);
+        // console.log('SSS available dates:', sssDates);
+  
+        // Convert arrays to Sets for faster lookup
+        const sstSet = new Set(sstDates);
+        const sssSet = new Set(sssDates);
+        const allDatesSet = new Set([...sstDates, ...sssDates]); // Combine both sets
+  
+        function initializePicker(mode) {
+          const options = {
+            opens: 'left',
+            maxDate: moment().format("MM/DD/YYYY"),
+            isInvalidDate: function (date) {
+              const formattedDate = date.format('YYYY-MM-DD');
+              // Cross out any date not in either SST or SSS files
+              return !allDatesSet.has(formattedDate);
+            },
+            isCustomDate: function (date) {
+              const formattedDate = date.format('YYYY-MM-DD');
+  
+              // Highlight days with both SST and SSS data
+              if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
+                return 'highlight-both'; // Green highlight
+              }
+              // Highlight days with only SSS data
+              if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
+                return 'highlight-sss'; // Blue highlight
+              }
+              // Highlight days with only SST data
+              if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
+                return 'highlight-sst'; // Yellow highlight
+              }
+              return ''; // No highlight
+            },
+          };
+  
+          if (mode === 'single') {
+            options.singleDatePicker = true;
+            options.startDate = moment().format("MM/DD/YYYY");
+          } else {
+            options.singleDatePicker = false;
+            options.startDate = '08/01/2024';
+            options.endDate = moment().format("MM/DD/YYYY");
+          }
+  
+          picker.daterangepicker(options, (start, end, label) => {
+            if (mode === 'range') {
+              const startDate = start.format('YYYY-MM-DD');
+              const endDate = end.format('YYYY-MM-DD');
+              loadProfiles(startDate, endDate);
+            } else if (mode === 'single') {
+              const year = start.year();
+              const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
+              const tileDate = `${year}_${dayOfYear}`;
+              console.log(tileDate);
+              updateLayerPaths(tileDate);
+            }
+          });
+        }
+  
+        $('input[name="date-mode"]').change(function () {
+          currentMode = $(this).val();
+          initializePicker(currentMode);
+        });
+  
+        initializePicker('range');
+      })
+      .catch(error => console.error('Error loading available dates:', error));
   });
-
-  // Initialize picker in range mode by default
-  initializePicker('range');
-});
 
 // Add Layer Controls
 const LayerSelectControl = L.Control.extend({
@@ -104,29 +199,67 @@ const LayerSelectControl = L.Control.extend({
 
 map.addControl(new LayerSelectControl({ position: 'topright' }));
 
-// Event listeners for layer toggles
+let activeLayerType = null; // Track the currently active layer
+
+// SST toggle listener
 document.getElementById('sst-toggle').addEventListener('change', (event) => {
   if (event.target.checked) {
+    // If SSS is active, deselect it
+    const sssToggle = document.getElementById('sss-toggle');
+    if (sssToggle.checked) {
+      sssToggle.checked = false; // Uncheck the SSS checkbox
+      map.removeLayer(sssOverlay); // Remove SSS layer
+      document.getElementById('sss-legend').style.display = 'none';
+      if (activeLayerType === 'SSS') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
+    // Activate SST
     map.addLayer(sstOverlay);
     document.getElementById('sst-legend').style.display = 'block';
-    createSSTLegend();
+    activeLayerType = 'SST'; // Set active layer to SST
+    createLegend('SST', tileDate); // Call the legend function for SST
   } else {
+    // Deactivate SST
     map.removeLayer(sstOverlay);
     document.getElementById('sst-legend').style.display = 'none';
+    if (activeLayerType === 'SST') {
+      activeLayerType = null; // Clear active layer
+    }
   }
 });
 
+// SSS toggle listener
 document.getElementById('sss-toggle').addEventListener('change', (event) => {
   if (event.target.checked) {
+    // If SST is active, deselect it
+    const sstToggle = document.getElementById('sst-toggle');
+    if (sstToggle.checked) {
+      sstToggle.checked = false; // Uncheck the SST checkbox
+      map.removeLayer(sstOverlay); // Remove SST layer
+      document.getElementById('sst-legend').style.display = 'none';
+      if (activeLayerType === 'SST') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
+    // Activate SSS
     map.addLayer(sssOverlay);
     document.getElementById('sss-legend').style.display = 'block';
-    createSSSLegend();
+    activeLayerType = 'SSS'; // Set active layer to SSS
+    createLegend('SSS', tileDate); // Call the legend function for SSS
   } else {
+    // Deactivate SSS
     map.removeLayer(sssOverlay);
     document.getElementById('sss-legend').style.display = 'none';
+    if (activeLayerType === 'SSS') {
+      activeLayerType = null; // Clear active layer
+    }
   }
 });
 
+// Bathymetry toggle listener 
 document.getElementById('bathymetry-toggle').addEventListener('change', (event) => {
   if (event.target.checked) {
     map.addLayer(bathymetryLayer);
@@ -200,3 +333,5 @@ map.addControl(new DeselectControl({ position: 'topright' }));
 
 // Initialize plots after controls are added
 initializePlots();
+
+export { activeLayerType };
