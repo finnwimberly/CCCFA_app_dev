@@ -1,7 +1,7 @@
 // Function to load metadata from the CSV and filter profiles by date
 function loadProfilesMetadata(startDate, endDate) {
   return new Promise((resolve, reject) => {
-    Papa.parse('/processed_data/CTD_profiles/metadata.csv', {
+    Papa.parse('../data/processed_data/CTD_profiles/metadata.csv', {
       download: true,
       header: true,
       complete: (results) => {
@@ -23,7 +23,7 @@ function loadProfilesMetadata(startDate, endDate) {
 // Function to load measurement data from a CSV for a specific profile ID
 function loadMeasurementData(profileId) {
   return new Promise((resolve, reject) => {
-    const filePath = `/processed_data/CTD_profiles/${profileId}_measurements.csv`;
+    const filePath = `../data/processed_data/CTD_profiles/${profileId}_measurements.csv`;
 
     Papa.parse(filePath, {
       download: true,
