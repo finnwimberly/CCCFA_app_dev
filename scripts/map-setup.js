@@ -20,6 +20,13 @@ const endDate = moment();
 loadProfiles(startDate, endDate);
 attachMarkerHandlers();
 
+let zoom = map.getZoom(); 
+
+// Add test zoom listener
+map.on('zoomend', () => {
+  // console.log('Zoom event fired - current zoom level:', map.getZoom());
+  zoom = map.getZoom(); 
+});
 
 // Export the map for use in other modules
-export { map };
+export { map, zoom };
