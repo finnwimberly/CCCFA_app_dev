@@ -94,84 +94,161 @@ async function fetchAvailableDates(filePath) {
     }
   }
 
+// $(function () {
+//     const picker = $('#daterange');
+//     let currentMode = 'range';
+  
+//     const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
+//     const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
+  
+//     Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
+//       .then(([sstDates, sssDates]) => {
+//         // console.log('SST available dates:', sstDates);
+//         // console.log('SSS available dates:', sssDates);
+  
+//         // Convert arrays to Sets for faster lookup
+//         const sstSet = new Set(sstDates);
+//         const sssSet = new Set(sssDates);
+//         const allDatesSet = new Set([...sstDates, ...sssDates]); // Combine both sets
+  
+//         function initializePicker(mode) {
+//           const options = {
+//             opens: 'left',
+//             maxDate: moment().format("MM/DD/YYYY"),
+//             isInvalidDate: function (date) {
+//               const formattedDate = date.format('YYYY-MM-DD');
+//               // Cross out any date not in either SST or SSS files
+//               return !allDatesSet.has(formattedDate);
+//             },
+//             isCustomDate: function (date) {
+//               const formattedDate = date.format('YYYY-MM-DD');
+  
+//               // Highlight days with both SST and SSS data
+//               if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
+//                 return 'highlight-both'; // Green highlight
+//               }
+//               // Highlight days with only SSS data
+//               if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
+//                 return 'highlight-sss'; // Blue highlight
+//               }
+//               // Highlight days with only SST data
+//               if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
+//                 return 'highlight-sst'; // Yellow highlight
+//               }
+//               return ''; // No highlight
+//             },
+//           };
+  
+//           if (mode === 'single') {
+//             options.singleDatePicker = true;
+//             options.startDate = moment().format("MM/DD/YYYY");
+//           } else {
+//             options.singleDatePicker = false;
+//             options.startDate = '08/01/2024';
+//             options.endDate = moment().format("MM/DD/YYYY");
+//           }
+  
+//           picker.daterangepicker(options, (start, end, label) => {
+//             if (mode === 'range') {
+//               const startDate = start.format('YYYY-MM-DD');
+//               const endDate = end.format('YYYY-MM-DD');
+//               loadProfiles(startDate, endDate);
+//             } else if (mode === 'single') {
+//               const year = start.year();
+//               const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
+//               const tileDate = `${year}_${dayOfYear}`;
+//               console.log(tileDate);
+//               updateLayerPaths(tileDate);
+//             }
+//           });
+//         }
+  
+//         $('input[name="date-mode"]').change(function () {
+//           currentMode = $(this).val();
+//           initializePicker(currentMode);
+//         });
+  
+//         initializePicker('range');
+//       })
+//       .catch(error => console.error('Error loading available dates:', error));
+//   });
+
 $(function () {
-    const picker = $('#daterange');
-    let currentMode = 'range';
-  
-    const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
-    const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
-  
-    Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
-      .then(([sstDates, sssDates]) => {
-        // console.log('SST available dates:', sstDates);
-        // console.log('SSS available dates:', sssDates);
-  
-        // Convert arrays to Sets for faster lookup
-        const sstSet = new Set(sstDates);
-        const sssSet = new Set(sssDates);
-        const allDatesSet = new Set([...sstDates, ...sssDates]); // Combine both sets
-  
-        function initializePicker(mode) {
-          const options = {
-            opens: 'left',
-            maxDate: moment().format("MM/DD/YYYY"),
-            isInvalidDate: function (date) {
-              const formattedDate = date.format('YYYY-MM-DD');
-              // Cross out any date not in either SST or SSS files
-              return !allDatesSet.has(formattedDate);
-            },
-            isCustomDate: function (date) {
-              const formattedDate = date.format('YYYY-MM-DD');
-  
-              // Highlight days with both SST and SSS data
+  const picker = $('#daterange');
+  let currentMode = 'range';
+
+  // Paths for SST and SSS dates
+  const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
+  const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
+
+  // Fetch available dates for highlighting
+  Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
+    .then(([sstDates, sssDates]) => {
+      const sstSet = new Set(sstDates);
+      const sssSet = new Set(sssDates);
+      const allDatesSet = new Set([...sstDates, ...sssDates]);
+
+      function initializePicker(mode) {
+        const options = {
+          opens: 'left',
+          maxDate: moment().format("MM/DD/YYYY"),
+          isInvalidDate: function (date) {
+            const formattedDate = date.format('YYYY-MM-DD');
+            return !allDatesSet.has(formattedDate);
+          },
+          isCustomDate: function (date) {
+            const formattedDate = date.format('YYYY-MM-DD');
+            if (mode === 'single') {
+              // Highlight dates for "Layer Date" mode
               if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
                 return 'highlight-both'; // Green highlight
               }
-              // Highlight days with only SSS data
               if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
                 return 'highlight-sss'; // Blue highlight
               }
-              // Highlight days with only SST data
               if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
                 return 'highlight-sst'; // Yellow highlight
               }
-              return ''; // No highlight
-            },
-          };
-  
-          if (mode === 'single') {
-            options.singleDatePicker = true;
-            options.startDate = moment().format("MM/DD/YYYY");
-          } else {
-            options.singleDatePicker = false;
-            options.startDate = '08/01/2024';
-            options.endDate = moment().format("MM/DD/YYYY");
-          }
-  
-          picker.daterangepicker(options, (start, end, label) => {
-            if (mode === 'range') {
-              const startDate = start.format('YYYY-MM-DD');
-              const endDate = end.format('YYYY-MM-DD');
-              loadProfiles(startDate, endDate);
-            } else if (mode === 'single') {
-              const year = start.year();
-              const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
-              const tileDate = `${year}_${dayOfYear}`;
-              console.log(tileDate);
-              updateLayerPaths(tileDate);
             }
-          });
+            // Remove any highlights for range mode
+            return ''; // No highlight
+          },
+        };
+
+        if (mode === 'single') {
+          options.singleDatePicker = true;
+          options.startDate = moment().format("MM/DD/YYYY");
+        } else {
+          options.singleDatePicker = false;
+          options.startDate = '08/01/2024';
+          options.endDate = moment().format("MM/DD/YYYY");
         }
-  
-        $('input[name="date-mode"]').change(function () {
-          currentMode = $(this).val();
-          initializePicker(currentMode);
+
+        picker.daterangepicker(options, (start, end) => {
+          if (mode === 'range') {
+            const startDate = start.format('YYYY-MM-DD');
+            const endDate = end.format('YYYY-MM-DD');
+            loadProfiles(startDate, endDate);
+          } else if (mode === 'single') {
+            const year = start.year();
+            const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
+            const tileDate = `${year}_${dayOfYear}`;
+            updateLayerPaths(tileDate);
+          }
         });
-  
-        initializePicker('range');
-      })
-      .catch(error => console.error('Error loading available dates:', error));
-  });
+      }
+
+      // Event listener for date-mode radio buttons
+      $('input[name="date-mode"]').change(function () {
+        currentMode = $(this).val();
+        initializePicker(currentMode);
+      });
+
+      // Initialize the picker with "range" mode by default
+      initializePicker('range');
+    })
+    .catch(error => console.error('Error loading available dates:', error));
+});
 
 // Add Layer Controls
 const LayerSelectControl = L.Control.extend({
