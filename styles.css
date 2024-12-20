@@ -185,27 +185,25 @@ body {
 
   /* Hovered Date Styling */
 .daterangepicker .calendar-table td:hover {
-  background-color: rgba(135, 206, 250, 0.2) !important; /* Light Sky Blue with slight transparency */
-  color: black !important; /* Text remains readable */
+  background-color: rgba(146, 201, 235, 0.2) !important; /* Light Sky Blue */
+  color: black !important; /* Ensure text is readable */
 }
 
-/* Selected Date Styling - Subtle Background */
+/* Selected Date Styling */
 .daterangepicker .calendar-table td.active,
 .daterangepicker .calendar-table td.in-range {
-  background-color: rgb(244, 213, 89) !important; 
-  color: black !important; /* Ensure text is readable */
-  border-radius: 50%; /* Keep the circle shape */
-  border: 0px solid #040404 !important; 
+  background-color: rgb(203, 225, 232) !important; /* Light Blue */
+  color: black !important; /* Text remains readable */
+  border-radius: 4px; /* Add a soft border radius for aesthetics */
 }
 
 /* Start and End of Range Styling */
 .daterangepicker .calendar-table td.start-date,
 .daterangepicker .calendar-table td.end-date {
-  background-color: rgb(240, 84, 84) !important; 
-  color: rgb(20, 20, 19) !important;
+  background-color: rgb(26, 112, 182) !important; /* Steel Blue */
+  color: white !important; /* High contrast for readability */
   font-weight: bold;
-  border-radius: 50%;
-  border: 0px solid #000000 !important; 
+  border-radius: 4px;
 }
 
 /* Overlay for the modal */
