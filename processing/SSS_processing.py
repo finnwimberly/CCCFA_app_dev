@@ -24,7 +24,7 @@ import json
 
 # Define directories
 base_dir = '/vast/clidex/data/obs/CCCFA'
-raw_data_dir = os.path.join(base_dir, 'raw_data', 'SSS')
+raw_data_dir = '/vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data'
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SSS', 'tiles_mirrored')
 
 # Get list of existing tile dates
@@ -68,7 +68,7 @@ sss = {}
 sss_subset = {}
 sss_subset_masked = {}
 
-raw_data_dir = os.path.join(base_dir, 'raw_data', 'SSS')
+raw_data_dir = '/vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data'
 
 # Define Atlantic region bounds
 bounds = {
@@ -436,7 +436,7 @@ sss = {}
 sss_subset = {}
 sss_subset_masked = {}
 
-raw_data_dir = os.path.join(base_dir, 'raw_data', 'SSS')
+raw_data_dir = '/vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data'
 
 # Define the bounds in lat/lon
 bounds = {
@@ -801,6 +801,22 @@ shutil.rmtree(local_tiles_dir)
 
 temp_directory = os.path.join(base_dir, 'processed_data', 'SSS', 'temp_files')
 shutil.rmtree(temp_directory)
+
+# Get all folder names in the tiles_3day directory and sort them
+dates = sorted([folder for folder in os.listdir(tiles_dir) if os.path.isdir(os.path.join(tiles_dir, folder))])
+
+#print("Found dates:", dates)
+
+# Output the list of dates to a txt file
+output_path = os.path.join(base_dir, 'processed_data', 'SSS', 'sss_dates.txt')
+
+# Open the file in append mode to debug any partial writes
+with open(output_path, 'w') as f:
+    for date in dates:
+        formatted_date = date.replace('_', '')  # Replace underscores with no separator
+        f.write(f"{formatted_date}\n")  # Write the formatted date to the file
+        # print(f"Written to file: {formatted_date}")  # Debugging: Print each date written to the file
+
 
 
 # In[ ]:
