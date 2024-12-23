@@ -24,7 +24,7 @@ import json
 
 # Define directories
 base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project/data'
-raw_data_dir = os.path.join(base_dir, 'raw_data', 'SST')
+raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 
 # Get list of existing tile dates
@@ -61,7 +61,7 @@ os.makedirs(temp_files_dir, exist_ok=True)
 # Load all SST data files in the directory and store in a dictionary
 sst_data = {}
 sst = {}
-raw_data_dir = os.path.join(base_dir,'raw_data', 'SST')
+raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
 
 # Load the data for filtered files
 files = []
