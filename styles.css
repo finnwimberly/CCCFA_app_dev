@@ -2,12 +2,13 @@ body {
     font-family: Arial, sans-serif;
     margin: 20px;
   }
-  
+
   #map {
-    height: 500px;
-    width: 100%;
-    margin-top: 20px;
-    background-color: #f0f0f0;
+    position: relative; /* Required for child elements (legends) to use absolute positioning */
+    height: 500px; /* Fixed height or dynamically adjusted */
+    width: 100%; /* Full width */
+    margin-top: 20px; /* Optional, to create space above the map */
+    background-color: #f0f0f0; /* Light gray background */
   }
 
   /* General Control Styles */
@@ -247,21 +248,22 @@ body {
   color: black;
 }
 
-  #sst-legend,
-  #sss-legend {
-    position: absolute; /* Ensures placement relative to the map container */
-    bottom: -30px; /* Adjust as needed */
-    left: 25px; /* Adjust as needed */
-    z-index: 1000; /* Ensure legends are above other map elements */
-    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    width: 100px; /* Adjust to fit your legend content */
-    height: auto; /* Allow dynamic content height */
-    display: none; /* Initially hidden */
-  }
+#sst-legend,
+#sss-legend {
+  position: absolute; /* Fixed relative to the parent container */
+  bottom: 10px; /* Distance from the bottom of the map */
+  left: 10px; /* Distance from the left of the map */
+  z-index: 1000; /* Ensure it appears above map elements */
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 5px; /* Rounded corners for aesthetics */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  padding: 10px; /* Padding inside the legend */
+  width: calc(15%); /* Dynamic width based on map container size */
+  max-width: 105px; /* Optional: cap maximum width */
+  min-width: 105px; /* Optional: enforce minimum width */
+  display: block; /* Ensure it is always visible (unless explicitly hidden in JS) */
+}
 
   #sst-legend .plotly,
   #sss-legend .plotly {
