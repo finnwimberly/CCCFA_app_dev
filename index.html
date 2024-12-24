@@ -20,20 +20,29 @@
   <h1>CCCFA Observations</h1>
 
   <div class="description">
-    <p>This website synthesizes the joint observation efforts of the CCCFA and WHOI. Since August 2024 the CCCFA has been using WHOI-provided CTDs to measure ocean temperature, salinity, and density at various locations off of the Cape Cod coast. Below, you can select any of the markers on the map to plot the corresponding CTD profiles. You can filter profiles by date or overlay sea surface temperature (SST) and sea surface salinity (SSS) observations. These SST data are acquired from the NOAA VIIRS instrument, while the SSS data are provided by NASA's SMAP satellite.</p>
+    <p>
+      This website synthesizes the joint observation efforts of the CCCFA and WHOI.
+      Since August 2024, the CCCFA has been using WHOI-provided CTDs to measure ocean
+      temperature, salinity, and density at various locations off the Cape Cod coast.
+      Below, you can select any of the markers on the map to plot the corresponding
+      CTD profiles. You can filter profiles by date or overlay sea surface temperature
+      (SST) and sea surface salinity (SSS) observations. These SST data are acquired
+      from the NOAA VIIRS instrument, while the SSS data are provided by NASA's SMAP
+      satellite.
+    </p>
   </div>
 
   <!-- Map Container -->
-  <div id="map"></div>
+  <div id="map" style="height: 80vh; width: 100%; position: relative;">
+    <!-- SST Legend Container -->
+    <div id="sst-legend" style="display: none;">
+      <!-- Plotly or dynamic legend will be rendered here -->
+    </div>
 
-  <!-- SST Legend Container -->
-  <div id="sst-legend" style="display: none;">
-    <!-- Plotly or dynamic legend will be rendered here -->
-  </div>
-
-  <!-- SSS Legend Container -->
-  <div id="sss-legend" style="display: none;">
-    <!-- Plotly or dynamic legend will be rendered here -->
+    <!-- SSS Legend Container -->
+    <div id="sss-legend" style="display: none;">
+      <!-- Plotly or dynamic legend will be rendered here -->
+    </div>
   </div>
 
   <!-- Plots Container -->
