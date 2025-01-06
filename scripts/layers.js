@@ -99,10 +99,10 @@ function createLegend(layerType, date) {
 
   // Dynamically determine file paths based on zoom level
   const rangeFile = zoom >= 8
-    ? `../data/processed_data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_local.json' : 'sss_range_local.json'}`
-    : `../data/processed_data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_global.json' : 'sss_range_global.json'}`;
+    ? `../../data/processed_data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_local.json' : 'sss_range_local.json'}`
+    : `../../data/processed_data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_global.json' : 'sss_range_global.json'}`;
 
-  const colormapFile = `../data/processed_data/${layerType}/thermal_colormap.txt`;
+  const colormapFile = `../../data/processed_data/${layerType}/thermal_colormap.txt`;
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -184,9 +184,9 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 // Update tile layer paths and update tileDate
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable
-  const sstPath = `../data/processed_data/SST/tiles_3day/${date}/{z}/{x}/{y}.png`;
+  const sstPath = `../../data/processed_data/SST/tiles_3day/${date}/{z}/{x}/{y}.png`;
   console.log('Constructed SST path:', sstPath);
-  const sssPath = `../data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+  const sssPath = `../../data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
 
   sstOverlay.setUrl(sstPath);
   sssOverlay.setUrl(sssPath);

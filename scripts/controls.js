@@ -99,8 +99,8 @@ $(function () {
   let currentMode = 'range';
 
   // Paths for SST and SSS dates
-  const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
-  const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
+  const sstDatesPath = '../../data/processed_data/SST/sst_dates.txt';
+  const sssDatesPath = '../../data/processed_data/SSS/sss_dates.txt';
 
   // Fetch available dates for highlighting
   Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
