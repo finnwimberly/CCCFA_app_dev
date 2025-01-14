@@ -204,11 +204,21 @@ function updateLayerPaths(date) {
   }
 }
 
+// map.on('zoomend', () => {
+//   // console.log(`Zoomend triggered in layers.js, activeLayerType: ${activeLayerType}`);
+//   if (activeLayerType) {
+//     // console.log(`Zoom level changed to ${zoom}, refreshing legend for: ${activeLayerType}`);
+//     createLegend(activeLayerType, tileDate);
+//   }
+// });
+
 map.on('zoomend', () => {
-  // console.log(`Zoomend triggered in layers.js, activeLayerType: ${activeLayerType}`);
-  if (activeLayerType) {
-    // console.log(`Zoom level changed to ${zoom}, refreshing legend for: ${activeLayerType}`);
+  console.log(`Zoomend triggered, activeLayerType: ${activeLayerType}`);
+  if (activeLayerType && tileDate) { // Check if tileDate is valid
+    console.log(`Zoom level changed to ${zoom}, refreshing legend for: ${activeLayerType}`);
     createLegend(activeLayerType, tileDate);
+  } else {
+    console.log("No valid date or layer selected; skipping legend update.");
   }
 });
 
