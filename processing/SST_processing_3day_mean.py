@@ -23,7 +23,7 @@ import json
 
 
 # Define directories
-base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/Project/data'
+base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/data'
 raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 
@@ -31,7 +31,7 @@ tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 existing_tiles = set()
 
 for folder_name in os.listdir(tiles_dir):
-    if os.path.isdir(os.path.join(tiles_dir, folder_name)) and folder_name.startswith('2024_'):
+    if os.path.isdir(os.path.join(tiles_dir, folder_name)) and folder_name.startswith('20'):
         # Convert tile folder name (e.g., 2024_211) to raw file format (e.g., 2024211)
         date_str = folder_name.replace('_', '')
         existing_tiles.add(date_str)
@@ -63,31 +63,82 @@ sst_data = {}
 sst = {}
 raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
 
+# # Load the data for filtered files
+# files = []
+# for filename in raw_files_to_process:  # Use the filtered file list
+#     day = int(filename.split('_')[1][4:])  # Extract day of year from raw filename (e.g., 2024211 -> 211)
+#     files.append((day, filename))
+
+# files.sort()  # Sort by day of year
+
+# # Load the data
+# for day, filename in files:
+#     file_path = os.path.join(raw_data_dir, filename)
+#     sst_data[f"2024{day:03d}"] = xr.open_dataset(file_path)
+    
+#     # Store the SST data
+#     sst[f"2024{day:03d}"] = sst_data[f"2024{day:03d}"]['sst'].squeeze()
+
+#     # Mask NaN values (or use your specific missing value markers)
+#     sst_masked = np.ma.masked_invalid(sst[f"2024{day:03d}"])
+
+#     # Define transform (origin: top-left corner) and resolution
+#     transform = from_origin(sst_data[f"2024{day:03d}"]['lon'].values.min(), sst_data[f"2024{day:03d}"]['lat'].values.max(), 750, 750)  # 750m resolution
+#     print(transform)
+
+#     # Save the SST data as a GeoTIFF
+#     output_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}.tif")
+#     with rasterio.open(
+#         output_file, 
+#         'w', 
+#         driver='GTiff', 
+#         height=sst_masked.shape[0], 
+#         width=sst_masked.shape[1], 
+#         count=1, 
+#         dtype=str(sst_masked.dtype),
+#         crs='EPSG:3857', 
+#         transform=transform
+#     ) as dst:
+#         dst.write(sst_masked.filled(np.nan), 1)
+#     print(f"Saved GeoTIFF: {output_file}")
+
 # Load the data for filtered files
 files = []
 for filename in raw_files_to_process:  # Use the filtered file list
-    day = int(filename.split('_')[1][4:])  # Extract day of year from raw filename (e.g., 2024211 -> 211)
-    files.append((day, filename))
+    year = filename.split('_')[1][:4]  # Extract year (e.g., 2024 from 2024211)
+    day = int(filename.split('_')[1][4:])  # Extract day of year (e.g., 211)
+    files.append((year, day, filename))
 
-files.sort()  # Sort by day of year
+files.sort(key=lambda x: (x[0], x[1]))  # Sort by year and day of year
 
 # Load the data
-for day, filename in files:
+for year, day, filename in files:
     file_path = os.path.join(raw_data_dir, filename)
-    sst_data[f"2024{day:03d}"] = xr.open_dataset(file_path)
+    dict_key = f"{year}{day:03d}"  # Generalized dictionary key
+    sst_data[dict_key] = xr.open_dataset(file_path)
     
     # Store the SST data
-    sst[f"2024{day:03d}"] = sst_data[f"2024{day:03d}"]['sst'].squeeze()
+    sst[dict_key] = sst_data[dict_key]['sst'].squeeze()
 
     # Mask NaN values (or use your specific missing value markers)
-    sst_masked = np.ma.masked_invalid(sst[f"2024{day:03d}"])
+    sst_masked = np.ma.masked_invalid(sst[dict_key])
 
     # Define transform (origin: top-left corner) and resolution
-    transform = from_origin(sst_data[f"2024{day:03d}"]['lon'].values.min(), sst_data[f"2024{day:03d}"]['lat'].values.max(), 750, 750)  # 750m resolution
+    transform = from_origin(
+        sst_data[dict_key]['lon'].values.min(),
+        sst_data[dict_key]['lat'].values.max(),
+        750, 750  # 750m resolution
+    )
     print(transform)
 
     # Save the SST data as a GeoTIFF
-    output_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}.tif")
+    output_file = os.path.join(
+        base_dir,
+        'processed_data',
+        'SST',
+        'temp_files_3day',
+        f"sst_data_{dict_key}.tif"
+    )
     with rasterio.open(
         output_file, 
         'w', 
@@ -125,7 +176,7 @@ def fix_geotiff_bounds(sst_data, temp_directory, base_dir):
             continue
             
         # Get the date from filename
-        date_str = filename.split('_')[2].split('.')[0]  # Extract '2024XXX' from filename
+        date_str = filename.split('_')[2].split('.')[0]  # Extract '202XXXX' from filename
         
         # Input and output file paths
         input_file = os.path.join(temp_directory, filename)
@@ -277,7 +328,9 @@ range_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
 # Loop through each file in the tiles directory
 for filename in os.listdir(range_dir):
     # Extract the date from the filename (e.g., '2024_211.tif' -> '2024211')
-    raw_date_str = f"2024{filename.split('_')[1].split('.')[0]}"  # Get '2024XXX'
+    # raw_date_str = f"2024{filename.split('_')[1].split('.')[0]}"  # Get '2024XXX'
+    raw_date_str = f"{filename.split('_')[0]}{filename.split('_')[1].split('.')[0]}"
+
 
     # Skip if the date doesn't exist in the SST dictionary
     if raw_date_str not in sst:
@@ -329,25 +382,32 @@ min_x, min_y = transformer.transform(cape_cod_bounds_latlon['min_lon'], cape_cod
 max_x, max_y = transformer.transform(cape_cod_bounds_latlon['max_lon'], cape_cod_bounds_latlon['max_lat'])
 #print(min_x, min_y, max_x, max_y)
 
+# # Load the data for filtered files
+# files = []
+# for filename in raw_files_to_process:  # Use the filtered file list
+#     day = int(filename.split('_')[1][4:])  # Extract day of year from raw filename (e.g., 2024211 -> 211)
+#     files.append((day, filename))
+
+# files.sort()  # Sort by day of year
+
 # Load the data for filtered files
 files = []
 for filename in raw_files_to_process:  # Use the filtered file list
-    day = int(filename.split('_')[1][4:])  # Extract day of year from raw filename (e.g., 2024211 -> 211)
-    files.append((day, filename))
+    year = filename.split('_')[1][:4]  # Extract year (e.g., 2024 from 2024211)
+    day = int(filename.split('_')[1][4:])  # Extract day of year (e.g., 211)
+    files.append((year, day, filename))
 
-files.sort()  # Sort by day of year
+files.sort(key=lambda x: (x[0], x[1]))  # Sort by year and day of year
 
 # Load the data
-for day, filename in files:
-
+for year, day, filename in files:
     file_path = os.path.join(raw_data_dir, filename)
-    sst_data[f"2024{day:03d}"] = xr.open_dataset(file_path)
-    
-    # Store the SST data
-    sst[f"2024{day:03d}"] = sst_data[f"2024{day:03d}"]['sst'].squeeze()
+    dict_key = f"{year}{day:03d}"  # Generalized dictionary key
+    sst_data[dict_key] = xr.open_dataset(file_path)
+    sst[dict_key] = sst_data[dict_key]['sst'].squeeze()
 
     # Subset the data using Web Mercator bounds
-    sst_subset = sst[f"2024{day:03d}"].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
+    sst_subset = sst[dict_key].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
 
     sst_subset_masked = np.ma.masked_invalid(sst_subset.values)
 
@@ -358,7 +418,7 @@ for day, filename in files:
 
   # Save the SST data as a GeoTIFF
     with rasterio.open(
-        os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}_local.tif"), 
+        os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{dict_key}_local.tif"), 
         'w', 
         driver='GTiff', 
         height=sst_subset_masked.shape[0], 
@@ -370,17 +430,51 @@ for day, filename in files:
     ) as dst:
         dst.write(sst_subset_masked.filled(np.nan), 1)
 
+# # Load the data
+# for day, filename in files:
+
+#     file_path = os.path.join(raw_data_dir, filename)
+#     sst_data[f"2024{day:03d}"] = xr.open_dataset(file_path)
+    
+#     # Store the SST data
+#     sst[f"2024{day:03d}"] = sst_data[f"2024{day:03d}"]['sst'].squeeze()
+
+#     # Subset the data using Web Mercator bounds
+#     sst_subset = sst[f"2024{day:03d}"].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
+
+#     sst_subset_masked = np.ma.masked_invalid(sst_subset.values)
+
+#     # Define transform (origin: top-left corner) and resolution
+#     transform = from_origin(sst_subset['lon'].values.min(), sst_subset['lat'].values.max(), 250, 250)  # 250m resolution
+#     #transform = from_origin(min_x, max_y, 250, 250)  # 250m resolution
+#     print(transform)
+
+#   # Save the SST data as a GeoTIFF
+#     with rasterio.open(
+#         os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}_local.tif"), 
+#         'w', 
+#         driver='GTiff', 
+#         height=sst_subset_masked.shape[0], 
+#         width=sst_subset_masked.shape[1], 
+#         count=1, 
+#         dtype=str(sst_subset_masked.dtype),
+#         crs='EPSG:3857', 
+#         transform=transform
+#     ) as dst:
+#         dst.write(sst_subset_masked.filled(np.nan), 1)
+
 
 # In[15]:
 
 
-for day, filename in files:
+for year, day, filename in files:
+    dict_key = f"{year}{day:03d}"  # Generalized dictionary key
     # Open your original GeoTIFF file
-    input_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}_local.tif")
-    fixed_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}_fixed_local.tif")
+    input_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{dict_key}_local.tif")
+    fixed_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{dict_key}_fixed_local.tif")
 
     # Define the correct bounds (min_lon, min_lat, max_lon, max_lat)
-    sst_subset = sst[f"2024{day:03d}"].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
+    sst_subset = sst[dict_key].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
 
     # Replace these with the actual bounding box values from your SST dataset
     min_lon, max_lon = sst_subset['lon'].values.min(), sst_subset['lon'].values.max()
@@ -408,9 +502,10 @@ for day, filename in files:
 # In[16]:
 
 
-for day, filename in files:
-    fixed_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_2024{day:03d}_fixed_local.tif")
-    vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_2024{day:03d}_local.vrt")
+for year, day, filename in files:
+    dict_key = f"{year}{day:03d}" 
+    fixed_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{dict_key}_fixed_local.tif")
+    vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_{dict_key}_local.vrt")
     tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_')
 
     # Open the fixed file and get its bounds
@@ -447,9 +542,10 @@ for day, filename in files:
 
 
 # Create a colored files
-for day, filename in files:
-    vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_2024{day:03d}_local.vrt")
-    colored_vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_2024{day:03d}_local.vrt")
+for year, day, filename in files:
+    dict_key = f"{year}{day:03d}" 
+    vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_{dict_key}_local.vrt")
+    colored_vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_{dict_key}_local.vrt")
     color_filename = os.path.join(base_dir, 'processed_data', 'SST', 'thermal_colormap.txt')
 
     gdaldem_command = [
@@ -461,11 +557,13 @@ for day, filename in files:
 # In[18]:
 
 
-for day, filename in files:
+for year, day, filename in files:
+    dict_key1 = f"{year}_{day:03d}" 
+    dict_key2 = f"{year}{day:03d}" 
 
     # Define the correct path for the tiles directory
-    tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local', f"2024_{day:03d}")
-    colored_vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_2024{day:03d}_local.vrt")
+    tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local', dict_key1)
+    colored_vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_{dict_key2}_local.vrt")
 
 
     # Generate tiles for local view (zoom levels 9-10)
@@ -488,10 +586,12 @@ for day, filename in files:
 
 
 # Load the data
-for day, filename in files:
-
+for year, day, filename in files:
+    
+    dict_key1 = f"{year}_{day:03d}"
+    dict_key2 = f"{year}{day:03d}"
     # Subset the data using Web Mercator bounds
-    sst_subset = sst[f"2024{day:03d}"].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
+    sst_subset = sst[dict_key].sel(x=slice(min_x, max_x), y=slice(max_y, min_y))
 
     min_temp = float(sst_subset.min())
     max_temp = float(sst_subset.max())
@@ -503,7 +603,7 @@ for day, filename in files:
     }
 
     # Define the output directory for the JSON file
-    json_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', f"2024_{day:03d}")
+    json_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', dict_key1)
 
     # Create the directory if it doesn't exist
     os.makedirs(json_dir, exist_ok=True)
@@ -519,11 +619,13 @@ for day, filename in files:
 # In[21]:
 
 
-for day, filename in files:
+for year, day, filename in files:
+
+    dict_key = f"{year}_{day:03d}"
 
     # Define the source and destination directories
-    source_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local', f"2024_{day:03d}")
-    destination_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', f"2024_{day:03d}")
+    source_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local', dict_key)
+    destination_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', dict_key)
 
     # Ensure the destination directory exists
     os.makedirs(destination_directory, exist_ok=True)
