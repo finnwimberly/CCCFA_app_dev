@@ -105,6 +105,10 @@ $(function () {
   // Fetch available dates for highlighting
   Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
     .then(([sstDates, sssDates]) => {
+      // Log the fetched dates for debugging
+      console.log("Fetched SST Dates:", sstDates);
+      console.log("Fetched SSS Dates:", sssDates);
+      
       const sstSet = new Set(sstDates);
       const sssSet = new Set(sssDates);
       const allDatesSet = new Set([...sstDates, ...sssDates]);
