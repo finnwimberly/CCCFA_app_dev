@@ -70,29 +70,56 @@ document.getElementById('info-overlay').addEventListener('click', () => {
   document.getElementById('info-modal').style.display = 'none';
 });
 
+// async function fetchAvailableDates(filePath) {
+//     try {
+//       const response = await fetch(filePath);
+//       if (!response.ok) {
+//         throw new Error(`Failed to fetch ${filePath}`);
+//       }
+//       const text = await response.text();
+//       // Parse dates into an array and convert from YYYYDDD to YYYY-MM-DD
+//       const dates = text
+//         .split('\n')
+//         .filter(line => line.trim()) // Remove empty lines
+//         .map(dateStr => {
+//           const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
+//           const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
+//           // Convert to YYYY-MM-DD using moment.js
+//           return moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
+//         });
+//       return dates;
+//     } catch (error) {
+//       console.error(`Error fetching dates: ${error.message}`);
+//       return [];
+//     }
+//   }
+
 async function fetchAvailableDates(filePath) {
-    try {
+  try {
+      console.log(`Fetching dates from: ${filePath}`); // Log the file path
       const response = await fetch(filePath);
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${filePath}`);
+          throw new Error(`Failed to fetch ${filePath}`);
       }
       const text = await response.text();
-      // Parse dates into an array and convert from YYYYDDD to YYYY-MM-DD
+      console.log(`Raw file contents (${filePath}):`, text); // Log raw text
       const dates = text
-        .split('\n')
-        .filter(line => line.trim()) // Remove empty lines
-        .map(dateStr => {
-          const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
-          const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
-          // Convert to YYYY-MM-DD using moment.js
-          return moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
-        });
+          .split('\n')
+          .filter(line => line.trim()) // Remove empty lines
+          .map(dateStr => {
+              const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
+              const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
+              const formattedDate = moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
+              console.log(`Parsed date: ${formattedDate}`); // Log parsed dates
+              return formattedDate;
+          });
+      console.log(`Parsed dates (${filePath}):`, dates);
       return dates;
-    } catch (error) {
-      console.error(`Error fetching dates: ${error.message}`);
+  } catch (error) {
+      console.error(`Error fetching dates from ${filePath}: ${error.message}`);
       return [];
-    }
   }
+}
 
 $(function () {
   const picker = $('#daterange');
@@ -108,7 +135,7 @@ $(function () {
       // Log the fetched dates for debugging
       console.log("Fetched SST Dates:", sstDates);
       console.log("Fetched SSS Dates:", sssDates);
-      
+
       const sstSet = new Set(sstDates);
       const sssSet = new Set(sssDates);
       const allDatesSet = new Set([...sstDates, ...sssDates]);
