@@ -105,7 +105,8 @@ async function fetchAvailableDates(filePath) {
       console.log(`Raw file contents (${filePath}):`, text); // Log raw text
       const dates = text
           .split('\n')
-          .filter(line => line.trim()) // Remove empty lines
+          // .filter(line => line.trim()) // Remove empty lines
+          .filter(line => line.trim() && /^\d{4}\d{3}$/.test(line.trim())) // Validate format
           .map(dateStr => {
               const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
               const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
