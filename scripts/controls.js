@@ -110,7 +110,7 @@ async function fetchAvailableDates(filePath) {
           .map(dateStr => {
               const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
               const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
-              const formattedDate = moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
+              const formattedDate = moment(`${year}-${dayOfYear}`, "YYYY-DDD").format("YYYY-MM-DD");
               console.log(`Parsed date: ${formattedDate}`); // Log parsed dates
               return formattedDate;
           });
