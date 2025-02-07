@@ -24,22 +24,71 @@ let sssOverlay = L.tileLayer('', {
   noWrap: true,
 });
 
-// // Bathymetry overlay
-// const bathymetryLayer = L.imageOverlay('../bathymetry_contours.png', sstBounds, {
-//   opacity: 1, // Fully opaque layer
+// // Bathymetry layer
+// const bathymetryLayer = L.tileLayer('../data/bathymetry_tiles/{z}/{x}/{y}.png', {
+//   minZoom: 0,
+//   maxZoom: 11,
+//   tms: false,
+//   opacity: 1,
 //   attribution: 'Bathymetry Data',
+//   // Optional: make transparent tiles not block mouse events
+//   noWrap: true,
+//   className: 'bathymetryLayer'
 // });
 
-// Bathymetry layer
-const bathymetryLayer = L.tileLayer('../data/bathymetry_tiles/{z}/{x}/{y}.png', {
+// Define bathymetry tile paths
+const bathymetryPaths = {
+  metric: '../data/bathymetry_tiles_m/{z}/{x}/{y}.png',
+  imperial: '../data/bathymetry_tiles/{z}/{x}/{y}.png'
+};
+
+// Function to determine active unit system
+function getSelectedUnitSystem() {
+  return document.querySelector('input[name="unit"]:checked').value === 'imperial'
+    ? 'imperial'
+    : 'metric';
+}
+
+// Function to update bathymetry layer based on unit selection
+function updateBathymetryLayer() {
+  const unitSystem = getSelectedUnitSystem(); // Get selected unit
+  const newPath = bathymetryPaths[unitSystem]; // Determine new path
+
+  console.log(`Updating bathymetry layer: ${unitSystem} -> ${newPath}`);
+
+  // Remove the old layer and add the new one if it's active
+  if (map.hasLayer(bathymetryLayer)) {
+    map.removeLayer(bathymetryLayer);
+  }
+
+  bathymetryLayer = L.tileLayer(newPath, {
+    minZoom: 0,
+    maxZoom: 11,
+    tms: false,
+    opacity: 1,
+    attribution: 'Bathymetry Data',
+    noWrap: true,
+    className: 'bathymetryLayer'
+  });
+
+  // Add the new layer back if it was previously active
+  map.addLayer(bathymetryLayer);
+}
+
+// Initialize bathymetry layer with the default selection
+let bathymetryLayer = L.tileLayer(bathymetryPaths[getSelectedUnitSystem()], {
   minZoom: 0,
   maxZoom: 11,
   tms: false,
   opacity: 1,
   attribution: 'Bathymetry Data',
-  // Optional: make transparent tiles not block mouse events
   noWrap: true,
   className: 'bathymetryLayer'
+});
+
+// Add event listener to unit selector to reload bathymetry layer when changed
+document.querySelectorAll('input[name="unit"]').forEach((radio) => {
+  radio.addEventListener('change', updateBathymetryLayer);
 });
 
 // Layer control (toggle overlays)
