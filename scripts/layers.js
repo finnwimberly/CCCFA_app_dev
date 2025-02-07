@@ -24,10 +24,22 @@ let sssOverlay = L.tileLayer('', {
   noWrap: true,
 });
 
-// Bathymetry overlay
-const bathymetryLayer = L.imageOverlay('../bathymetry_contours.png', sstBounds, {
-  opacity: 1, // Fully opaque layer
+// // Bathymetry overlay
+// const bathymetryLayer = L.imageOverlay('../bathymetry_contours.png', sstBounds, {
+//   opacity: 1, // Fully opaque layer
+//   attribution: 'Bathymetry Data',
+// });
+
+// Bathymetry layer
+const bathymetryLayer = L.tileLayer('../data/bathymetry_tiles/{z}/{x}/{y}.png', {
+  minZoom: 0,
+  maxZoom: 11,
+  tms: false,
+  opacity: 1,
   attribution: 'Bathymetry Data',
+  // Optional: make transparent tiles not block mouse events
+  noWrap: true,
+  className: 'bathymetryLayer'
 });
 
 // Layer control (toggle overlays)
