@@ -24,17 +24,14 @@ let sssOverlay = L.tileLayer('', {
   noWrap: true,
 });
 
-// // Bathymetry layer
-// const bathymetryLayer = L.tileLayer('../data/bathymetry_tiles/{z}/{x}/{y}.png', {
-//   minZoom: 0,
-//   maxZoom: 11,
-//   tms: false,
-//   opacity: 1,
-//   attribution: 'Bathymetry Data',
-//   // Optional: make transparent tiles not block mouse events
-//   noWrap: true,
-//   className: 'bathymetryLayer'
-// });
+let chlOverlay = L.tileLayer('', {
+  opacity: 0.6,
+  attribution: 'Chlorophyll-a Data',
+  maxZoom: 10,
+  bounds: sstBounds, // Assuming same bounds as SST/SSS
+  noWrap: true,
+});
+
 
 // Define bathymetry tile paths
 const bathymetryPaths = {
@@ -91,10 +88,17 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', updateBathymetryLayer);
 });
 
-// Layer control (toggle overlays)
+// // Layer control (toggle overlays)
+// const overlayLayers = {
+//   'SST (Sea Surface Temp)': sstOverlay,
+//   'SSS (Sea Surface Salinity)': sssOverlay,
+//   'Bathymetry Contours': bathymetryLayer,
+// };
+
 const overlayLayers = {
   'SST (Sea Surface Temp)': sstOverlay,
   'SSS (Sea Surface Salinity)': sssOverlay,
+  'CHL (Chlorophyll-a)': chlOverlay,
   'Bathymetry Contours': bathymetryLayer,
 };
 
@@ -126,11 +130,123 @@ function showModal(message) {
     mapContainer.removeChild(modal);
   });
 }
+// // Helper function to generate legend
+// function createLegend(layerType, date) {
+//   // Get the legend container element
+//   const legendContainer = document.getElementById(`${layerType.toLowerCase()}-legend`);
+//   const overlay = layerType === 'SST' ? sstOverlay : sssOverlay; // Get the correct layer overlay
+
+//   // Check the selected unit system (metric or imperial)
+//   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
+
+//   // Check if a valid date is provided
+//   if (!date) {
+//     // Uncheck the layer toggle box
+//     const checkbox = document.getElementById(`${layerType.toLowerCase()}-toggle`);
+//     if (checkbox) {
+//       checkbox.checked = false; // Uncheck the checkbox
+//     }
+
+//     // Hide the legend container
+//     if (legendContainer) {
+//       legendContainer.style.display = 'none';
+//     }
+
+//     // Remove the layer from the map
+//     if (map.hasLayer(overlay)) {
+//       map.removeLayer(overlay); // Ensure the layer is not selected
+//     }
+
+//     // Show the modal message
+//     showModal("Please select a date for the layer first.");
+//     return; // Exit the function
+//   }
+
+//   // Dynamically determine file paths based on zoom level
+//   const rangeFile = zoom >= 8
+//     ? `../data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_local.json' : 'sss_range_local.json'}`
+//     : `../data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_global.json' : 'sss_range_global.json'}`;
+
+//   const colormapFile = `../data/${layerType}/thermal_colormap.txt`;
+
+//   Promise.all([
+//     fetch(colormapFile).then((res) => res.text()),
+//     fetch(rangeFile).then((res) => res.json()),
+//   ])
+//     .then(([colormapText, range]) => {
+//       const rgbValues = colormapText.split('\n')
+//         .filter((line) => line.trim())
+//         .map((line) => line.split(' ').map(Number));
+
+//       // Get min and max values
+//       let minValue = layerType === 'SST' ? range.min_temp : range.min_SSS;
+//       let maxValue = layerType === 'SST' ? range.max_temp : range.max_SSS;
+
+//       // Convert to Fahrenheit if the unit system is imperial
+//       if (unitSystem === 'imperial' && layerType === 'SST') {
+//         minValue = (minValue * 9) / 5 + 32;
+//         maxValue = (maxValue * 9) / 5 + 32;
+//       }
+
+//       const colorscale = rgbValues.map((rgb, i) => {
+//         const [index, r, g, b, a] = rgb; // Ensure we use all 5 columns (including alpha)
+//         if (i === 0 || i === rgbValues.length - 1) {
+//           return [i / (rgbValues.length - 1), 'rgba(255, 255, 255, 0)'];
+//         }
+//         return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
+//       });
+
+//       const legendData = {
+//         z: [[minValue, maxValue]],
+//         type: 'heatmap',
+//         colorscale: colorscale,
+//         showscale: true,
+//         hoverinfo: 'none',
+//         colorbar: {
+//           len: 1,
+//           thickness: 25,
+//           tickmode: 'linear',
+//           tick0: minValue,
+//           dtick: (maxValue - minValue) / 5,
+//           tickformat: '.1f',
+//         },
+//       };
+
+//       const layout = {
+//         title: layerType === 'SST'
+//           ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+//           : 'SSS (PSU)',
+//         width: 100,
+//         height: 300,
+//         margin: { l: 0, r: 75, t: 40, b: 0 },
+//         xaxis: { visible: false },
+//         yaxis: { visible: false },
+//       };
+
+//       Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);
+//       legendContainer.style.display = 'block'; // Ensure legend is shown when data is valid
+//     })
+//     .catch((err) => {
+//       console.error(`Error loading ${layerType} legend data:`, err);
+//       // Hide the legend container on error
+//       if (legendContainer) {
+//         legendContainer.style.display = 'none';
+//       }
+//     });
+
+//   console.log(`Creating legend for ${layerType} with date: ${date}`);
+// }
+
 // Helper function to generate legend
 function createLegend(layerType, date) {
   // Get the legend container element
   const legendContainer = document.getElementById(`${layerType.toLowerCase()}-legend`);
-  const overlay = layerType === 'SST' ? sstOverlay : sssOverlay; // Get the correct layer overlay
+  // Determine the active overlay layer
+  const overlay = layerType === 'SST' ? sstOverlay 
+                 : layerType === 'SSS' ? sssOverlay 
+                 : chlOverlay; // Add CHL overlay reference
+
+  const zoomLevel = map.getZoom();
 
   // Check the selected unit system (metric or imperial)
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
@@ -159,11 +275,22 @@ function createLegend(layerType, date) {
   }
 
   // Dynamically determine file paths based on zoom level
-  const rangeFile = zoom >= 8
-    ? `../data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_local.json' : 'sss_range_local.json'}`
-    : `../data/${layerType}/${layerType === 'SST' ? 'tiles_3day' : 'tiles_mirrored'}/${date}/${layerType === 'SST' ? 'sst_range_global.json' : 'sss_range_global.json'}`;
+  let rangeFile;
+  if (layerType === 'SST') {
+    rangeFile = zoomLevel >= 8
+      ? `../data/processed_data/SST/tiles_3day/${date}/sst_range_local.json`
+      : `../data/processed_data/SST/tiles_3day/${date}/sst_range_global.json`;
+  } else if (layerType === 'SSS') {
+    rangeFile = zoomLevel >= 8
+      ? `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_local.json`
+      : `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+  } else if (layerType === 'CHL') {
+    rangeFile = zoomLevel >= 8
+      ? `../data/processed_data/CHL/tiles/${date}/chl_range_local.json`
+      : `../data/processed_data/CHL/tiles/${date}/chl_range_global.json`;
+  }
 
-  const colormapFile = `../data/${layerType}/thermal_colormap.txt`;
+  const colormapFile = `../data/processed_data/${layerType}/thermal_colormap.txt`;
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -175,8 +302,19 @@ function createLegend(layerType, date) {
         .map((line) => line.split(' ').map(Number));
 
       // Get min and max values
-      let minValue = layerType === 'SST' ? range.min_temp : range.min_SSS;
-      let maxValue = layerType === 'SST' ? range.max_temp : range.max_SSS;
+      let minValue, maxValue;
+
+      if (layerType === 'SST') {
+        minValue = range.min_temp;
+        maxValue = range.max_temp;
+      } else if (layerType === 'SSS') {
+        minValue = range.min_SSS;
+        maxValue = range.max_SSS;
+      } else if (layerType === 'CHL') {
+        minValue = range.min_chl;
+        maxValue = range.max_chl;
+      }
+
 
       // Convert to Fahrenheit if the unit system is imperial
       if (unitSystem === 'imperial' && layerType === 'SST') {
@@ -208,16 +346,34 @@ function createLegend(layerType, date) {
         },
       };
 
+      // const layout = {
+      //   title: layerType === 'CHL' ? 'Chl (mg/m³)' 
+      //     : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})` 
+      //     : 'SSS (PSU)',
+      //   width: 100,
+      //   height: 300,
+      //   margin: { l: 0, r: 75, t: 40, b: 0 },
+      //   xaxis: { visible: false },
+      //   yaxis: { visible: false },
+      // };
+
       const layout = {
-        title: layerType === 'SST'
-          ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
-          : 'SSS (PSU)',
+        title: {
+          text: layerType === 'CHL' ? 'Chl (mg/m³)' 
+                : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                : 'SSS (PSU)',
+          font: {
+            size: 14, // Adjust font size here (e.g., 16px)
+            family: 'Arial, sans-serif', // Optional: Define font family
+            color: '#333' // Optional: Change title color
+          }
+        },
         width: 100,
         height: 300,
         margin: { l: 0, r: 75, t: 40, b: 0 },
         xaxis: { visible: false },
-        yaxis: { visible: false },
-      };
+        yaxis: { visible: false }
+      };      
 
       Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);
       legendContainer.style.display = 'block'; // Ensure legend is shown when data is valid
@@ -242,19 +398,48 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   });
 });
 
-// Update tile layer paths and update tileDate
+// // Update tile layer paths and update tileDate
+// function updateLayerPaths(date) {
+//   tileDate = date; // Update the global tileDate variable
+//   const sstPath = `../data/SST/tiles_3day/${date}/{z}/{x}/{y}.png`;
+//   console.log('Constructed SST path:', sstPath);
+//   const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+
+//   sstOverlay.setUrl(sstPath);
+//   sssOverlay.setUrl(sssPath);
+
+//   console.log('Checking active layers...');
+//   console.log('Is SST overlay active?', map.hasLayer(sstOverlay));
+//   console.log('Is SSS overlay active?', map.hasLayer(sssOverlay));
+
+//   if (map.hasLayer(sstOverlay)) {
+//     console.log('Creating SST legend');
+//     createLegend('SST', date);
+//   } else if (map.hasLayer(sssOverlay)) {
+//     console.log('Creating SSS legend');
+//     createLegend('SSS', date);
+//   }
+// }
+
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable
+
   const sstPath = `../data/SST/tiles_3day/${date}/{z}/{x}/{y}.png`;
-  console.log('Constructed SST path:', sstPath);
   const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+  const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
+
+  console.log('Constructed SST path:', sstPath);
+  console.log('Constructed SSS path:', sssPath);
+  console.log('Constructed CHL path:', chlPath);
 
   sstOverlay.setUrl(sstPath);
   sssOverlay.setUrl(sssPath);
+  chlOverlay.setUrl(chlPath);
 
   console.log('Checking active layers...');
   console.log('Is SST overlay active?', map.hasLayer(sstOverlay));
   console.log('Is SSS overlay active?', map.hasLayer(sssOverlay));
+  console.log('Is CHL overlay active?', map.hasLayer(chlOverlay));
 
   if (map.hasLayer(sstOverlay)) {
     console.log('Creating SST legend');
@@ -262,6 +447,9 @@ function updateLayerPaths(date) {
   } else if (map.hasLayer(sssOverlay)) {
     console.log('Creating SSS legend');
     createLegend('SSS', date);
+  } else if (map.hasLayer(chlOverlay)) {
+    console.log('Creating CHL legend');
+    createLegend('CHL', date);
   }
 }
 

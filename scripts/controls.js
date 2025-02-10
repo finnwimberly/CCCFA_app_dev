@@ -204,6 +204,29 @@ $(function () {
 });
 
 // Add Layer Controls
+// const LayerSelectControl = L.Control.extend({
+//   onAdd: function () {
+//     const div = L.DomUtil.create('div', 'leaflet-control custom-control layer-control');
+//     div.innerHTML = `
+//       <div class="control-container">
+//         <h3 class="control-title">Layer Selection</h3>
+//         <div class="control-item">
+//           <input type="checkbox" id="sst-toggle">
+//           <label for="sst-toggle" class="control-label">SST</label>
+//         </div>
+//         <div class="control-item">
+//           <input type="checkbox" id="sss-toggle">
+//           <label for="sss-toggle" class="control-label">SSS</label>
+//         </div>
+//         <div class="control-item">
+//           <input type="checkbox" id="bathymetry-toggle">
+//           <label for="bathymetry-toggle" class="control-label">Bathymetry Contours</label>
+//         </div>
+//       </div>`;
+//     return div;
+//   },
+// });
+
 const LayerSelectControl = L.Control.extend({
   onAdd: function () {
     const div = L.DomUtil.create('div', 'leaflet-control custom-control layer-control');
@@ -219,6 +242,10 @@ const LayerSelectControl = L.Control.extend({
           <label for="sss-toggle" class="control-label">SSS</label>
         </div>
         <div class="control-item">
+          <input type="checkbox" id="chl-toggle">
+          <label for="chl-toggle" class="control-label">Chlorophyll-a</label>
+        </div>
+        <div class="control-item">
           <input type="checkbox" id="bathymetry-toggle">
           <label for="bathymetry-toggle" class="control-label">Bathymetry Contours</label>
         </div>
@@ -231,6 +258,64 @@ map.addControl(new LayerSelectControl({ position: 'topright' }));
 
 let activeLayerType = null; // Track the currently active layer
 
+// // SST toggle listener
+// document.getElementById('sst-toggle').addEventListener('change', (event) => {
+//   if (event.target.checked) {
+//     // If SSS is active, deselect it
+//     const sssToggle = document.getElementById('sss-toggle');
+//     if (sssToggle.checked) {
+//       sssToggle.checked = false; // Uncheck the SSS checkbox
+//       map.removeLayer(sssOverlay); // Remove SSS layer
+//       document.getElementById('sss-legend').style.display = 'none';
+//       if (activeLayerType === 'SSS') {
+//         activeLayerType = null; // Clear active layer
+//       }
+//     }
+
+//     // Activate SST
+//     map.addLayer(sstOverlay);
+//     document.getElementById('sst-legend').style.display = 'block';
+//     activeLayerType = 'SST'; // Set active layer to SST
+//     createLegend('SST', tileDate); // Call the legend function for SST
+//   } else {
+//     // Deactivate SST
+//     map.removeLayer(sstOverlay);
+//     document.getElementById('sst-legend').style.display = 'none';
+//     if (activeLayerType === 'SST') {
+//       activeLayerType = null; // Clear active layer
+//     }
+//   }
+// });
+
+// // SSS toggle listener
+// document.getElementById('sss-toggle').addEventListener('change', (event) => {
+//   if (event.target.checked) {
+//     // If SST is active, deselect it
+//     const sstToggle = document.getElementById('sst-toggle');
+//     if (sstToggle.checked) {
+//       sstToggle.checked = false; // Uncheck the SST checkbox
+//       map.removeLayer(sstOverlay); // Remove SST layer
+//       document.getElementById('sst-legend').style.display = 'none';
+//       if (activeLayerType === 'SST') {
+//         activeLayerType = null; // Clear active layer
+//       }
+//     }
+
+//     // Activate SSS
+//     map.addLayer(sssOverlay);
+//     document.getElementById('sss-legend').style.display = 'block';
+//     activeLayerType = 'SSS'; // Set active layer to SSS
+//     createLegend('SSS', tileDate); // Call the legend function for SSS
+//   } else {
+//     // Deactivate SSS
+//     map.removeLayer(sssOverlay);
+//     document.getElementById('sss-legend').style.display = 'none';
+//     if (activeLayerType === 'SSS') {
+//       activeLayerType = null; // Clear active layer
+//     }
+//   }
+// });
+
 // SST toggle listener
 document.getElementById('sst-toggle').addEventListener('change', (event) => {
   if (event.target.checked) {
@@ -241,6 +326,17 @@ document.getElementById('sst-toggle').addEventListener('change', (event) => {
       map.removeLayer(sssOverlay); // Remove SSS layer
       document.getElementById('sss-legend').style.display = 'none';
       if (activeLayerType === 'SSS') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
+    // If CHL is active, deselect it
+    const chlToggle = document.getElementById('chl-toggle');
+    if (chlToggle.checked) {
+      chlToggle.checked = false; // Uncheck the CHL checkbox
+      map.removeLayer(chlOverlay); // Remove CHL layer
+      document.getElementById('chl-legend').style.display = 'none';
+      if (activeLayerType === 'CHL') {
         activeLayerType = null; // Clear active layer
       }
     }
@@ -274,6 +370,17 @@ document.getElementById('sss-toggle').addEventListener('change', (event) => {
       }
     }
 
+    // If CHL is active, deselect it
+    const chlToggle = document.getElementById('chl-toggle');
+    if (chlToggle.checked) {
+      chlToggle.checked = false; // Uncheck the CHL checkbox
+      map.removeLayer(chlOverlay); // Remove CHL layer
+      document.getElementById('chl-legend').style.display = 'none';
+      if (activeLayerType === 'CHL') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
     // Activate SSS
     map.addLayer(sssOverlay);
     document.getElementById('sss-legend').style.display = 'block';
@@ -284,6 +391,46 @@ document.getElementById('sss-toggle').addEventListener('change', (event) => {
     map.removeLayer(sssOverlay);
     document.getElementById('sss-legend').style.display = 'none';
     if (activeLayerType === 'SSS') {
+      activeLayerType = null; // Clear active layer
+    }
+  }
+});
+
+// CHL toggle listener
+document.getElementById('chl-toggle').addEventListener('change', (event) => {
+  if (event.target.checked) {
+    // If SST is active, deselect it
+    const sstToggle = document.getElementById('sst-toggle');
+    if (sstToggle.checked) {
+      sstToggle.checked = false; // Uncheck SST checkbox
+      map.removeLayer(sstOverlay); // Remove SST layer
+      document.getElementById('sst-legend').style.display = 'none';
+      if (activeLayerType === 'SST') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
+    // If SSS is active, deselect it
+    const sssToggle = document.getElementById('sss-toggle');
+    if (sssToggle.checked) {
+      sssToggle.checked = false; // Uncheck SSS checkbox
+      map.removeLayer(sssOverlay); // Remove SSS layer
+      document.getElementById('sss-legend').style.display = 'none';
+      if (activeLayerType === 'SSS') {
+        activeLayerType = null; // Clear active layer
+      }
+    }
+
+    // Activate CHL
+    map.addLayer(chlOverlay);
+    document.getElementById('chl-legend').style.display = 'block';
+    activeLayerType = 'CHL'; // Set active layer to CHL
+    createLegend('CHL', tileDate); // Call the legend function for CHL
+  } else {
+    // Deactivate CHL
+    map.removeLayer(chlOverlay);
+    document.getElementById('chl-legend').style.display = 'none';
+    if (activeLayerType === 'CHL') {
       activeLayerType = null; // Clear active layer
     }
   }
