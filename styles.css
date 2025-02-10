@@ -3,6 +3,35 @@ body {
     margin: 20px;
   }
 
+/* Header styling */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #f8f9fa; /* Light background to distinguish header */
+  border-bottom: 2px solid #ddd; /* Optional: subtle border for separation */
+}
+
+/* Title styling */
+.title h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Logo container */
+.logos {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between logos */
+}
+
+/* Logo images */
+.logos img {
+  height: 50px; /* Adjust height as needed */
+  max-width: 150px;
+}
+
   #map {
     position: relative; /* Required for child elements (legends) to use absolute positioning */
     height: 500px; /* Fixed height or dynamically adjusted */

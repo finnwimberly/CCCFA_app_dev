@@ -17,20 +17,47 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>CCCFA Observations</h1>
+  <header>
+    <div class="title">
+        <h1>Observing the Cape Cod Ocean</h1>
+    </div>
+    <div class="logos">
+        <img src="/logos/CCCFA_logo.jpg" alt="Cape Cod Commercial Fishermen's Alliance Logo">
+        <img src="/logos/Seagrant_logo.jpg" alt="Sea Grant Logo">
+        <img src="/logos/WHOI_Tagline-Logo-1.png" alt="Woods Hole Oceanographic Institution Logo">
+    </div>
+  </header>
 
   <div class="description">
     <p>
-      This website synthesizes the joint observation efforts of the CCCFA and WHOI.
-      Since August 2024, the CCCFA has been using WHOI-provided CTDs to measure ocean
-      temperature, salinity, and density at various locations off the Cape Cod coast.
-      Below, you can select any of the markers on the map to plot the corresponding
-      CTD profiles. You can filter profiles by date or overlay sea surface temperature
-      (SST) and sea surface salinity (SSS) observations. These SST data are acquired
-      from the NOAA VIIRS instrument, while the SSS data are provided by NASA's SMAP
-      satellite.
+      A collaboration between the Cape Cod Commercial Fishermen’s Alliance and the Woods Hole Oceanographic Institution supports 
+      joint observational efforts to study oceanographic conditions around Cape Cod and the broader continental shelf. This 
+      partnership aims to enhance our understanding of the connections between oceanographic and fishing conditions. 
+    </p>
+
+    <p>Since August 2024, fishermen are equipped with a CTD (Conductivity-Temperature-Depth), which can be deployed from the ship 
+      and provides profiles of ocean temperature, salinity and density throughout the water column at various locations off 
+      the Cape Cod coast.  
+    </p>
+
+    <p>This website provides an interactive tool to visualize the collected data while also providing additional information 
+      about current conditions, such as maps of sea surface temperature and salinity in the region, measured by satellite. 
+      More information about the datasets can be found here. 
     </p>
   </div>
+
+  <div id="usage">
+    <strong>How to Use:</strong>
+    <p id="usage-text">
+      All CTD profiles are represented by black markers on the map. Hovering over a marker displays the date on which the profile
+      was taken. Clicking on a marker opens a pop-up with summary statistics and plots of temperature, salinity, and density 
+      beneath the map. To filter profiles by date, use the "Observation Range" filter in the "Time Control" panel. To view 
+      satellite imagery, select a date in the "Time Control" panel, then choose a dataset (SSS, SST, or Chlorophyll-a) in the 
+      "Layer Control" panel. Note: SSS (a rolling average) and Chlorophyll-a (daily imagery) layers are available every day, while the
+      SST layer (a three day average) is available once every three days.
+    </p>
+  </div>
+  
 
   <!-- Map Container -->
   <div id="map" style="height: 80vh; width: 100%; position: relative;">
@@ -76,23 +103,17 @@
   </footer> -->
 
   <footer style="display: flex; justify-content: center; align-items: center; padding: 10px; background-color: white; border-top: 1px solid #ddd; font-size: 14px;">
-    <!-- Centered content -->
-    <div style="display: flex; align-items: center;">
-      <!-- Logo -->
-      <img src="Sea-Grant__Primary_Color.png" alt="Sea Grant Logo" style="height: 80px; margin-right: 20px;">
-      
-      <!-- Developer credit -->
-      <div style="text-align: left; line-height: 1.2; display: flex; align-items: center;">
-        <span>
-          Developed by:<br>
-          Finn Wimberly
-        </span>
-        <a href="https://github.com/finnwimberly" target="_blank" style="margin-left: 10px; text-decoration: none;">
-          <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
-               alt="GitHub" 
-               style="width: 40px; height: 40px; vertical-align: middle;">
-        </a>
-      </div>
+    <!-- Developer credit -->
+    <div style="text-align: left; line-height: 1.2; display: flex; align-items: center;">
+      <span>
+        Developed by:<br>
+        Finn Wimberly
+      </span>
+      <a href="https://github.com/finnwimberly" target="_blank" style="margin-left: 10px; text-decoration: none;">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
+              alt="GitHub" 
+              style="width: 40px; height: 40px; vertical-align: middle;">
+      </a>
     </div>
 </footer>
   
