@@ -461,4 +461,4 @@ map.on('zoomend', () => {
 });
 
 // Export necessary variables and functions
-export { sstOverlay, sssOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend };
+export { sstOverlay, sssOverlay, chlOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend };

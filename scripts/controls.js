@@ -1,5 +1,5 @@
 import { map } from './map-setup.js';
-import { sstOverlay, sssOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend } from './layers.js';
+import { sstOverlay, sssOverlay, chlOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend } from './layers.js';
 import { initializePlots, removeCTDMeasurements } from './plots.js';
 import { loadProfiles } from './map.js';
 import { state } from './state.js';
