@@ -46,18 +46,47 @@ function getSelectedUnitSystem() {
     : 'metric';
 }
 
-// Function to update bathymetry layer based on unit selection
+// // Function to update bathymetry layer based on unit selection
+// function updateBathymetryLayer() {
+//   const unitSystem = getSelectedUnitSystem(); // Get selected unit
+//   const newPath = bathymetryPaths[unitSystem]; // Determine new path
+
+//   console.log(`Updating bathymetry layer: ${unitSystem} -> ${newPath}`);
+
+//   // Remove the old layer and add the new one if it's active
+//   if (map.hasLayer(bathymetryLayer)) {
+//     map.removeLayer(bathymetryLayer);
+//   }
+
+//   bathymetryLayer = L.tileLayer(newPath, {
+//     minZoom: 0,
+//     maxZoom: 11,
+//     tms: false,
+//     opacity: 1,
+//     attribution: 'Bathymetry Data',
+//     noWrap: true,
+//     className: 'bathymetryLayer'
+//   });
+
+//   // Add the new layer back if it was previously active
+//   map.addLayer(bathymetryLayer);
+// }
+
 function updateBathymetryLayer() {
   const unitSystem = getSelectedUnitSystem(); // Get selected unit
   const newPath = bathymetryPaths[unitSystem]; // Determine new path
 
   console.log(`Updating bathymetry layer: ${unitSystem} -> ${newPath}`);
 
-  // Remove the old layer and add the new one if it's active
-  if (map.hasLayer(bathymetryLayer)) {
+  // Check if bathymetry layer is currently active
+  const wasActive = map.hasLayer(bathymetryLayer);
+
+  // Remove the old layer
+  if (wasActive) {
     map.removeLayer(bathymetryLayer);
   }
 
+  // Create a new bathymetry layer with the correct unit-based tiles
   bathymetryLayer = L.tileLayer(newPath, {
     minZoom: 0,
     maxZoom: 11,
@@ -68,8 +97,10 @@ function updateBathymetryLayer() {
     className: 'bathymetryLayer'
   });
 
-  // Add the new layer back if it was previously active
-  map.addLayer(bathymetryLayer);
+  // **Only add back the bathymetry layer if it was already active**
+  if (wasActive) {
+    map.addLayer(bathymetryLayer);
+  }
 }
 
 // Initialize bathymetry layer with the default selection
