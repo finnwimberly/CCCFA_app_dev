@@ -8,7 +8,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 1px 20px;
   background-color: #f8f9fa;
   border-bottom: 2px solid #ddd;
 }
@@ -33,7 +33,7 @@ header {
 }
 
 .seagrant-logo {
-  height: 90px;
+  height: 100px;
   width: auto;
 }
 
