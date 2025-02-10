@@ -278,19 +278,19 @@ function createLegend(layerType, date) {
   let rangeFile;
   if (layerType === 'SST') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/SST/tiles_3day/${date}/sst_range_local.json`
-      : `../data/processed_data/SST/tiles_3day/${date}/sst_range_global.json`;
+      ? `../data/SST/tiles_3day/${date}/sst_range_local.json`
+      : `../data/SST/tiles_3day/${date}/sst_range_global.json`;
   } else if (layerType === 'SSS') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_local.json`
-      : `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+      ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
+      : `../data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
   } else if (layerType === 'CHL') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/CHL/tiles/${date}/chl_range_local.json`
-      : `../data/processed_data/CHL/tiles/${date}/chl_range_global.json`;
+      ? `../data/CHL/tiles/${date}/chl_range_local.json`
+      : `../data/CHL/tiles/${date}/chl_range_global.json`;
   }
 
-  const colormapFile = `../data/processed_data/${layerType}/thermal_colormap.txt`;
+  const colormapFile = `../data/${layerType}/thermal_colormap.txt`;
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -345,17 +345,6 @@ function createLegend(layerType, date) {
           tickformat: '.1f',
         },
       };
-
-      // const layout = {
-      //   title: layerType === 'CHL' ? 'Chl (mg/m³)' 
-      //     : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})` 
-      //     : 'SSS (PSU)',
-      //   width: 100,
-      //   height: 300,
-      //   margin: { l: 0, r: 75, t: 40, b: 0 },
-      //   xaxis: { visible: false },
-      //   yaxis: { visible: false },
-      // };
 
       const layout = {
         title: {
