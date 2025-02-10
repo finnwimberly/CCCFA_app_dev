@@ -9,8 +9,8 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #f8f9fa; /* Light background to distinguish header */
-  border-bottom: 2px solid #ddd; /* Optional: subtle border for separation */
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #ddd;
 }
 
 /* Title styling */
@@ -23,13 +23,23 @@ header {
 .logos {
   display: flex;
   align-items: center;
-  gap: 15px; /* Space between logos */
+  gap: 15px; /* Adds space between logos */
 }
 
-/* Logo images */
-.logos img {
-  height: 70px; /* Adjust height as needed */
-  max-width: 150px;
+/* Individual Logo Sizing */
+.cccfa-logo {
+  height: 65px;
+  width: auto;
+}
+
+.seagrant-logo {
+  height: 80px;
+  width: auto;
+}
+
+.whoi-logo {
+  height: 55px;
+  width: auto;
 }
 
   #map {
