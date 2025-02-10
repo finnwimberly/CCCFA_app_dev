@@ -165,7 +165,9 @@ function handleUnitChange(selectedProfiles) {
     const depthConverted =
       unitSystem === 'imperial'
         ? measurements.depth.map((d) => d * 0.546807) // meters to fathoms
-        : measurements.depth.map((d) => d / 0.546807); // fathoms to meters
+        // : measurements.depth.map((d) => d / 0.546807); // fathoms to meters
+        : measurements.depth.map((d) => d); // fathoms to meters
+
 
     const temperatureConverted =
       unitSystem === 'imperial'
