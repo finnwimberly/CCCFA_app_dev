@@ -33,18 +33,39 @@ const DateRangeControl = L.Control.extend({
 
 map.addControl(new DateRangeControl({ position: 'topright' }));
 
+// const infoModal = `
+//   <div id="info-overlay"></div>
+//   <div id="info-modal">
+//     <span id="info-modal-close">&times;</span>
+//     <h4>Layer Selection Color Scheme</h4>
+//     <p class="modal-subtitle">
+//       In order to see SST or SSS data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
+//     </p>
+//     <ul>
+//       <li><span class="color-block green-block">Green</span> Both SST and SSS layers available</li>
+//       <li><span class="color-block blue-block">Blue</span> Only SSS layer available</li>
+//       <li><span class="color-block yellow-block">Yellow</span> Only SST layer available</li>
+//     </ul>
+//     <p class="modal-subtitle">
+//       The range over which profile markers are visible can be changed through selecting the "Observation Range" option. Select the start and end date by clicking on the range below. You can select values with the pop-up calendar or by typing in values directly into the text box.
+//     </p>
+//   </div>
+// `;
+
 const infoModal = `
   <div id="info-overlay"></div>
   <div id="info-modal">
     <span id="info-modal-close">&times;</span>
     <h4>Layer Selection Color Scheme</h4>
     <p class="modal-subtitle">
-      In order to see SST or SSS data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
+      In order to see SST, SSS, or Chlorophyll-a data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
     </p>
     <ul>
-      <li><span class="color-block green-block">Green</span> Both SST and SSS layers available</li>
-      <li><span class="color-block blue-block">Blue</span> Only SSS layer available</li>
-      <li><span class="color-block yellow-block">Yellow</span> Only SST layer available</li>
+      <li><span class="color-block green-block">Green</span> All three layers (SST, SSS, Chloro) available</li>
+      <li><span class="color-block purple-block">Purple</span> Only Chloro and SST available</li>
+      <li><span class="color-block yellow-block">Yellow</span> Only Chloro and SSS available</li>
+      <li><span class="color-block blue-block">Blue</span> Only SST and SSS available</li>
+      <li><span class="color-block orange-block">Orange</span> Only SST available</li>
     </ul>
     <p class="modal-subtitle">
       The range over which profile markers are visible can be changed through selecting the "Observation Range" option. Select the start and end date by clicking on the range below. You can select values with the pop-up calendar or by typing in values directly into the text box.
@@ -122,85 +143,183 @@ async function fetchAvailableDates(filePath) {
   }
 }
 
+// $(function () {
+//   const picker = $('#daterange');
+//   let currentMode = 'range';
+
+//   // Paths for SST and SSS dates
+//   const sstDatesPath = '../data/SST/sst_dates.txt';
+//   const sssDatesPath = '../data/SSS/sss_dates.txt';
+
+//   // Fetch available dates for highlighting
+//   Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
+//     .then(([sstDates, sssDates]) => {
+//       // Log the fetched dates for debugging
+//       console.log("Fetched SST Dates:", sstDates);
+//       console.log("Fetched SSS Dates:", sssDates);
+
+//       const sstSet = new Set(sstDates);
+//       const sssSet = new Set(sssDates);
+//       const allDatesSet = new Set([...sstDates, ...sssDates]);
+
+//       function initializePicker(mode) {
+//         const options = {
+//           opens: 'left',
+//           maxDate: moment().format("MM/DD/YYYY"),
+//           isInvalidDate: function (date) {
+//             const formattedDate = date.format('YYYY-MM-DD');
+//             return !allDatesSet.has(formattedDate);
+//           },
+//           isCustomDate: function (date) {
+//             const formattedDate = date.format('YYYY-MM-DD');
+//             if (mode === 'single') {
+//               // Highlight dates for "Layer Date" mode
+//               if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
+//                 return 'highlight-both'; // Green highlight
+//               }
+//               if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
+//                 return 'highlight-sss'; // Blue highlight
+//               }
+//               if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
+//                 return 'highlight-sst'; // Yellow highlight
+//               }
+//             }
+//             // Remove any highlights for range mode
+//             return ''; // No highlight
+//           },
+//         };
+
+//         if (mode === 'single') {
+//           options.singleDatePicker = true;
+//           options.startDate = moment().format("MM/DD/YYYY");
+//         } else {
+//           options.singleDatePicker = false;
+//           options.startDate = '08/01/2024';
+//           options.endDate = moment().format("MM/DD/YYYY");
+//         }
+
+//         picker.daterangepicker(options, (start, end) => {
+//           if (mode === 'range') {
+//             const startDate = start.format('YYYY-MM-DD');
+//             const endDate = end.format('YYYY-MM-DD');
+//             loadProfiles(startDate, endDate);
+//           } else if (mode === 'single') {
+//             const year = start.year();
+//             const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
+//             const tileDate = `${year}_${dayOfYear}`;
+//             updateLayerPaths(tileDate);
+//           }
+//         });
+//       }
+
+//       // Event listener for date-mode radio buttons
+//       $('input[name="date-mode"]').change(function () {
+//         currentMode = $(this).val();
+//         initializePicker(currentMode);
+//       });
+
+//       // Initialize the picker with "range" mode by default
+//       initializePicker('range');
+//     })
+//     .catch(error => console.error('Error loading available dates:', error));
+// });
+
 $(function () {
   const picker = $('#daterange');
   let currentMode = 'range';
 
-  // Paths for SST and SSS dates
+  // Paths for SST, SSS, and Chloro dates
   const sstDatesPath = '../data/SST/sst_dates.txt';
   const sssDatesPath = '../data/SSS/sss_dates.txt';
+  const chloroDatesPath = '../data/CHLORO/chloro_dates.txt';
 
   // Fetch available dates for highlighting
-  Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
-    .then(([sstDates, sssDates]) => {
+  Promise.all([
+      fetchAvailableDates(sstDatesPath),
+      fetchAvailableDates(sssDatesPath),
+      fetchAvailableDates(chloroDatesPath)
+  ])
+  .then(([sstDates, sssDates, chloroDates]) => {
       // Log the fetched dates for debugging
       console.log("Fetched SST Dates:", sstDates);
       console.log("Fetched SSS Dates:", sssDates);
+      console.log("Fetched Chloro Dates:", chloroDates);
 
       const sstSet = new Set(sstDates);
       const sssSet = new Set(sssDates);
-      const allDatesSet = new Set([...sstDates, ...sssDates]);
+      const chloroSet = new Set(chloroDates);
+      const allDatesSet = new Set([...sstDates, ...sssDates, ...chloroDates]);
 
       function initializePicker(mode) {
-        const options = {
-          opens: 'left',
-          maxDate: moment().format("MM/DD/YYYY"),
-          isInvalidDate: function (date) {
-            const formattedDate = date.format('YYYY-MM-DD');
-            return !allDatesSet.has(formattedDate);
-          },
-          isCustomDate: function (date) {
-            const formattedDate = date.format('YYYY-MM-DD');
-            if (mode === 'single') {
-              // Highlight dates for "Layer Date" mode
-              if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
-                return 'highlight-both'; // Green highlight
-              }
-              if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
-                return 'highlight-sss'; // Blue highlight
-              }
-              if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
-                return 'highlight-sst'; // Yellow highlight
-              }
-            }
-            // Remove any highlights for range mode
-            return ''; // No highlight
-          },
-        };
+          const options = {
+              opens: 'left',
+              maxDate: moment().format("MM/DD/YYYY"),
+              isInvalidDate: function (date) {
+                  const formattedDate = date.format('YYYY-MM-DD');
+                  return !allDatesSet.has(formattedDate);
+              },
+              isCustomDate: function (date) {
+                  const formattedDate = date.format('YYYY-MM-DD');
 
-        if (mode === 'single') {
-          options.singleDatePicker = true;
-          options.startDate = moment().format("MM/DD/YYYY");
-        } else {
-          options.singleDatePicker = false;
-          options.startDate = '08/01/2024';
-          options.endDate = moment().format("MM/DD/YYYY");
-        }
+                  if (mode === 'single') {
+                      // Green: All three layers available
+                      if (sstSet.has(formattedDate) && sssSet.has(formattedDate) && chloroSet.has(formattedDate)) {
+                          return 'highlight-all'; // Green
+                      }
+                      // Purple: Chloro + SST
+                      if (chloroSet.has(formattedDate) && sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
+                          return 'highlight-chloro-sst'; // Purple
+                      }
+                      // Yellow: Chloro + SSS
+                      if (chloroSet.has(formattedDate) && sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
+                          return 'highlight-chloro-sss'; // Yellow
+                      }
+                      // Blue: SST + SSS
+                      if (sstSet.has(formattedDate) && sssSet.has(formattedDate) && !chloroSet.has(formattedDate)) {
+                          return 'highlight-sst-sss'; // Blue
+                      }
+                      // Orange: Only SST available
+                      if (sstSet.has(formattedDate) && !sssSet.has(formattedDate) && !chloroSet.has(formattedDate)) {
+                          return 'highlight-sst-only'; // Orange
+                      }
+                  }
+                  return ''; // No highlight
+              },
+          };
 
-        picker.daterangepicker(options, (start, end) => {
-          if (mode === 'range') {
-            const startDate = start.format('YYYY-MM-DD');
-            const endDate = end.format('YYYY-MM-DD');
-            loadProfiles(startDate, endDate);
-          } else if (mode === 'single') {
-            const year = start.year();
-            const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
-            const tileDate = `${year}_${dayOfYear}`;
-            updateLayerPaths(tileDate);
+          if (mode === 'single') {
+              options.singleDatePicker = true;
+              options.startDate = moment().format("MM/DD/YYYY");
+          } else {
+              options.singleDatePicker = false;
+              options.startDate = '08/01/2024';
+              options.endDate = moment().format("MM/DD/YYYY");
           }
-        });
+
+          picker.daterangepicker(options, (start, end) => {
+              if (mode === 'range') {
+                  const startDate = start.format('YYYY-MM-DD');
+                  const endDate = end.format('YYYY-MM-DD');
+                  loadProfiles(startDate, endDate);
+              } else if (mode === 'single') {
+                  const year = start.year();
+                  const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
+                  const tileDate = `${year}_${dayOfYear}`;
+                  updateLayerPaths(tileDate);
+              }
+          });
       }
 
       // Event listener for date-mode radio buttons
       $('input[name="date-mode"]').change(function () {
-        currentMode = $(this).val();
-        initializePicker(currentMode);
+          currentMode = $(this).val();
+          initializePicker(currentMode);
       });
 
       // Initialize the picker with "range" mode by default
       initializePicker('range');
-    })
-    .catch(error => console.error('Error loading available dates:', error));
+  })
+  .catch(error => console.error('Error loading available dates:', error));
 });
 
 // Add Layer Controls

@@ -167,15 +167,23 @@ header {
 
 /* Specific color blocks */
 .green-block {
-  background-color: rgba(129, 199, 132, 1); /* Green */
+  background-color: rgba(129, 199, 132, 1); /* Green - All three layers available */
 }
 
-.blue-block {
-  background-color: rgba(100, 181, 246, 1); /* Blue */
+.purple-block {
+  background-color: rgba(186, 104, 200, 1); /* Purple - Chloro + SST */
 }
 
 .yellow-block {
-  background-color: rgba(255, 224, 130, 1); /* Yellow */
+  background-color: rgba(255, 224, 130, 1); /* Yellow - Chloro + SSS */
+}
+
+.blue-block {
+  background-color: rgba(100, 181, 246, 1); /* Blue - SST + SSS */
+}
+
+.orange-block {
+  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST available */
 }
 
 /* Deselect Button Specific Styles */
