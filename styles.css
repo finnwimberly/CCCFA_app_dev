@@ -165,25 +165,24 @@ header {
   min-width: 60px; /* Ensure consistent block size */
 }
 
-/* Specific color blocks */
-.green-block {
-  background-color: rgba(129, 199, 132, 1); /* Green - All three layers available */
+.highlight-all {
+  background-color: rgba(129, 199, 132, 1); /* Green - All three layers */
 }
 
-.purple-block {
+.highlight-chloro-sst {
   background-color: rgba(186, 104, 200, 1); /* Purple - Chloro + SST */
 }
 
-.yellow-block {
+.highlight-chloro-sss {
   background-color: rgba(255, 224, 130, 1); /* Yellow - Chloro + SSS */
 }
 
-.blue-block {
+.highlight-sst-sss {
   background-color: rgba(100, 181, 246, 1); /* Blue - SST + SSS */
 }
 
-.orange-block {
-  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST available */
+.highlight-sst-only {
+  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST */
 }
 
 /* Deselect Button Specific Styles */
