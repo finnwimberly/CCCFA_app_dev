@@ -165,26 +165,6 @@ header {
   min-width: 60px; /* Ensure consistent block size */
 }
 
-.highlight-all {
-  background-color: rgba(129, 199, 132, 1); /* Green - All three layers */
-}
-
-.highlight-chloro-sst {
-  background-color: rgba(186, 104, 200, 1); /* Purple - Chloro + SST */
-}
-
-.highlight-chloro-sss {
-  background-color: rgba(255, 224, 130, 1); /* Yellow - Chloro + SSS */
-}
-
-.highlight-sst-sss {
-  background-color: rgba(100, 181, 246, 1); /* Blue - SST + SSS */
-}
-
-.highlight-sst-only {
-  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST */
-}
-
 /* Deselect Button Specific Styles */
 .control-button {
   width: 200px;
@@ -227,20 +207,25 @@ header {
   }
 }
 
-  .highlight-both {
-    background-color: rgba(129, 199, 132, 0.5) !important; /* Semi-transparent green */
-    color: black !important; /* Change to black for better visibility */
-  }
-  
-  .highlight-sss {
-    background-color: rgba(100, 181, 246, 0.5) !important; /* Semi-transparent blue */
-    color: black !important;
-  }
-  
-  .highlight-sst {
-    background-color: rgba(255, 224, 130, 0.5) !important; /* Semi-transparent yellow */
-    color: black !important;
-  }
+.highlight-all {
+  background-color: rgba(129, 199, 132, 1); /* Green - All three layers */
+}
+
+.highlight-chloro-sst {
+  background-color: rgba(186, 104, 200, 1); /* Purple - Chloro + SST */
+}
+
+.highlight-chloro-sss {
+  background-color: rgba(255, 224, 130, 1); /* Yellow - Chloro + SSS */
+}
+
+.highlight-sst-sss {
+  background-color: rgba(100, 181, 246, 1); /* Blue - SST + SSS */
+}
+
+.highlight-sst-only {
+  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST */
+}
 
   /* Hovered Date Styling */
 .daterangepicker .calendar-table td:hover {

@@ -58,17 +58,17 @@ const infoModal = `
     <span id="info-modal-close">&times;</span>
     <h4>Layer Selection Color Scheme</h4>
     <p class="modal-subtitle">
-      In order to see SST, SSS, or Chlorophyll-a data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
+      In order to view Sea Surface Temperature (SST), Sea Surface Salinity (SSS), or Chlorophyll-a (Chloro) data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
     </p>
     <ul>
-      <li><span class="color-block green-block">Green</span> All three layers (SST, SSS, Chloro) available</li>
-      <li><span class="color-block purple-block">Purple</span> Only Chloro and SST available</li>
-      <li><span class="color-block yellow-block">Yellow</span> Only Chloro and SSS available</li>
-      <li><span class="color-block blue-block">Blue</span> Only SST and SSS available</li>
-      <li><span class="color-block orange-block">Orange</span> Only SST available</li>
+      <li><span class="color-block highlight-all">Green</span> SST, SSS, and Chloro available</li>
+      <li><span class="color-block highlight-chloro-sst">Purple</span> SST and Chloro available</li>
+      <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
+      <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
+      <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
     </ul>
     <p class="modal-subtitle">
-      The range over which profile markers are visible can be changed through selecting the "Observation Range" option. Select the start and end date by clicking on the range below. You can select values with the pop-up calendar or by typing in values directly into the text box.
+      To adjust the range over which profile markers are visible, select the "Observation Range" option. You can choose the start and end dates by clicking on the range below. Dates can be selected using the pop-up calendar or by entering values directly into the text box.
     </p>
   </div>
 `;
