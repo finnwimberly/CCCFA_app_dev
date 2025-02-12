@@ -224,8 +224,13 @@ header {
 }
 
 .highlight-sst-only {
-  background-color: rgba(255, 152, 0, 1); /* Orange - Only SST */
+  background-color: rgb(246, 174, 67); /* Orange - Only SST */
 }
+
+.highlight-chloro-only {
+  background-color: rgb(38, 218, 197); /* Teal - Only Chloro */
+}
+
 
   /* Hovered Date Styling */
 .daterangepicker .calendar-table td:hover {

@@ -39,15 +39,17 @@ map.addControl(new DateRangeControl({ position: 'topright' }));
 //     <span id="info-modal-close">&times;</span>
 //     <h4>Layer Selection Color Scheme</h4>
 //     <p class="modal-subtitle">
-//       In order to see SST or SSS data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
+//       In order to view Sea Surface Temperature (SST), Sea Surface Salinity (SSS), or Chlorophyll-a (Chloro) data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
 //     </p>
 //     <ul>
-//       <li><span class="color-block green-block">Green</span> Both SST and SSS layers available</li>
-//       <li><span class="color-block blue-block">Blue</span> Only SSS layer available</li>
-//       <li><span class="color-block yellow-block">Yellow</span> Only SST layer available</li>
+//       <li><span class="color-block highlight-all">Green</span> SST, SSS, and Chloro available</li>
+//       <li><span class="color-block highlight-chloro-sst">Purple</span> SST and Chloro available</li>
+//       <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
+//       <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
+//       <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
 //     </ul>
 //     <p class="modal-subtitle">
-//       The range over which profile markers are visible can be changed through selecting the "Observation Range" option. Select the start and end date by clicking on the range below. You can select values with the pop-up calendar or by typing in values directly into the text box.
+//       To adjust the range over which profile markers are visible, select the "Observation Range" option. You can choose the start and end dates by clicking on the range below. Dates can be selected using the pop-up calendar or by entering values directly into the text box.
 //     </p>
 //   </div>
 // `;
@@ -66,6 +68,7 @@ const infoModal = `
       <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
       <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
       <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
+      <li><span class="color-block highlight-chloro-only">Teal</span> Only Chloro available</li>
     </ul>
     <p class="modal-subtitle">
       To adjust the range over which profile markers are visible, select the "Observation Range" option. You can choose the start and end dates by clicking on the range below. Dates can be selected using the pop-up calendar or by entering values directly into the text box.
@@ -282,6 +285,11 @@ $(function () {
                       if (sstSet.has(formattedDate) && !sssSet.has(formattedDate) && !chloroSet.has(formattedDate)) {
                           return 'highlight-sst-only'; // Orange
                       }
+
+                      // New: Only Chloro available
+                      if (chloroSet.has(formattedDate) && !sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
+                          return 'highlight-chloro-only'; // Teal (New)
+                      }
                   }
                   return ''; // No highlight
               },
@@ -322,30 +330,6 @@ $(function () {
   .catch(error => console.error('Error loading available dates:', error));
 });
 
-// Add Layer Controls
-// const LayerSelectControl = L.Control.extend({
-//   onAdd: function () {
-//     const div = L.DomUtil.create('div', 'leaflet-control custom-control layer-control');
-//     div.innerHTML = `
-//       <div class="control-container">
-//         <h3 class="control-title">Layer Selection</h3>
-//         <div class="control-item">
-//           <input type="checkbox" id="sst-toggle">
-//           <label for="sst-toggle" class="control-label">SST</label>
-//         </div>
-//         <div class="control-item">
-//           <input type="checkbox" id="sss-toggle">
-//           <label for="sss-toggle" class="control-label">SSS</label>
-//         </div>
-//         <div class="control-item">
-//           <input type="checkbox" id="bathymetry-toggle">
-//           <label for="bathymetry-toggle" class="control-label">Bathymetry Contours</label>
-//         </div>
-//       </div>`;
-//     return div;
-//   },
-// });
-
 const LayerSelectControl = L.Control.extend({
   onAdd: function () {
     const div = L.DomUtil.create('div', 'leaflet-control custom-control layer-control');
@@ -377,63 +361,6 @@ map.addControl(new LayerSelectControl({ position: 'topright' }));
 
 let activeLayerType = null; // Track the currently active layer
 
-// // SST toggle listener
-// document.getElementById('sst-toggle').addEventListener('change', (event) => {
-//   if (event.target.checked) {
-//     // If SSS is active, deselect it
-//     const sssToggle = document.getElementById('sss-toggle');
-//     if (sssToggle.checked) {
-//       sssToggle.checked = false; // Uncheck the SSS checkbox
-//       map.removeLayer(sssOverlay); // Remove SSS layer
-//       document.getElementById('sss-legend').style.display = 'none';
-//       if (activeLayerType === 'SSS') {
-//         activeLayerType = null; // Clear active layer
-//       }
-//     }
-
-//     // Activate SST
-//     map.addLayer(sstOverlay);
-//     document.getElementById('sst-legend').style.display = 'block';
-//     activeLayerType = 'SST'; // Set active layer to SST
-//     createLegend('SST', tileDate); // Call the legend function for SST
-//   } else {
-//     // Deactivate SST
-//     map.removeLayer(sstOverlay);
-//     document.getElementById('sst-legend').style.display = 'none';
-//     if (activeLayerType === 'SST') {
-//       activeLayerType = null; // Clear active layer
-//     }
-//   }
-// });
-
-// // SSS toggle listener
-// document.getElementById('sss-toggle').addEventListener('change', (event) => {
-//   if (event.target.checked) {
-//     // If SST is active, deselect it
-//     const sstToggle = document.getElementById('sst-toggle');
-//     if (sstToggle.checked) {
-//       sstToggle.checked = false; // Uncheck the SST checkbox
-//       map.removeLayer(sstOverlay); // Remove SST layer
-//       document.getElementById('sst-legend').style.display = 'none';
-//       if (activeLayerType === 'SST') {
-//         activeLayerType = null; // Clear active layer
-//       }
-//     }
-
-//     // Activate SSS
-//     map.addLayer(sssOverlay);
-//     document.getElementById('sss-legend').style.display = 'block';
-//     activeLayerType = 'SSS'; // Set active layer to SSS
-//     createLegend('SSS', tileDate); // Call the legend function for SSS
-//   } else {
-//     // Deactivate SSS
-//     map.removeLayer(sssOverlay);
-//     document.getElementById('sss-legend').style.display = 'none';
-//     if (activeLayerType === 'SSS') {
-//       activeLayerType = null; // Clear active layer
-//     }
-//   }
-// });
 
 // SST toggle listener
 document.getElementById('sst-toggle').addEventListener('change', (event) => {
