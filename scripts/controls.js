@@ -33,27 +33,6 @@ const DateRangeControl = L.Control.extend({
 
 map.addControl(new DateRangeControl({ position: 'topright' }));
 
-// const infoModal = `
-//   <div id="info-overlay"></div>
-//   <div id="info-modal">
-//     <span id="info-modal-close">&times;</span>
-//     <h4>Layer Selection Color Scheme</h4>
-//     <p class="modal-subtitle">
-//       In order to view Sea Surface Temperature (SST), Sea Surface Salinity (SSS), or Chlorophyll-a (Chloro) data, select "Layer Date" and then click on a date below. The color of the date corresponds to the data available for that date as follows:
-//     </p>
-//     <ul>
-//       <li><span class="color-block highlight-all">Green</span> SST, SSS, and Chloro available</li>
-//       <li><span class="color-block highlight-chloro-sst">Purple</span> SST and Chloro available</li>
-//       <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
-//       <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
-//       <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
-//     </ul>
-//     <p class="modal-subtitle">
-//       To adjust the range over which profile markers are visible, select the "Observation Range" option. You can choose the start and end dates by clicking on the range below. Dates can be selected using the pop-up calendar or by entering values directly into the text box.
-//     </p>
-//   </div>
-// `;
-
 const infoModal = `
   <div id="info-overlay"></div>
   <div id="info-modal">
@@ -66,8 +45,7 @@ const infoModal = `
       <li><span class="color-block highlight-all">Green</span> SST, SSS, and Chloro available</li>
       <li><span class="color-block highlight-chloro-sst">Purple</span> SST and Chloro available</li>
       <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
-      <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
-      <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
+      <li><span class="color-block highlight-sst-only">Blue</span> Only SST available</li>
       <li><span class="color-block highlight-chloro-only">Gray</span> Only Chloro available</li>
     </ul>
     <p class="modal-subtitle">
@@ -277,18 +255,15 @@ $(function () {
                       if (chloroSet.has(formattedDate) && sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
                           return 'highlight-chloro-sss'; // Yellow
                       }
-                      // Blue: SST + SSS
-                      if (sstSet.has(formattedDate) && sssSet.has(formattedDate) && !chloroSet.has(formattedDate)) {
-                          return 'highlight-sst-sss'; // Blue
-                      }
-                      // Orange: Only SST available
+            
+                      // Blue: Only SST available
                       if (sstSet.has(formattedDate) && !sssSet.has(formattedDate) && !chloroSet.has(formattedDate)) {
-                          return 'highlight-sst-only'; // Orange
+                          return 'highlight-sst-only'; // Blue
                       }
 
-                      // New: Only Chloro available
+                      // Only Chloro available
                       if (chloroSet.has(formattedDate) && !sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
-                          return 'highlight-chloro-only'; // Teal (New)
+                          return 'highlight-chloro-only'; // Gray
                       }
                   }
                   return ''; // No highlight
