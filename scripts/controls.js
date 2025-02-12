@@ -68,7 +68,7 @@ const infoModal = `
       <li><span class="color-block highlight-chloro-sss">Yellow</span> SSS and Chloro available</li>
       <li><span class="color-block highlight-sst-sss">Blue</span> SST and SSS available</li>
       <li><span class="color-block highlight-sst-only">Orange</span> Only SST available</li>
-      <li><span class="color-block highlight-chloro-only">Teal</span> Only Chloro available</li>
+      <li><span class="color-block highlight-chloro-only">Gray</span> Only Chloro available</li>
     </ul>
     <p class="modal-subtitle">
       To adjust the range over which profile markers are visible, select the "Observation Range" option. You can choose the start and end dates by clicking on the range below. Dates can be selected using the pop-up calendar or by entering values directly into the text box.

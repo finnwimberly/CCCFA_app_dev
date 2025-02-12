@@ -212,7 +212,7 @@ header {
 }
 
 .highlight-chloro-sst {
-  background-color: rgba(186, 104, 200, 1); /* Purple - Chloro + SST */
+  background-color: rgb(173, 121, 182); /* Purple - Chloro + SST */
 }
 
 .highlight-chloro-sss {
