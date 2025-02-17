@@ -389,51 +389,51 @@ function createLegend(layerType, date) {
       }
 
       const colorscale = rgbValues.map((rgb, i) => {
-        const [index, r, g, b, a] = rgb;
-    
-        let scaleIndex;
-        if (layerType === 'CHL') {
-            // Logarithmic scale for CHL
-            let logIndex = Math.log10(1 + (i / (rgbValues.length - 1)) * (maxValue - minValue));
-            scaleIndex = logIndex / Math.log10(maxValue + 1);
-        } else {
-            // Linear scale for SST and SSS
-            scaleIndex = i / (rgbValues.length - 1);
+        const [index, r, g, b, a] = rgb; // Ensure we use all 5 columns (including alpha)
+        if (i === 0 || i === rgbValues.length - 1) {
+          return [i / (rgbValues.length - 1), 'rgba(255, 255, 255, 0)'];
         }
-    
-          return [scaleIndex, `rgba(${r}, ${g}, ${b}, ${a / 255})`];
+        return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
       });
-    
-    // Set up the colorbar with different tick modes based on layer type
-    const colorbarConfig = {
-        len: 1,
-        thickness: 25,
-        tickformat: '.1f',
-    };
-    
-    // Apply log-scale ticks only for CHL
-    if (layerType === 'CHL') {
-        colorbarConfig.tickmode = 'array';
-        colorbarConfig.tickvals = [Math.log10(0.1), Math.log10(1), Math.log10(10), Math.log10(20)];
-        colorbarConfig.ticktext = ['0.1', '1', '10', '20'];
-    } else {
-        // Linear scale for SST and SSS
-        colorbarConfig.tickmode = 'linear';
-        colorbarConfig.tick0 = minValue;
-        colorbarConfig.dtick = (maxValue - minValue) / 5;
-    }
-    
-    // Define the legend data
-    const legendData = {
-        z: layerType === 'CHL' 
-            ? [[Math.log10(minValue + 1), Math.log10(maxValue + 1)]] // Log-scale for CHL
-            : [[minValue, maxValue]], // Linear-scale for others
+
+      // const legendData = {
+      //   z: [[minValue, maxValue]],
+      //   type: 'heatmap',
+      //   colorscale: colorscale,
+      //   showscale: true,
+      //   hoverinfo: 'none',
+      //   colorbar: {
+      //     len: 1,
+      //     thickness: 25,
+      //     tickmode: 'linear',
+      //     tick0: minValue,
+      //     dtick: (maxValue - minValue) / 5,
+      //     tickformat: '.1f',
+      //   },
+      // };
+
+      const legendData = {
+        z: [[minValue, maxValue]],  // Keep the color mapping linear
         type: 'heatmap',
         colorscale: colorscale,
         showscale: true,
         hoverinfo: 'none',
-        colorbar: colorbarConfig,
-    };
+        colorbar: {
+          len: 1,
+          thickness: 25,
+          tickmode: layerType === 'CHL' ? 'array' : 'linear', // Log scale only for CHL
+          tickvals: layerType === 'CHL' 
+            ? [Math.log10(0.1), Math.log10(1), Math.log10(10), Math.log10(20)] 
+            : undefined,  // Use default linear ticks for others
+          ticktext: layerType === 'CHL' 
+            ? ['0.1', '1', '10', '20'] 
+            : undefined,  // Use default for linear
+          tick0: layerType === 'CHL' ? undefined : minValue, // Disable linear tick0 for CHL
+          dtick: layerType === 'CHL' ? undefined : (maxValue - minValue) / 5, // Disable dtick for CHL
+          tickformat: '.1f',
+        },
+      };
+      
 
       const layout = {
         title: {
