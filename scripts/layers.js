@@ -413,7 +413,7 @@ function createLegend(layerType, date) {
       // };
 
       const legendData = {
-        z: [[minValue, maxValue]],  // Keep the color mapping linear
+        z: [[minValue, maxValue]],  // Keep color mapping linear
         type: 'heatmap',
         colorscale: colorscale,
         showscale: true,
@@ -421,19 +421,18 @@ function createLegend(layerType, date) {
         colorbar: {
           len: 1,
           thickness: 25,
-          tickmode: layerType === 'CHL' ? 'array' : 'linear', // Log scale only for CHL
+          tickmode: layerType === 'CHL' ? 'array' : 'linear',
           tickvals: layerType === 'CHL' 
-            ? [Math.log10(0.1), Math.log10(1), Math.log10(10), Math.log10(20)] 
-            : undefined,  // Use default linear ticks for others
+            ? [0, 0.25, 0.5, 0.75, 1]  // Logarithmic ticks spaced in the correct locations
+            : undefined,  
           ticktext: layerType === 'CHL' 
-            ? ['0.1', '1', '10', '20'] 
-            : undefined,  // Use default for linear
-          tick0: layerType === 'CHL' ? undefined : minValue, // Disable linear tick0 for CHL
-          dtick: layerType === 'CHL' ? undefined : (maxValue - minValue) / 5, // Disable dtick for CHL
+            ? ['0.1', '1', '10', '20']  // Logarithmic labels
+            : undefined,  
+          tick0: layerType === 'CHL' ? undefined : minValue,  
+          dtick: layerType === 'CHL' ? undefined : (maxValue - minValue) / 5,  
           tickformat: '.1f',
         },
-      };
-      
+      };      
 
       const layout = {
         title: {
