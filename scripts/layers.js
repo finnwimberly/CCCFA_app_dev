@@ -377,8 +377,8 @@ function createLegend(layerType, date) {
         minValue = range.min_SSS;
         maxValue = range.max_SSS;
       } else if (layerType === 'CHL') {
-        minValue = range.min_chl;
-        maxValue = range.max_chl;
+        minValue = 0;
+        maxValue = 20;
       }
 
 
