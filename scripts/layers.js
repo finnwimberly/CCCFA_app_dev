@@ -459,8 +459,10 @@ function createLegend(layerType, date) {
         );
     
         // Step 2: Map log values to linear positions (0 to 1) for colorbar
-        const tickPositions = logValues.map(v => (Math.log10(v) - logMin) / (logMax - logMin));
-    
+        // const tickPositions = logValues.map(v => (Math.log10(v) - logMin) / (logMax - logMin));
+        const tickPositions = logValues.map(v =>minColorbar + ((Math.log10(v) - logMin))
+        );
+
         // Step 3: Assign tick positions & labels
         legendData.colorbar.tickmode = 'array';
         legendData.colorbar.tickvals = tickPositions;  // Linear positions
