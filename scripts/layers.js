@@ -449,21 +449,26 @@ function createLegend(layerType, date) {
       
       // Apply different tick positioning for CHL log scale
       if (layerType === 'CHL') {
+        const numTicks = 6;  // Number of tick marks
         const logMin = Math.log10(minValue);
         const logMax = Math.log10(maxValue);
-        const numTicks = 6;
     
-        // Generate log-spaced tick values
-        const logTicks = Array.from({ length: numTicks }, (_, i) =>
+        // Step 1: Generate log-scaled values for labels
+        const logValues = Array.from({ length: numTicks }, (_, i) =>
             Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin))
         );
     
-        // Set the colorbar scale to "log" so the ticks are evenly spaced
+        // Step 2: Map log values to linear positions (0 to 1) for colorbar
+        const tickPositions = logValues.map(v => (Math.log10(v) - logMin) / (logMax - logMin));
+    
+        // Step 3: Assign tick positions & labels
         legendData.colorbar.tickmode = 'array';
-        legendData.colorbar.tickvals = logTicks;
-        legendData.colorbar.ticktext = logTicks.map(t => t.toPrecision(2)); // Format for readability
-        legendData.colorbar.type = "log";  // Force log scale on the colorbar!
-      } else {
+        legendData.colorbar.tickvals = tickPositions;  // Linear positions
+        legendData.colorbar.ticktext = logValues.map(t => t.toPrecision(2)); // Logarithmic labels
+    
+        console.log("CHL Log Tick Positions:", tickPositions); // Debugging
+        console.log("CHL Log Tick Labels:", logValues);
+      }   else {
         // Default linear tick mode for SST & SSS
         legendData.colorbar.tickmode = 'linear';
         legendData.colorbar.tick0 = minValue;
