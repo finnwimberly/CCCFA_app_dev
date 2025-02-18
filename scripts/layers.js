@@ -129,6 +129,184 @@ function showModal(message) {
   });
 }
 
+// // Helper function to generate legend
+// function createLegend(layerType, date) {
+//   // Get the legend container element
+//   const legendContainer = document.getElementById(`${layerType.toLowerCase()}-legend`);
+//   // Determine the active overlay layer
+//   const overlay = layerType === 'SST' ? sstOverlay 
+//                  : layerType === 'SSS' ? sssOverlay 
+//                  : chlOverlay; // Add CHL overlay reference
+
+//   const zoomLevel = map.getZoom();
+
+//   // Check the selected unit system (metric or imperial)
+//   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
+
+//   // Check if a valid date is provided
+//   if (!date) {
+//     // Uncheck the layer toggle box
+//     const checkbox = document.getElementById(`${layerType.toLowerCase()}-toggle`);
+//     if (checkbox) {
+//       checkbox.checked = false; // Uncheck the checkbox
+//     }
+
+//     // Hide the legend container
+//     if (legendContainer) {
+//       legendContainer.style.display = 'none';
+//     }
+
+//     // Remove the layer from the map
+//     if (map.hasLayer(overlay)) {
+//       map.removeLayer(overlay); // Ensure the layer is not selected
+//     }
+
+//     // Show the modal message
+//     showModal("Please select a date for the layer first.");
+//     return; // Exit the function
+//   }
+
+//   // Dynamically determine file paths based on zoom level
+//   let rangeFile;
+//   if (layerType === 'SST') {
+//     rangeFile = zoomLevel >= 8
+//       ? `../data/SST/tiles_3day/${date}/sst_range_local.json`
+//       : `../data/SST/tiles_3day/${date}/sst_range_global.json`;
+//   } else if (layerType === 'SSS') {
+//     rangeFile = zoomLevel >= 8
+//       ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
+//       : `../data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+//   } else if (layerType === 'CHL') {
+//     rangeFile = zoomLevel >= 8
+//       ? `../data/CHL/tiles/${date}/chl_range_local.json`
+//       : `../data/CHL/tiles/${date}/chl_range_global.json`;
+//   }
+
+//   const colormapFile = `../data/${layerType}/thermal_colormap.txt`;
+
+//   Promise.all([
+//     fetch(colormapFile).then((res) => res.text()),
+//     fetch(rangeFile).then((res) => res.json()),
+//   ])
+//     .then(([colormapText, range]) => {
+//       const rgbValues = colormapText.split('\n')
+//         .filter((line) => line.trim())
+//         .map((line) => line.split(' ').map(Number));
+
+//       // Get min and max values
+//       let minValue, maxValue;
+
+//       if (layerType === 'SST') {
+//         minValue = range.min_temp;
+//         maxValue = range.max_temp;
+//       } else if (layerType === 'SSS') {
+//         minValue = range.min_SSS;
+//         maxValue = range.max_SSS;
+//       } else if (layerType === 'CHL') {
+//         minValue = range.min_chl;
+//         maxValue = range.max_chl;
+//       }
+
+
+//       // Convert to Fahrenheit if the unit system is imperial
+//       if (unitSystem === 'imperial' && layerType === 'SST') {
+//         minValue = (minValue * 9) / 5 + 32;
+//         maxValue = (maxValue * 9) / 5 + 32;
+//       }
+
+//       const colorscale = rgbValues.map((rgb, i) => {
+//         const [index, r, g, b, a] = rgb; // Ensure we use all 5 columns (including alpha)
+//         if (i === 0 || i === rgbValues.length - 1) {
+//           return [i / (rgbValues.length - 1), 'rgba(255, 255, 255, 0)'];
+//         }
+//         return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
+//       });
+
+//       // const legendData = {
+//       //   z: [[minValue, maxValue]],
+//       //   type: 'heatmap',
+//       //   colorscale: colorscale,
+//       //   showscale: true,
+//       //   hoverinfo: 'none',
+//       //   colorbar: {
+//       //     len: 1,
+//       //     thickness: 25,
+//       //     tickmode: 'linear',
+//       //     tick0: minValue,
+//       //     dtick: (maxValue - minValue) / 5,
+//       //     tickformat: '.1f',
+//       //   },
+//       // };
+
+//       const legendData = {
+//         z: [[minValue, maxValue]],
+//         type: 'heatmap',
+//         colorscale: colorscale,
+//         showscale: true,
+//         hoverinfo: 'none',
+//         colorbar: {
+//           len: 1,
+//           thickness: 25,
+//           tickformat: '.1f'
+//         }
+//       };
+      
+//       // Apply different tick positioning for CHL log scale
+//       if (layerType === 'CHL') {
+//         const logMin = Math.log10(minValue);
+//         const logMax = Math.log10(maxValue);
+//         const numTicks = 6; // Number of tick marks you want
+      
+//         // Generate log-spaced ticks
+//         const logTicks = Array.from({ length: numTicks }, (_, i) => {
+//           return Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin));
+//         });
+      
+//         legendData.colorbar.tickmode = 'array';
+//         legendData.colorbar.tickvals = logTicks;
+//         legendData.colorbar.ticktext = logTicks.map(t => t.toFixed(2)); // Format tick labels
+//       } else {
+//         // Default linear tick mode for SST & SSS
+//         legendData.colorbar.tickmode = 'linear';
+//         legendData.colorbar.tick0 = minValue;
+//         legendData.colorbar.dtick = (maxValue - minValue) / 5;
+//       }
+      
+//       // Plot legend with updated settings
+//       Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);      
+
+//       const layout = {
+//         title: {
+//           text: layerType === 'CHL' ? 'Chl (mg/m³)' 
+//                 : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+//                 : 'SSS (PSU)',
+//           font: {
+//             size: 14, // Adjust font size here (e.g., 16px)
+//             family: 'Arial, sans-serif', // Optional: Define font family
+//             color: '#333' // Optional: Change title color
+//           }
+//         },
+//         width: 100,
+//         height: 300,
+//         margin: { l: 0, r: 75, t: 40, b: 0 },
+//         xaxis: { visible: false },
+//         yaxis: { visible: false }
+//       };      
+
+//       Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);
+//       legendContainer.style.display = 'block'; // Ensure legend is shown when data is valid
+//     })
+//     .catch((err) => {
+//       console.error(`Error loading ${layerType} legend data:`, err);
+//       // Hide the legend container on error
+//       if (legendContainer) {
+//         legendContainer.style.display = 'none';
+//       }
+//     });
+
+//   console.log(`Creating legend for ${layerType} with date: ${date}`);
+// }
+
 // Helper function to generate legend
 function createLegend(layerType, date) {
   // Get the legend container element
@@ -238,6 +416,24 @@ function createLegend(layerType, date) {
       //   },
       // };
 
+      const layout = {
+        title: {
+          text: layerType === 'CHL' ? 'Chl (mg/m³)' 
+                : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                : 'SSS (PSU)',
+          font: {
+            size: 14, // Adjust font size here (e.g., 16px)
+            family: 'Arial, sans-serif', // Optional: Define font family
+            color: '#333' // Optional: Change title color
+          }
+        },
+        width: 100,
+        height: 300,
+        margin: { l: 0, r: 75, t: 40, b: 0 },
+        xaxis: { visible: false },
+        yaxis: { visible: false }
+      }; 
+
       const legendData = {
         z: [[minValue, maxValue]],
         type: 'heatmap',
@@ -273,25 +469,7 @@ function createLegend(layerType, date) {
       }
       
       // Plot legend with updated settings
-      Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);      
-
-      const layout = {
-        title: {
-          text: layerType === 'CHL' ? 'Chl (mg/m³)' 
-                : layerType === 'SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                : 'SSS (PSU)',
-          font: {
-            size: 14, // Adjust font size here (e.g., 16px)
-            family: 'Arial, sans-serif', // Optional: Define font family
-            color: '#333' // Optional: Change title color
-          }
-        },
-        width: 100,
-        height: 300,
-        margin: { l: 0, r: 75, t: 40, b: 0 },
-        xaxis: { visible: false },
-        yaxis: { visible: false }
-      };      
+      Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);           
 
       Plotly.newPlot(`${layerType.toLowerCase()}-legend`, [legendData], layout);
       legendContainer.style.display = 'block'; // Ensure legend is shown when data is valid
