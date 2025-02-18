@@ -451,16 +451,18 @@ function createLegend(layerType, date) {
       if (layerType === 'CHL') {
         const logMin = Math.log10(minValue);
         const logMax = Math.log10(maxValue);
-        const numTicks = 6; // Number of tick marks you want
-      
-        // Generate log-spaced ticks
-        const logTicks = Array.from({ length: numTicks }, (_, i) => {
-          return Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin));
-        });
-      
+        const numTicks = 6;
+    
+        // Generate log-spaced tick values
+        const logTicks = Array.from({ length: numTicks }, (_, i) =>
+            Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin))
+        );
+    
+        // Set the colorbar scale to "log" so the ticks are evenly spaced
         legendData.colorbar.tickmode = 'array';
         legendData.colorbar.tickvals = logTicks;
-        legendData.colorbar.ticktext = logTicks.map(t => t.toFixed(2)); // Format tick labels
+        legendData.colorbar.ticktext = logTicks.map(t => t.toPrecision(2)); // Format for readability
+        legendData.colorbar.type = "log";  // Force log scale on the colorbar!
       } else {
         // Default linear tick mode for SST & SSS
         legendData.colorbar.tickmode = 'linear';
