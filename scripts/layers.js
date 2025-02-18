@@ -463,8 +463,8 @@ function createLegend(layerType, date) {
         const minColorbar = 1;  // Min of scaled data
         const maxColorbar = 255;  // Max of scaled data
         const tickPositions = logValues.map(v =>
-            minColorbar + ((Math.log10(v) - logMin) / (logMax - logMin)) * (maxColorbar - minColorbar)
-        );
+          minValue + ((Math.log10(v) - logMin) / (logMax - logMin)) * (maxValue - minValue)
+      );
 
         // Step 3: Assign tick positions & labels
         legendData.colorbar.tickmode = 'array';
