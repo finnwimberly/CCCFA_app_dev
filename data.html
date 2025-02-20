@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Data</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="data-access-page">
+
+    </nav>
+
+    <header>
+        <div class="title">
+            <h1>Data Access</h1>
+        </div>
+        <div class="logos">
+            <img src="/logos/CCCFA_logo-removebg-preview.png" alt="Cape Cod Commercial Fishermen's Alliance Logo" class="cccfa-logo">
+            <img src="/logos/Seagrant_logo-removebg-preview.png" alt="Sea Grant Logo" class="seagrant-logo">
+            <img src="/logos/WHOI_Tagline-Logo-1.png" alt="Woods Hole Oceanographic Institution Logo" class="whoi-logo">
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="data.html">Data Access</a></li>
+        </ul>
+    </nav>
+
+    <main class="content-container">
+        <section class="data-card">
+            <h2>CTD Profiles</h2>
+            <p>CTD profiles are collected by CCCFA and CFRF vessels. The profiles are processed by the CFRF team and made available 
+                via their <a href="https://erddap.ondeckdata.com/erddap/tabledap/mobile_gear_oceanography.html">ERDDAP 
+                server</a>. Our dashboard uses the 1-meter binned profiles (distinct salinity, temperature, and density values 
+                at 1-meter intervals), but complete, continuous profiles are also available on the ERDDAP page. 
+            </p>
+        </section>
+
+        <section class="data-card">
+            <h2>Satellite Data</h2>
+            <p>New satellite datasets are downloaded nightly, and the imagery is automatically generated for visualization. The following datasets are included in the dashboard:</p>
+                <ul class="data-list">
+                    <li><strong><span class="emoji">🌊</span> Sea Surface Temperature (SST):</strong> Sourced from NOAA's 
+                        <a href="https://www.nesdis.noaa.gov/our-satellites/currently-flying/joint-polar-satellite-system/visible-infrared-imaging-radiometer-suite-viirs">VIIRS satellite</a>.
+                        The dataset displayed is a 3-day rolling mean, accessible here: 
+                        <a href="https://www.star.nesdis.noaa.gov/pub/socd1/ecn/data/avhrr-viirs/sst-ngt/3day/ec/">SST data</a>.</li>
+                    
+                    <li><strong><span class="emoji">🧂</span> Sea Surface Salinity (SSS):</strong> Provided by NASA's 
+                        <a href="https://podaac.jpl.nasa.gov/smap">SMAP mission</a>.
+                        Our visualization uses an 8-day rolling mean. More details can be found here: 
+                        <a href="https://podaac.jpl.nasa.gov/dataset/SMAP_RSS_L3_SSS_SMI_8DAY-RUNNINGMEAN_V6">SSS data</a>.</li>
+
+                    <li><strong><span class="emoji">🌿</span> Chlorophyll-a:</strong> Sourced from the Copernicus Glob-Colour processor. Dataset description and 
+                        download instructions are available 
+                        <a href="https://data.marine.copernicus.eu/product/OCEANCOLOUR_GLO_BGC_L3_MY_009_103/description">here</a>.
+                        This is a daily product rather than a multi-day mean, so it is often impacted by cloud cover.</li>
+                </ul>
+        </section>        
+    </main>
+
+    <!-- <footer style="display: flex; justify-content: center; align-items: center; padding: 10px; background-color: #f8f9fa; border-top: 1px solid #ddd; font-size: 14px;">
+        <div style="text-align: left; line-height: 1.2; display: flex; align-items: center;">
+          <span>
+            Developed by Finn Wimberly
+          </span>
+          <a href="https://github.com/finnwimberly/CCCFA_app_dev" target="_blank" style="margin-left: 10px; text-decoration: none;">
+            <img src="/logos/GitHub-Mark-removebg-preview.png" 
+                  alt="GitHub" 
+                  style="width: 40px; height: 40px; vertical-align: middle;">
+          </a>
+        </div>
+    </footer> -->
+</body>
+</html>
