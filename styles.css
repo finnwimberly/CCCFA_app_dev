@@ -415,3 +415,14 @@ display: block; /* Ensure it is always visible (unless explicitly hidden in JS) 
   font-size: 1.0em; /* Adjust the multiplier as needed */
   vertical-align: middle; /* Ensures alignment with text */
 }
+
+/* Apply the same link styles globally */
+.content-container a, .description a {
+  color: #0000d6;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.content-container a:hover, .description a:hover {
+  text-decoration: underline;
+}
