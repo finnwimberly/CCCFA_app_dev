@@ -348,8 +348,8 @@ function createLegend(layerType, date) {
   let rangeFile;
   if (layerType === 'SST') {
     rangeFile = zoomLevel >= 8
-      ? `../data/SST/tiles_3day/${date}/sst_range_local.json`
-      : `../data/SST/tiles_3day/${date}/sst_range_global.json`;
+      ? `../data/SST/tiles/${date}/sst_range_local.json`
+      : `../data/SST/tiles/${date}/sst_range_global.json`;
   } else if (layerType === 'SSS') {
     rangeFile = zoomLevel >= 8
       ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
@@ -509,7 +509,7 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable
 
-  const sstPath = `../data/SST/tiles_3day/${date}/{z}/{x}/{y}.png`;
+  const sstPath = `../data/SST/tiles/${date}/{z}/{x}/{y}.png`;
   const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
   const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
 
