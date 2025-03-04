@@ -172,7 +172,7 @@ function handleUnitChange(selectedProfiles) {
     const temperatureConverted =
       unitSystem === 'imperial'
         ? measurements.temperature.map((t) => (t * 9) / 5 + 32) // Celsius to Fahrenheit
-        : measurements.temperature.map((t) => ((t - 32) * 5) / 9); // Fahrenheit to Celsius
+        : measurements.temperature.map((t) => t); // Fahrenheit to Celsius
 
     // Update plots for this profile
     const tempTraceUpdate = { x: [temperatureConverted], y: [depthConverted] };
