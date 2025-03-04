@@ -28,5 +28,34 @@ map.on('zoomend', () => {
   zoom = map.getZoom(); 
 });
 
+// Add resize handling
+const mapContainer = document.getElementById('map-container');
+const resizeHandle = document.getElementById('resize-handle');
+let isResizing = false;
+
+resizeHandle.addEventListener('mousedown', (e) => {
+  isResizing = true;
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isResizing) return;
+  
+  const containerRect = mapContainer.getBoundingClientRect();
+  const newHeight = e.clientY - containerRect.top;
+  
+  // Apply min/max constraints
+  const minHeight = 300;
+  const maxHeight = window.innerHeight * 0.9;
+  const constrainedHeight = Math.min(Math.max(newHeight, minHeight), maxHeight);
+  
+  mapContainer.style.height = `${constrainedHeight}px`;
+  map.invalidateSize();
+});
+
+document.addEventListener('mouseup', () => {
+  isResizing = false;
+});
+
 // Export the map for use in other modules
 export { map, zoom };
