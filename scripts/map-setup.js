@@ -3,7 +3,7 @@ import { loadProfiles, attachMarkerHandlers } from './map.js';
 // Initialize the Leaflet map
 const map = L.map('map', {
   center: [41.85, -70.2962], // Center on Cape Cod
-  zoom: 8,                   // Initial zoom level
+  zoom: 7,                   // Initial zoom level
   crs: L.CRS.EPSG3857,       // Use standard Web Mercator CRS
   scrollWheelZoom: false,    // Disable zooming with scroll wheel
   zoomControl: true,         // Add default zoom controls
