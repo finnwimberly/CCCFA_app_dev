@@ -72,18 +72,24 @@ let plotData = {
 function initializePlots() {
   const commonLayout = {
     margin: {
-      t: 25,  // reduced top margin
-      r: 100,  // increased right margin for legend
-      b: 50,  // bottom margin
+      t: 60,  // reduced top margin
+      r: 60,  // increased right margin for legend
+      b: 60,  // bottom margin
       l: 60   // left margin for axis labels
     },
     autosize: true,
     showlegend: true, // Enable legend
     legend: {
-      x: 1.02,      // Position legend outside the plot
-      y: 1,         // Align to top
-      xanchor: 'left',
+      x: 0.5,       // Center horizontally
+      y: 1.3,       // Position above the plot
+      xanchor: 'center',
       yanchor: 'top',
+      orientation: 'h',    // Horizontal layout
+      traceorder: 'normal',
+      itemwidth: 80,      // Control width of each legend item
+      itemsizing: 'constant',
+      xgap: 10,          // Add space between legend items
+      font: { size: 9 }, // Slightly smaller font
       bgcolor: 'rgba(255,255,255,0.8)',
       bordercolor: '#ddd',
       borderwidth: 1
@@ -98,12 +104,12 @@ function initializePlots() {
     ...commonLayout,
     xaxis: { 
       title: 'Temperature (°F)',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     },
     yaxis: { 
       title: 'Depth (ftm)', 
       autorange: 'reversed',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     }
   });
 
@@ -112,12 +118,12 @@ function initializePlots() {
     ...commonLayout,
     xaxis: { 
       title: 'Salinity (PSU)',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     },
     yaxis: { 
       title: 'Depth (ftm)', 
       autorange: 'reversed',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     }
   });
 
@@ -126,12 +132,12 @@ function initializePlots() {
     ...commonLayout,
     xaxis: { 
       title: 'Density (kg/m³)',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     },
     yaxis: { 
       title: 'Depth (ftm)', 
       autorange: 'reversed',
-      titlefont: { size: 12 }
+      titlefont: { size: 14 }
     }
   });
 }
@@ -190,13 +196,22 @@ async function plotCTDMeasurements(profileId, measurements, color) {
   const depthConverted = unitSystem === "imperial" ? depth.map(d => d * 0.546807) : depth;
   const temperatureConverted = unitSystem === "imperial" ? temperature.map(t => (t * 9/5) + 32) : temperature;
 
-  // Format the date for the legend
-  const date = state.selectedProfiles[profileId].date;
-  const legendName = `${date}`; // You can format the date here if needed
+  // Extract and format date from profile ID (format: XXX_XXXXXX_YYYYMMDD_HHMM)
+  let legendName;
+  try {
+    const datePart = profileId.split('_')[2]; // Get the YYYYMMDD part
+    const year = datePart.substring(0, 4);
+    const month = datePart.substring(4, 6);
+    const day = datePart.substring(6, 8);
+    legendName = `${month}/${day}/${year}`;
+  } catch (error) {
+    console.warn(`Error formatting date for profile ${profileId}:`, error);
+    legendName = `Profile ${profileId}`;
+  }
 
   // Add traces with profile ID and date in legend
-  await Plotly.addTraces('temp-plot', {
-    x: temperatureConverted,
+  await Plotly.addTraces('sal-plot', {
+    x: salinity,
     y: depthConverted,
     mode: 'lines+markers',
     name: legendName,
@@ -206,15 +221,15 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     showlegend: true
   });
 
-  await Plotly.addTraces('sal-plot', {
-    x: salinity,
+  await Plotly.addTraces('temp-plot', {
+    x: temperatureConverted,
     y: depthConverted,
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
     line: { shape: 'linear', color: color },
     marker: { color: color },
-    showlegend: false  // Only show legend on temperature plot
+    showlegend: false
   });
 
   await Plotly.addTraces('dens-plot', {
@@ -225,7 +240,7 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     meta: { profileId },
     line: { shape: 'linear', color: color },
     marker: { color: color },
-    showlegend: false  // Only show legend on temperature plot
+    showlegend: false
   });
 }
 
