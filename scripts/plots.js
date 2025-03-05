@@ -11,29 +11,87 @@ let plotData = {
   dens: [],
 };
 
+// function initializePlots() {
+//   // Temperature vs Depth plot
+//   Plotly.newPlot('temp-plot', [], {
+//     title: "",
+//     xaxis: { title: 'Temperature (°F)' },
+//     yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
+//     showlegend: false
+//   });
+
+//   // Salinity vs Depth plot
+//   Plotly.newPlot('sal-plot', [], {
+//     title: "",
+//     xaxis: { title: 'Salinity (PSU)' },
+//     yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
+//     showlegend: false
+//   });
+
+//   // Density vs Depth plot
+//   Plotly.newPlot('dens-plot', [], {
+//     title: "",
+//     xaxis: { title: 'Density (kg/m³)' },
+//     yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
+//     showlegend: false
+//   });
+// }
+
 function initializePlots() {
+  const commonLayout = {
+    margin: {
+      t: 60,  // reduced top margin
+      r: 60,  // right margin
+      b: 60,  // reduced bottom margin
+      l: 60   // left margin for axis labels
+    },
+    autosize: true,
+    showlegend: false,
+    height: 350, // explicit height
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)'
+  };
+
   // Temperature vs Depth plot
   Plotly.newPlot('temp-plot', [], {
-    title: "",
-    xaxis: { title: 'Temperature (°F)' },
-    yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
-    showlegend: false
+    ...commonLayout,
+    xaxis: { 
+      title: 'Temperature (°F)',
+      titlefont: { size: 14 }
+    },
+    yaxis: { 
+      title: 'Depth (ftm)', 
+      autorange: 'reversed',
+      titlefont: { size: 14 }
+    }
   });
 
   // Salinity vs Depth plot
   Plotly.newPlot('sal-plot', [], {
-    title: "",
-    xaxis: { title: 'Salinity (PSU)' },
-    yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
-    showlegend: false
+    ...commonLayout,
+    xaxis: { 
+      title: 'Salinity (PSU)',
+      titlefont: { size: 14 }
+    },
+    yaxis: { 
+      title: 'Depth (ftm)', 
+      autorange: 'reversed',
+      titlefont: { size: 14 }
+    }
   });
 
   // Density vs Depth plot
   Plotly.newPlot('dens-plot', [], {
-    title: "",
-    xaxis: { title: 'Density (kg/m³)' },
-    yaxis: { title: 'Depth (ftm)', autorange: 'reversed' },
-    showlegend: false
+    ...commonLayout,
+    xaxis: { 
+      title: 'Density (kg/m³)',
+      titlefont: { size: 14 }
+    },
+    yaxis: { 
+      title: 'Depth (ftm)', 
+      autorange: 'reversed',
+      titlefont: { size: 14 }
+    }
   });
 }
 
