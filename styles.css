@@ -100,6 +100,10 @@ width: auto;
   min-height: 300px;
   resize: vertical;
   overflow: hidden;
+  user-select: none; /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 #map {
@@ -108,6 +112,22 @@ width: auto;
   height: 100%;
   top: 0;
   left: 0;
+}
+
+/* Prevent text selection in controls during resize */
+.leaflet-control {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Prevent text selection in unit selector */
+#unit-selector {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Resize handle styling */
@@ -120,7 +140,7 @@ width: auto;
   background-color: #f0f0f0;
   border-top: 1px solid #ddd;
   cursor: ns-resize;
-  z-index: 1000;
+  z-index: 400;
 }
 
 .resize-handle:hover {

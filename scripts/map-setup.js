@@ -49,6 +49,11 @@ function stopResize() {
   isResizing = false;
   document.removeEventListener('mousemove', resize);
   document.removeEventListener('mouseup', stopResize);
+
+    
+  // Prevent default behaviors
+  e.preventDefault();
+  e.stopPropagation();
 }
 
 // Initialize with a default date range (e.g., from August 1, 2024, to today)
