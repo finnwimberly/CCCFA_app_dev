@@ -83,21 +83,29 @@
   
 
   <!-- Map Container -->
-  <div id="map" style="height: 80vh; width: 100%; position: relative;">
-    <!-- SST Legend Container -->
+  <!-- <div id="map" style="height: 80vh; width: 100%; position: relative;">
     <div id="sst-legend" style="display: none;">
-      <!-- Plotly or dynamic legend will be rendered here -->
     </div>
 
-    <!-- SSS Legend Container -->
     <div id="sss-legend" style="display: none;">
-      <!-- Plotly or dynamic legend will be rendered here -->
     </div>
 
-    <!-- CHL Legend Container -->
     <div id="chl-legend" style="display: none;"></div>
-      <!-- Plotly or dynamic legend will be rendered here -->
     </div>
+  </div> -->
+
+  <div id="map-container" style="height: 80vh;">
+    <div id="map">
+      <!-- SST Legend Container -->
+      <div id="sst-legend" style="display: none;"></div>
+  
+      <!-- SSS Legend Container -->
+      <div id="sss-legend" style="display: none;"></div>
+  
+      <!-- CHL Legend Container -->
+      <div id="chl-legend" style="display: none;"></div>
+    </div>
+    <div class="resize-handle"></div>
   </div>
 
   <!-- Unit Selector -->
@@ -115,28 +123,6 @@
     <div id="sal-plot" class="plot-container"></div>
     <div id="dens-plot" class="plot-container"></div>
   </div>
-
-  <!-- <footer style="text-align: center; padding: 5px; font-size: 14px; margin-top: 20px;">
-    <span>Developed by Finn Wimberly</span>
-    <a href="https://github.com/finnwimberly" target="_blank" style="margin-left: 1px; margin-top: 20px; text-decoration: none;">
-      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
-           alt="GitHub" 
-           style="width: 40px; height: 40px; vertical-align: middle;">
-    </a>
-  </footer> -->
-
-  <!-- <footer style="display: flex; justify-content: center; align-items: center; padding: 10px; background-color: #f8f9fa; border-top: 1px solid #ddd; font-size: 14px;">
-    <div style="text-align: left; line-height: 1.2; display: flex; align-items: center;">
-      <span>
-        Developed by Finn Wimberly
-      </span>
-      <a href="https://github.com/finnwimberly/CCCFA_app_dev" target="_blank" style="margin-left: 10px; text-decoration: none;">
-        <img src="/logos/GitHub-Mark-removebg-preview.png" 
-              alt="GitHub" 
-              style="width: 40px; height: 40px; vertical-align: middle;">
-      </a>
-    </div>
-  </footer> -->
 
   <footer style="width: 100%; background-color: #f8f9fa; border-top: 1px solid #ddd; font-size: 14px; padding: 10px 0;">
     <div class="footer-container" style="display: flex; justify-content: space-between; width: 100%; align-items: center;">

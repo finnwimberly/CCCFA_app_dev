@@ -85,12 +85,46 @@ width: auto;
   /* border-radius: 5px; */
 }
 
+/* #map {
+  position: relative; 
+  height: 500px; 
+  width: 100%; 
+  margin-top: 20px; 
+  background-color: #f0f0f0; 
+} */
+
+/* Map container styling */
+#map-container {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+  overflow: hidden;
+}
+
 #map {
-  position: relative; /* Required for child elements (legends) to use absolute positioning */
-  height: 500px; /* Fixed height or dynamically adjusted */
-  width: 100%; /* Full width */
-  margin-top: 20px; /* Optional, to create space above the map */
-  background-color: #f0f0f0; /* Light gray background */
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/* Resize handle styling */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ddd;
+  cursor: ns-resize;
+  z-index: 1000;
+}
+
+.resize-handle:hover {
+  background-color: #e0e0e0;
 }
 
 /* General Control Styles */

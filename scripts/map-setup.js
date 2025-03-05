@@ -14,6 +14,43 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
 }).addTo(map);
 
+// Initialize resize functionality
+const mapContainer = document.getElementById('map-container');
+const resizeHandle = document.querySelector('.resize-handle');
+
+let isResizing = false;
+let startY;
+let startHeight;
+
+resizeHandle.addEventListener('mousedown', initResize);
+
+function initResize(e) {
+  isResizing = true;
+  startY = e.clientY;
+  startHeight = mapContainer.offsetHeight;
+  
+  document.addEventListener('mousemove', resize);
+  document.addEventListener('mouseup', stopResize);
+}
+
+function resize(e) {
+  if (!isResizing) return;
+  
+  const newHeight = startHeight + (e.clientY - startY);
+  // Set minimum and maximum heights
+  const minHeight = 300;
+  const maxHeight = window.innerHeight * 0.9;
+  
+  mapContainer.style.height = `${Math.min(Math.max(newHeight, minHeight), maxHeight)}px`;
+  map.invalidateSize(); // Update map size
+}
+
+function stopResize() {
+  isResizing = false;
+  document.removeEventListener('mousemove', resize);
+  document.removeEventListener('mouseup', stopResize);
+}
+
 // Initialize with a default date range (e.g., from August 1, 2024, to today)
 const startDate = moment('2024-08-01', 'YYYY-MM-DD');
 const endDate = moment();
