@@ -86,27 +86,11 @@ width: auto;
 }
 
 #map {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 5px; /* Leave space for the resize handle */
-  background-color: #f0f0f0;
-}
-
-#resize-handle {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: #ddd;
-  cursor: row-resize;
-  z-index: 1000;
-}
-
-#resize-handle:hover {
-  background: #bbb;
+  position: relative; /* Required for child elements (legends) to use absolute positioning */
+  height: 500px; /* Fixed height or dynamically adjusted */
+  width: 100%; /* Full width */
+  margin-top: 20px; /* Optional, to create space above the map */
+  background-color: #f0f0f0; /* Light gray background */
 }
 
 /* General Control Styles */
