@@ -72,30 +72,6 @@ document.getElementById('info-overlay').addEventListener('click', () => {
   document.getElementById('info-modal').style.display = 'none';
 });
 
-// async function fetchAvailableDates(filePath) {
-//     try {
-//       const response = await fetch(filePath);
-//       if (!response.ok) {
-//         throw new Error(`Failed to fetch ${filePath}`);
-//       }
-//       const text = await response.text();
-//       // Parse dates into an array and convert from YYYYDDD to YYYY-MM-DD
-//       const dates = text
-//         .split('\n')
-//         .filter(line => line.trim()) // Remove empty lines
-//         .map(dateStr => {
-//           const year = parseInt(dateStr.slice(0, 4), 10); // Extract year
-//           const dayOfYear = parseInt(dateStr.slice(4), 10); // Extract day of year
-//           // Convert to YYYY-MM-DD using moment.js
-//           return moment(`${year}-${dayOfYear}`, "YYYY-DDDD").format("YYYY-MM-DD");
-//         });
-//       return dates;
-//     } catch (error) {
-//       console.error(`Error fetching dates: ${error.message}`);
-//       return [];
-//     }
-//   }
-
 async function fetchAvailableDates(filePath) {
   try {
       console.log(`Fetching dates from: ${filePath}`); // Log the file path
@@ -123,87 +99,6 @@ async function fetchAvailableDates(filePath) {
       return [];
   }
 }
-
-// $(function () {
-//   const picker = $('#daterange');
-//   let currentMode = 'range';
-
-//   // Paths for SST and SSS dates
-//   const sstDatesPath = '../data/SST/sst_dates.txt';
-//   const sssDatesPath = '../data/SSS/sss_dates.txt';
-
-//   // Fetch available dates for highlighting
-//   Promise.all([fetchAvailableDates(sstDatesPath), fetchAvailableDates(sssDatesPath)])
-//     .then(([sstDates, sssDates]) => {
-//       // Log the fetched dates for debugging
-//       console.log("Fetched SST Dates:", sstDates);
-//       console.log("Fetched SSS Dates:", sssDates);
-
-//       const sstSet = new Set(sstDates);
-//       const sssSet = new Set(sssDates);
-//       const allDatesSet = new Set([...sstDates, ...sssDates]);
-
-//       function initializePicker(mode) {
-//         const options = {
-//           opens: 'left',
-//           maxDate: moment().format("MM/DD/YYYY"),
-//           isInvalidDate: function (date) {
-//             const formattedDate = date.format('YYYY-MM-DD');
-//             return !allDatesSet.has(formattedDate);
-//           },
-//           isCustomDate: function (date) {
-//             const formattedDate = date.format('YYYY-MM-DD');
-//             if (mode === 'single') {
-//               // Highlight dates for "Layer Date" mode
-//               if (sstSet.has(formattedDate) && sssSet.has(formattedDate)) {
-//                 return 'highlight-both'; // Green highlight
-//               }
-//               if (sssSet.has(formattedDate) && !sstSet.has(formattedDate)) {
-//                 return 'highlight-sss'; // Blue highlight
-//               }
-//               if (sstSet.has(formattedDate) && !sssSet.has(formattedDate)) {
-//                 return 'highlight-sst'; // Yellow highlight
-//               }
-//             }
-//             // Remove any highlights for range mode
-//             return ''; // No highlight
-//           },
-//         };
-
-//         if (mode === 'single') {
-//           options.singleDatePicker = true;
-//           options.startDate = moment().format("MM/DD/YYYY");
-//         } else {
-//           options.singleDatePicker = false;
-//           options.startDate = '08/01/2024';
-//           options.endDate = moment().format("MM/DD/YYYY");
-//         }
-
-//         picker.daterangepicker(options, (start, end) => {
-//           if (mode === 'range') {
-//             const startDate = start.format('YYYY-MM-DD');
-//             const endDate = end.format('YYYY-MM-DD');
-//             loadProfiles(startDate, endDate);
-//           } else if (mode === 'single') {
-//             const year = start.year();
-//             const dayOfYear = start.dayOfYear().toString().padStart(3, '0');
-//             const tileDate = `${year}_${dayOfYear}`;
-//             updateLayerPaths(tileDate);
-//           }
-//         });
-//       }
-
-//       // Event listener for date-mode radio buttons
-//       $('input[name="date-mode"]').change(function () {
-//         currentMode = $(this).val();
-//         initializePicker(currentMode);
-//       });
-
-//       // Initialize the picker with "range" mode by default
-//       initializePicker('range');
-//     })
-//     .catch(error => console.error('Error loading available dates:', error));
-// });
 
 $(function () {
   const picker = $('#daterange');
@@ -501,6 +396,13 @@ const DeselectControl = L.Control.extend({
       Object.keys(state.selectedProfiles).forEach(profileId => {
         removeCTDMeasurements(profileId);
       });
+
+      // NEW ADDITION
+      // Clear legend items and hide container
+      const legendItems = document.getElementById('profile-legend-items');
+      legendItems.innerHTML = '';  // Remove all legend items
+      document.getElementById('profile-legend-container').style.display = 'none';
+      // NEW ADDITION
     
       // Clear all properties of selectedProfiles
       Object.keys(state.selectedProfiles).forEach(profileId => {

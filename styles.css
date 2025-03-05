@@ -273,18 +273,9 @@ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 background: #f0f0f0;
 }
 
-/* #plots {
-display: flex;
-flex-wrap: wrap;
-justify-content: space-around;
-width: 100%;
-height: 40vh; 
-min-height: 350px; 
-} */
-
 #plots {
   margin-top: 10px;
-  margin-bottom: 20px; /* Increased bottom margin */
+  margin-bottom: 20px; 
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
@@ -433,10 +424,6 @@ display: block; /* Ensure it is always visible (unless explicitly hidden in JS) 
   transition: transform 0.3s ease-in-out;
 }
 
-/* .data-card:hover {
-  transform: translateY(-5px);
-} */
-
 /* Improve spacing between list items */
 .data-list li {
   list-style-type: none; /* Remove default bullets */
@@ -482,4 +469,44 @@ display: block; /* Ensure it is always visible (unless explicitly hidden in JS) 
 
 .content-container a:hover, .description a:hover {
   text-decoration: underline;
+}
+
+/* NEW ADDITIONS FOR PROFILE LEGEND CONTAINER */
+#profile-legend-container {
+  width: 80%;
+  margin: 20px auto;
+  padding: 5px;
+  background-color: white;
+  border-radius: 8px;
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); */
+  display: flex;  /* Add flex display */
+  justify-content: center;
+  align-items: center;
+}
+
+#profile-legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px;
+  justify-content: center;  /* Center items horizontally */
+  align-items: center;     /* Center items vertically */
+  width: 100%;            /* Take full width of container */
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap; 
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }

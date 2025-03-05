@@ -11,31 +11,89 @@ let plotData = {
   dens: [],
 };
 
+// function initializePlots() {
+//   const commonLayout = {
+//     margin: {
+//       t: 60,  // reduced top margin
+//       r: 60,  // increased right margin for legend
+//       b: 60,  // bottom margin
+//       l: 60   // left margin for axis labels
+//     },
+//     autosize: true,
+//     showlegend: true, // Enable legend
+//     legend: {
+//       x: 0.5,       // Center horizontally
+//       y: 1.3,       // Position above the plot
+//       xanchor: 'center',
+//       yanchor: 'top',
+//       orientation: 'h',    // Horizontal layout
+//       traceorder: 'normal',
+//       itemwidth: 80,      // Control width of each legend item
+//       itemsizing: 'constant',
+//       xgap: 10,          // Add space between legend items
+//       font: { size: 9 }, // Slightly smaller font
+//       bgcolor: 'rgba(255,255,255,0.8)',
+//       bordercolor: '#ddd',
+//       borderwidth: 1
+//     },
+//     height: 350,
+//     paper_bgcolor: 'rgba(0,0,0,0)',
+//     plot_bgcolor: 'rgba(0,0,0,0)'
+//   };
+
+//   // Temperature vs Depth plot
+//   Plotly.newPlot('temp-plot', [], {
+//     ...commonLayout,
+//     xaxis: { 
+//       title: 'Temperature (°F)',
+//       titlefont: { size: 14 }
+//     },
+//     yaxis: { 
+//       title: 'Depth (ftm)', 
+//       autorange: 'reversed',
+//       titlefont: { size: 14 }
+//     }
+//   });
+
+//   // Salinity vs Depth plot
+//   Plotly.newPlot('sal-plot', [], {
+//     ...commonLayout,
+//     xaxis: { 
+//       title: 'Salinity (PSU)',
+//       titlefont: { size: 14 }
+//     },
+//     yaxis: { 
+//       title: 'Depth (ftm)', 
+//       autorange: 'reversed',
+//       titlefont: { size: 14 }
+//     }
+//   });
+
+//   // Density vs Depth plot
+//   Plotly.newPlot('dens-plot', [], {
+//     ...commonLayout,
+//     xaxis: { 
+//       title: 'Density (kg/m³)',
+//       titlefont: { size: 14 }
+//     },
+//     yaxis: { 
+//       title: 'Depth (ftm)', 
+//       autorange: 'reversed',
+//       titlefont: { size: 14 }
+//     }
+//   });
+// }
+
 function initializePlots() {
   const commonLayout = {
     margin: {
-      t: 60,  // reduced top margin
-      r: 60,  // increased right margin for legend
-      b: 60,  // bottom margin
-      l: 60   // left margin for axis labels
+      t: 60,    // top margin
+      r: 60,    // right margin
+      b: 60,    // bottom margin
+      l: 60     // left margin for axis labels
     },
     autosize: true,
-    showlegend: true, // Enable legend
-    legend: {
-      x: 0.5,       // Center horizontally
-      y: 1.3,       // Position above the plot
-      xanchor: 'center',
-      yanchor: 'top',
-      orientation: 'h',    // Horizontal layout
-      traceorder: 'normal',
-      itemwidth: 80,      // Control width of each legend item
-      itemsizing: 'constant',
-      xgap: 10,          // Add space between legend items
-      font: { size: 9 }, // Slightly smaller font
-      bgcolor: 'rgba(255,255,255,0.8)',
-      bordercolor: '#ddd',
-      borderwidth: 1
-    },
+    showlegend: false,  // Disable legend on all plots
     height: 350,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)'
