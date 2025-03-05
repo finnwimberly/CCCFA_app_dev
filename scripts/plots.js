@@ -11,64 +11,6 @@ let plotData = {
   dens: [],
 };
 
-// function initializePlots() {
-//   const commonLayout = {
-//     margin: {
-//       t: 60,  // reduced top margin
-//       r: 60,  // right margin
-//       b: 60,  // reduced bottom margin
-//       l: 60   // left margin for axis labels
-//     },
-//     autosize: true,
-//     showlegend: false,
-//     height: 350, // explicit height
-//     paper_bgcolor: 'rgba(0,0,0,0)',
-//     plot_bgcolor: 'rgba(0,0,0,0)'
-//   };
-
-//   // Temperature vs Depth plot
-//   Plotly.newPlot('temp-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Temperature (°F)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-
-//   // Salinity vs Depth plot
-//   Plotly.newPlot('sal-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Salinity (PSU)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-
-//   // Density vs Depth plot
-//   Plotly.newPlot('dens-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Density (kg/m³)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-// }
-
 function initializePlots() {
   const commonLayout = {
     margin: {
@@ -142,52 +84,6 @@ function initializePlots() {
   });
 }
 
-// async function plotCTDMeasurements(profileId, measurements, color) {
-//   console.log(`Plotting profile: ${profileId}`);
-//   console.log(`Measurements:`, measurements);
-//   console.log(`Color assigned: ${color}`);
-
-//   const { temperature, salinity, density, depth } = measurements;
-//   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
-
-//   // Convert measurements
-//   const depthConverted = unitSystem === "imperial" ? depth.map(d => d * 0.546807) : depth;
-//   const temperatureConverted = unitSystem === "imperial" ? temperature.map(t => (t * 9/5) + 32) : temperature;
-
-//   // Add traces with profile ID as part of the `meta` property
-//   await Plotly.addTraces('temp-plot', {
-//     x: temperatureConverted,
-//     y: depthConverted,
-//     mode: 'lines+markers',
-//     name: `Profile ${profileId}`,
-//     meta: { profileId },
-//     line: { shape: 'linear', color: color },
-//     marker: { color: color }
-//   });
-
-//   await Plotly.addTraces('sal-plot', {
-//     x: salinity,
-//     y: depthConverted,
-//     mode: 'lines+markers',
-//     name: `Profile ${profileId}`,
-//     meta: { profileId },
-//     line: { shape: 'linear', color: color },
-//     marker: { color: color }
-//   });
-
-//   await Plotly.addTraces('dens-plot', {
-//     x: density,
-//     y: depthConverted,
-//     mode: 'lines+markers',
-//     name: `Profile ${profileId}`,
-//     meta: { profileId },
-//     line: { shape: 'linear', color: color },
-//     marker: { color: color }
-//   });
-
-//   console.log(`Traces for profile ${profileId} added successfully.`);
-// }
-
 async function plotCTDMeasurements(profileId, measurements, color) {
   const { temperature, salinity, density, depth } = measurements;
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
@@ -216,8 +112,18 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    line: { shape: 'linear', color: color },
-    marker: { color: color },
+    // line: { shape: 'linear', color: color },
+    // marker: { color: color },
+    line: { 
+      shape: 'linear', 
+      color: color,
+      width: 2  // Line width in the plot and legend
+    },
+    marker: { 
+      color: color,
+      size: 4,  // Point size in the plot and legend
+      symbol: 'circle'
+    },
     showlegend: true
   });
 
@@ -227,8 +133,18 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    line: { shape: 'linear', color: color },
-    marker: { color: color },
+    // line: { shape: 'linear', color: color },
+    // marker: { color: color },
+    line: { 
+      shape: 'linear', 
+      color: color,
+      width: 2  // Line width in the plot and legend
+    },
+    marker: { 
+      color: color,
+      size: 4,  // Point size in the plot and legend
+      symbol: 'circle'
+    },
     showlegend: false
   });
 
@@ -238,8 +154,18 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    line: { shape: 'linear', color: color },
-    marker: { color: color },
+    // line: { shape: 'linear', color: color },
+    // marker: { color: color },
+    line: { 
+      shape: 'linear', 
+      color: color,
+      width: 2  // Line width in the plot and legend
+    },
+    marker: { 
+      color: color,
+      size: 4,  // Point size in the plot and legend
+      symbol: 'circle'
+    },
     showlegend: false
   });
 }
