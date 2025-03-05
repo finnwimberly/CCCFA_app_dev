@@ -112,18 +112,8 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    // line: { shape: 'linear', color: color },
-    // marker: { color: color },
-    line: { 
-      shape: 'linear', 
-      color: color,
-      width: 2  // Line width in the plot and legend
-    },
-    marker: { 
-      color: color,
-      size: 4,  // Point size in the plot and legend
-      symbol: 'circle'
-    },
+    line: { shape: 'linear', color: color },
+    marker: { color: color },
     showlegend: true
   });
 
@@ -133,18 +123,8 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    // line: { shape: 'linear', color: color },
-    // marker: { color: color },
-    line: { 
-      shape: 'linear', 
-      color: color,
-      width: 2  // Line width in the plot and legend
-    },
-    marker: { 
-      color: color,
-      size: 4,  // Point size in the plot and legend
-      symbol: 'circle'
-    },
+    line: { shape: 'linear', color: color },
+    marker: { color: color },
     showlegend: false
   });
 
@@ -154,18 +134,8 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     mode: 'lines+markers',
     name: legendName,
     meta: { profileId },
-    // line: { shape: 'linear', color: color },
-    // marker: { color: color },
-    line: { 
-      shape: 'linear', 
-      color: color,
-      width: 2  // Line width in the plot and legend
-    },
-    marker: { 
-      color: color,
-      size: 4,  // Point size in the plot and legend
-      symbol: 'circle'
-    },
+    line: { shape: 'linear', color: color },
+    marker: { color: color },
     showlegend: false
   });
 }
