@@ -364,15 +364,20 @@ document.getElementById('bathymetry-toggle').addEventListener('change', (event) 
 // Add Deselect All Profiles control
 const DeselectControl = L.Control.extend({
   onAdd: function () {
-    const button = L.DomUtil.create('button', 'control-button');
-    button.innerHTML = 'Deselect All Profiles';
+    const div = L.DomUtil.create('div', 'leaflet-control custom-control');
+    div.innerHTML = `
+      <div class="control-container">
+        <button class="control-button">Deselect All Profiles</button>
+      </div>
+    `;
+    
+    const button = div.querySelector('.control-button');
     button.style.background = 'white';
     button.style.padding = '4px';
     button.style.borderRadius = '4px';
     button.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.3)';
-    button.style.fontSize = '14px';
     button.style.cursor = 'pointer';
-    button.style.width = '208px';
+    button.style.width = '100%';
     button.style.transition = 'box-shadow 0.3s ease, background 0.3s ease';
 
     // Add hover effect using JavaScript events
@@ -396,13 +401,11 @@ const DeselectControl = L.Control.extend({
       Object.keys(state.selectedProfiles).forEach(profileId => {
         removeCTDMeasurements(profileId);
       });
-
-      // NEW ADDITION
+    
       // Clear legend items and hide container
       const legendItems = document.getElementById('profile-legend-items');
       legendItems.innerHTML = '';  // Remove all legend items
       document.getElementById('profile-legend-container').style.display = 'none';
-      // NEW ADDITION
     
       // Clear all properties of selectedProfiles
       Object.keys(state.selectedProfiles).forEach(profileId => {
@@ -416,15 +419,12 @@ const DeselectControl = L.Control.extend({
           layer.unbindPopup();
         }
       });
-    
-      console.log('All profiles have been deselected. Updated selected profiles:', state.selectedProfiles);
     });
-    
 
     // Prevent map click events when clicking the button
-    L.DomEvent.disableClickPropagation(button);
+    L.DomEvent.disableClickPropagation(div);
 
-    return button;
+    return div;
   },
 });
 

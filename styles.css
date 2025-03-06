@@ -89,7 +89,7 @@ width: auto;
 #map-container {
   position: relative;
   width: 100%;
-  min-height: 300px;
+  min-height: 350px;
   resize: vertical;
   overflow: hidden;
   user-select: none; /* Prevent text selection */
@@ -141,52 +141,107 @@ width: auto;
 
 /* General Control Styles */
 .control-container {
-background: white;
-padding: 4px;
-border-radius: 8px;
-width: 200px;
-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  background: white;
+  padding: 4px;
+  border-radius: 8px;
+  width: clamp(180px, 15vw, 250px); /* Responsive width between 180px and 250px */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .control-title {
-font-size: 18px;
-margin: 4px 0 4px 0;
-margin-left: 5px;
-text-align: left;
-font-weight: bold;
+  font-size: clamp(14px, 1.2vw, 18px);
+  margin: 4px 0 4px 0;
+  margin-left: 5px;
+  text-align: left;
+  font-weight: bold;
 }
 
 .control-item {
-margin-bottom: 4px;
+  margin-bottom: 4px;
 }
 
 .control-label {
-font-size: 16px;
-margin-left: 5px;
+  font-size: clamp(12px, 1vw, 16px);
+  margin-left: 5px;
 }
 
 .control-input {
-width: calc(100% - 10px);
-box-sizing: border-box;
-border: 1px solid #ccc;
-padding: 5px;
-border-radius: 3px;
-font-size: 16px;
+  width: calc(100% - 10px);
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  font-size: clamp(12px, 1vw, 16px);
 }
 
+/* Info icon styling */
 #info-icon {
-font-size: 16px;
-color: #007bff;
-cursor: pointer;
-margin-left: 50px;
-vertical-align: middle;
-display: inline-block;
-transition: color 0.3s ease;
+  font-size: 18px;
+  color: #007bff;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  display: inline-block;
+  transition: color 0.3s ease;
 }
 
 #info-icon:hover {
 color: #0056b3;
 }
+
+/* Deselect button styling */
+.control-button {
+  width: clamp(180px, 15vw, 250px) !important;
+  font-size: clamp(12px, 1vw, 14px) !important;
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 768px) {
+  .control-container {
+    width: clamp(150px, 20vw, 180px);
+  }
+  
+  .control-title {
+    font-size: 14px;
+  }
+  
+  .control-label, .control-input {
+    font-size: 12px;
+  }
+  
+  #info-icon {
+    margin-left: 15px;
+  }
+  
+  .control-button {
+    width: clamp(150px, 20vw, 180px) !important;
+  }
+}
+
+/* Media queries for very small screens */
+@media (max-width: 480px) {
+  .control-container {
+    width: clamp(120px, 25vw, 150px);
+  }
+  
+  .control-title {
+    font-size: 12px;
+  }
+  
+  .control-label, .control-input {
+    font-size: 11px;
+  }
+  
+  #info-icon {
+    margin-left: 10px;
+  }
+  
+  .control-button {
+    width: clamp(120px, 25vw, 150px) !important;
+  }
+}
+
 /* Modal Styles */
 #info-modal {
 position: fixed;
