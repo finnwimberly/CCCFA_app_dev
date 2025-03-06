@@ -328,7 +328,7 @@ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 background: #f0f0f0;
 }
 
-#plots {
+/* #plots {
   margin-top: 10px;
   margin-bottom: 20px; 
   display: flex;
@@ -340,17 +340,119 @@ background: #f0f0f0;
 }
 
 .plot-container {
-width: 32%; /* Each plot takes up a third of the width */
-height: 100%; /* Make height match the parent */
-min-width: 300px; /* Prevent plots from becoming too narrow */
+width: 32%; 
+height: 100%; 
+min-width: 300px; 
 box-sizing: border-box;
+} */
+
+#plots {
+  margin-top: 10px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  min-height: 350px;
+}
+
+.plot-container {
+  flex: 1 1 30%; /* grow, shrink, basis */
+  min-width: 300px;
+  max-width: 600px;
+  height: 40vh;
+  min-height: 350px;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+/* Footer styling */
+footer {
+  width: 100%;
+  background-color: #f8f9fa;
+  border-top: 1px solid #ddd;
+  font-size: 14px;
+  padding: 10px 0;
+  margin-top: 20px;
+  clear: both;
+  position: relative;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footer-section {
+  flex: 1;
+  line-height: 30px;
+}
+
+.footer-section.left {
+  text-align: left;
+  padding-left: 10px;
+}
+
+.footer-section.center {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.footer-section.right {
+  text-align: right;
+  padding-right: 10px;
+}
+
+.footer-section a {
+  color: #0000d6;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.footer-section a:hover {
+  text-decoration: underline;
+}
+
+.footer-section img {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
 }
 
 /* Ensure responsiveness on smaller screens */
 @media (max-width: 800px) {
 .plot-container {
-  width: 100%; /* On smaller screens, make plots full width */
+  flex: 0 1 100%; /* Changed from 1 1 100% to 0 1 100% to prevent stretching */
+  margin: 0 auto;
 }
+}
+
+/* Footer responsive adjustments */
+@media (max-width: 800px) {
+  .footer-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .footer-section {
+    flex: 1 1 100%;
+    text-align: center !important;
+    padding: 0;
+  }
+
+  .footer-section.left,
+  .footer-section.right {
+    padding: 0;
+  }
 }
 
 .highlight-all {
