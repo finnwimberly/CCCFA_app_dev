@@ -517,9 +517,9 @@ async function fetchAvailableDates(filePath) {
 
 $(function () {
   // Paths for SST, SSS, and Chloro dates
-  const sstDatesPath = '../data/processed_data/SST/sst_dates.txt';
-  const sssDatesPath = '../data/processed_data/SSS/sss_dates.txt';
-  const chloroDatesPath = '../data/processed_data/CHL/chl_dates.txt';
+  const sstDatesPath = '../data/SST/sst_dates.txt';
+  const sssDatesPath = '../data/SSS/sss_dates.txt';
+  const chloroDatesPath = '../data/CHL/chl_dates.txt';
 
   // Fetch available dates for highlighting
   Promise.all([

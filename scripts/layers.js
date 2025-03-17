@@ -35,8 +35,8 @@ let chlOverlay = L.tileLayer('', {
 
 // Define bathymetry tile paths
 const bathymetryPaths = {
-  metric: '../data/processed_data/bathymetry_tiles_m/{z}/{x}/{y}.png',
-  imperial: '../data/processed_data/bathymetry_tiles/{z}/{x}/{y}.png'
+  metric: '../data/bathymetry_tiles_m/{z}/{x}/{y}.png',
+  imperial: '../data/bathymetry_tiles/{z}/{x}/{y}.png'
 };
 
 // Function to determine active unit system
@@ -170,19 +170,19 @@ function createLegend(layerType, date) {
   let rangeFile;
   if (layerType === 'SST') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/SST/tiles/${date}/sst_range_local.json`
-      : `../data/processed_data/SST/tiles/${date}/sst_range_global.json`;
+      ? `../data/SST/tiles/${date}/sst_range_local.json`
+      : `../data/SST/tiles/${date}/sst_range_global.json`;
   } else if (layerType === 'SSS') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_local.json`
-      : `../data/processed_data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+      ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
+      : `../data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
   } else if (layerType === 'CHL') {
     rangeFile = zoomLevel >= 8
-      ? `../data/processed_data/CHL/tiles/${date}/chl_range_local.json`
-      : `../data/processed_data/CHL/tiles/${date}/chl_range_global.json`;
+      ? `../data/CHL/tiles/${date}/chl_range_local.json`
+      : `../data/CHL/tiles/${date}/chl_range_global.json`;
   }
 
-  const colormapFile = `../data/processed_data/${layerType}/thermal_colormap.txt`;
+  const colormapFile = `../data/${layerType}/thermal_colormap.txt`;
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -315,9 +315,9 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable
 
-  const sstPath = `../data/processed_data/SST/tiles/${date}/{z}/{x}/{y}.png`;
-  const sssPath = `../data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
-  const chlPath = `../data/processed_data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
+  const sstPath = `../data/SST/tiles/${date}/{z}/{x}/{y}.png`;
+  const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+  const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
 
   console.log('Constructed SST path:', sstPath);
   console.log('Constructed SSS path:', sssPath);
