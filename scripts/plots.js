@@ -1,3 +1,4 @@
+// Remove this commented-out import
 // import { selectedProfiles } from './map.js';
 import { generateColor } from './utils.js';
 import { loadMeasurementData } from './data-loading.js';
@@ -11,89 +12,31 @@ let plotData = {
   dens: [],
 };
 
-// function initializePlots() {
-//   const commonLayout = {
-//     margin: {
-//       t: 60,  // reduced top margin
-//       r: 60,  // increased right margin for legend
-//       b: 60,  // bottom margin
-//       l: 60   // left margin for axis labels
-//     },
-//     autosize: true,
-//     showlegend: true, // Enable legend
-//     legend: {
-//       x: 0.5,       // Center horizontally
-//       y: 1.3,       // Position above the plot
-//       xanchor: 'center',
-//       yanchor: 'top',
-//       orientation: 'h',    // Horizontal layout
-//       traceorder: 'normal',
-//       itemwidth: 80,      // Control width of each legend item
-//       itemsizing: 'constant',
-//       xgap: 10,          // Add space between legend items
-//       font: { size: 9 }, // Slightly smaller font
-//       bgcolor: 'rgba(255,255,255,0.8)',
-//       bordercolor: '#ddd',
-//       borderwidth: 1
-//     },
-//     height: 350,
-//     paper_bgcolor: 'rgba(0,0,0,0)',
-//     plot_bgcolor: 'rgba(0,0,0,0)'
-//   };
-
-//   // Temperature vs Depth plot
-//   Plotly.newPlot('temp-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Temperature (°F)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-
-//   // Salinity vs Depth plot
-//   Plotly.newPlot('sal-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Salinity (PSU)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-
-//   // Density vs Depth plot
-//   Plotly.newPlot('dens-plot', [], {
-//     ...commonLayout,
-//     xaxis: { 
-//       title: 'Density (kg/m³)',
-//       titlefont: { size: 14 }
-//     },
-//     yaxis: { 
-//       title: 'Depth (ftm)', 
-//       autorange: 'reversed',
-//       titlefont: { size: 14 }
-//     }
-//   });
-// }
-
 function initializePlots() {
   const commonLayout = {
     margin: {
-      t: 60,    // top margin
-      r: 60,    // right margin
-      b: 60,    // bottom margin
-      l: 60     // left margin for axis labels
+      t: 60,  // reduced top margin
+      r: 60,  // increased right margin for legend
+      b: 60,  // bottom margin
+      l: 60   // left margin for axis labels
     },
     autosize: true,
-    showlegend: false,  // Disable legend on all plots
+    showlegend: true, // Enable legend
+    legend: {
+      x: 0.5,       // Center horizontally
+      y: 1.3,       // Position above the plot
+      xanchor: 'center',
+      yanchor: 'top',
+      orientation: 'h',    // Horizontal layout
+      traceorder: 'normal',
+      itemwidth: 80,      // Control width of each legend item
+      itemsizing: 'constant',
+      xgap: 10,          // Add space between legend items
+      font: { size: 9 }, // Slightly smaller font
+      bgcolor: 'rgba(255,255,255,0.8)',
+      bordercolor: '#ddd',
+      borderwidth: 1
+    },
     height: 350,
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)'
@@ -143,38 +86,42 @@ function initializePlots() {
 }
 
 async function plotCTDMeasurements(profileId, measurements, color) {
-  const { temperature, salinity, density, depth } = measurements;
+  const { temperature, depth } = measurements;
+  const dataType = state.selectedProfiles[profileId].dataType;
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
 
   // Convert measurements
   const depthConverted = unitSystem === "imperial" ? depth.map(d => d * 0.546807) : depth;
   const temperatureConverted = unitSystem === "imperial" ? temperature.map(t => (t * 9/5) + 32) : temperature;
 
-  // Extract and format date from profile ID (format: XXX_XXXXXX_YYYYMMDD_HHMM)
+  // Extract and format date from profile ID or use date from state
   let legendName;
-  try {
-    const datePart = profileId.split('_')[2]; // Get the YYYYMMDD part
-    const year = datePart.substring(0, 4);
-    const month = datePart.substring(4, 6);
-    const day = datePart.substring(6, 8);
-    legendName = `${month}/${day}/${year}`;
-  } catch (error) {
-    console.warn(`Error formatting date for profile ${profileId}:`, error);
-    legendName = `Profile ${profileId}`;
+  if (state.selectedProfiles[profileId].date) {
+    const date = state.selectedProfiles[profileId].date;
+    try {
+      const formattedDate = new Date(date).toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+      legendName = `${formattedDate} (${dataType})`;
+    } catch (error) {
+      legendName = `${date} (${dataType})`;
+    }
+  } else {
+    try {
+      const datePart = profileId.split('_')[2]; // Get the YYYYMMDD part
+      const year = datePart.substring(0, 4);
+      const month = datePart.substring(4, 6);
+      const day = datePart.substring(6, 8);
+      legendName = `${month}/${day}/${year} (${dataType})`;
+    } catch (error) {
+      console.warn(`Error formatting date for profile ${profileId}:`, error);
+      legendName = `Profile ${profileId} (${dataType})`;
+    }
   }
 
-  // Add traces with profile ID and date in legend
-  await Plotly.addTraces('sal-plot', {
-    x: salinity,
-    y: depthConverted,
-    mode: 'lines+markers',
-    name: legendName,
-    meta: { profileId },
-    line: { shape: 'linear', color: color },
-    marker: { color: color },
-    showlegend: true
-  });
-
+  // Always plot temperature
   await Plotly.addTraces('temp-plot', {
     x: temperatureConverted,
     y: depthConverted,
@@ -186,16 +133,32 @@ async function plotCTDMeasurements(profileId, measurements, color) {
     showlegend: false
   });
 
-  await Plotly.addTraces('dens-plot', {
-    x: density,
-    y: depthConverted,
-    mode: 'lines+markers',
-    name: legendName,
-    meta: { profileId },
-    line: { shape: 'linear', color: color },
-    marker: { color: color },
-    showlegend: false
-  });
+  // Only plot salinity and density for CTD data
+  if (dataType === 'CTD' && measurements.salinity && measurements.density) {
+    const { salinity, density } = measurements;
+    
+    await Plotly.addTraces('sal-plot', {
+      x: salinity,
+      y: depthConverted,
+      mode: 'lines+markers',
+      name: legendName,
+      meta: { profileId },
+      line: { shape: 'linear', color: color },
+      marker: { color: color },
+      showlegend: false
+    });
+
+    await Plotly.addTraces('dens-plot', {
+      x: density,
+      y: depthConverted,
+      mode: 'lines+markers',
+      name: legendName,
+      meta: { profileId },
+      line: { shape: 'linear', color: color },
+      marker: { color: color },
+      showlegend: false
+    });
+  }
 }
 
 function removeCTDMeasurements(profileId) {
@@ -207,53 +170,92 @@ function removeCTDMeasurements(profileId) {
     return;
   }
 
+  const dataType = state.selectedProfiles[profileId].dataType;
+
   try {
-    // Get plots to iterate through
-    const plots = ['temp-plot', 'sal-plot', 'dens-plot'];
+    // Always remove from temperature plot
+    const tempPlot = document.getElementById('temp-plot');
+    const tempTraces = tempPlot.data
+      .map((trace, index) => (trace.meta?.profileId === profileId ? index : null))
+      .filter((index) => index !== null);
+    
+    Plotly.deleteTraces('temp-plot', tempTraces);
 
-    for (const plot of plots) {
-      const plotData = document.getElementById(plot).data;
-
-      // Find traces matching the profileId
-      const traceIndices = plotData
+    // Only remove from salinity and density plots if it's CTD data
+    if (dataType === 'CTD') {
+      const salPlot = document.getElementById('sal-plot');
+      const salTraces = salPlot.data
         .map((trace, index) => (trace.meta?.profileId === profileId ? index : null))
         .filter((index) => index !== null);
+      
+      Plotly.deleteTraces('sal-plot', salTraces);
 
-      console.log(`Removing traces for profile ${profileId} in plot ${plot}:`, traceIndices);
-
-      // Remove all traces for the profile
-      Plotly.deleteTraces(plot, traceIndices);
+      const densPlot = document.getElementById('dens-plot');
+      const densTraces = densPlot.data
+        .map((trace, index) => (trace.meta?.profileId === profileId ? index : null))
+        .filter((index) => index !== null);
+      
+      Plotly.deleteTraces('dens-plot', densTraces);
     }
 
-    // Clean up `selectedProfiles`
-    delete state.selectedProfiles[profileId];
     console.log(`Successfully removed traces for profile ${profileId}`);
   } catch (error) {
     console.error(`Error removing traces for profile ${profileId}:`, error);
   }
 }
 
-
 // Helper function to get trace index by profile ID
 function getTraceIndex(plotId, profileId) {
   const plotData = document.getElementById(plotId).data;
-
-  // Find the trace with the matching profileId
-  const traceIndex = plotData.findIndex((trace) => trace.meta?.profileId === profileId);
-
-  if (traceIndex === -1) {
-    console.warn(`Trace for profile ${profileId} not found in ${plotId}`);
-  }
-  return traceIndex;
+  return plotData.findIndex((trace) => trace.meta?.profileId === profileId);
 }
 
-// Function to update the axis labels
-function updateAxisLabels() {
+function handleUnitChange(selectedProfiles) {
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
+
+  Object.entries(selectedProfiles).forEach(([profileId, profile]) => {
+    const { measurements, dataType } = profile;
+    if (!measurements) return;
+
+    // Convert data
+    const depthConverted = measurements.depth.map(d => 
+      unitSystem === 'imperial' ? d * 0.546807 : d
+    );
+    const temperatureConverted = measurements.temperature.map(t =>
+      unitSystem === 'imperial' ? (t * 9/5) + 32 : t
+    );
+
+    // Update temperature plot for both CTD and EMOLT
+    const tempTraceIndex = getTraceIndex('temp-plot', profileId);
+    if (tempTraceIndex !== -1) {
+      Plotly.restyle('temp-plot', {
+        x: [temperatureConverted],
+        y: [depthConverted]
+      }, [tempTraceIndex]);
+    }
+
+    // Only update salinity and density for CTD data
+    if (dataType === 'CTD') {
+      const salTraceIndex = getTraceIndex('sal-plot', profileId);
+      if (salTraceIndex !== -1) {
+        Plotly.restyle('sal-plot', {
+          y: [depthConverted]
+        }, [salTraceIndex]);
+      }
+
+      const densTraceIndex = getTraceIndex('dens-plot', profileId);
+      if (densTraceIndex !== -1) {
+        Plotly.restyle('dens-plot', {
+          y: [depthConverted]
+        }, [densTraceIndex]);
+      }
+    }
+  });
+
+  // Update axis labels
   const depthLabel = unitSystem === "imperial" ? "Depth (ftm)" : "Depth (m)";
   const tempLabel = unitSystem === "imperial" ? "Temperature (°F)" : "Temperature (°C)";
 
-  // Update the labels for each plot
   Plotly.relayout('temp-plot', {
     'xaxis.title.text': tempLabel,
     'yaxis.title.text': depthLabel
@@ -268,41 +270,4 @@ function updateAxisLabels() {
   });
 }
 
-function handleUnitChange(selectedProfiles) {
-  const unitSystem = document.querySelector('input[name="unit"]:checked').value;
-  console.log(`Unit system changed to: ${unitSystem}`);
-
-  Object.keys(state.selectedProfiles).forEach((profileId) => {
-    const profile = state.selectedProfiles[profileId];
-    const { measurements } = profile;
-
-    // Convert data
-    const depthConverted =
-      unitSystem === 'imperial'
-        ? measurements.depth.map((d) => d * 0.546807) // meters to fathoms
-        : measurements.depth.map((d) => d); // fathoms to meters
-
-
-    const temperatureConverted =
-      unitSystem === 'imperial'
-        ? measurements.temperature.map((t) => (t * 9) / 5 + 32) // Celsius to Fahrenheit
-        : measurements.temperature.map((t) => t); // Fahrenheit to Celsius
-
-    // Update plots for this profile
-    const tempTraceUpdate = { x: [temperatureConverted], y: [depthConverted] };
-    const salTraceUpdate = { y: [depthConverted] };
-    const densTraceUpdate = { y: [depthConverted] };
-
-    // Use `Plotly.restyle` to update the plots without replotting everything
-    Plotly.restyle('temp-plot', tempTraceUpdate, getTraceIndex('temp-plot', profileId));
-    Plotly.restyle('sal-plot', salTraceUpdate, getTraceIndex('sal-plot', profileId));
-    Plotly.restyle('dens-plot', densTraceUpdate, getTraceIndex('dens-plot', profileId));
-
-    console.log(`Updated plot data for profile ${profileId} to ${unitSystem} units.`);
-  });
-
-  // Update axis labels after data is converted
-  updateAxisLabels();
-}
-
-export { initializePlots, plotCTDMeasurements, removeCTDMeasurements, getTraceIndex, handleUnitChange, updateAxisLabels };
+export { initializePlots, plotCTDMeasurements, removeCTDMeasurements, handleUnitChange };

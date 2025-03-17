@@ -1,8 +1,8 @@
-import { loadProfiles, attachMarkerHandlers } from './map.js';
+import { loadProfiles } from './map.js';
 
 // Initialize the Leaflet map
 const map = L.map('map', {
-  center: [41.85, -70.2962], // Center on Cape Cod
+  center: [41.65, -70.2962], // Center on Cape Cod
   zoom: 7,                   // Initial zoom level
   crs: L.CRS.EPSG3857,       // Use standard Web Mercator CRS
   scrollWheelZoom: false,    // Disable zooming with scroll wheel
@@ -35,40 +35,29 @@ function initResize(e) {
 
 function resize(e) {
   if (!isResizing) return;
+  const deltaY = e.clientY - startY;
+  const newHeight = startHeight + deltaY;
   
-  const newHeight = startHeight + (e.clientY - startY);
   // Set minimum and maximum heights
-  const minHeight = 300;
+  const minHeight = 400; // Increased from 300 to 400 to provide more space for controls
   const maxHeight = window.innerHeight * 0.9;
   
   mapContainer.style.height = `${Math.min(Math.max(newHeight, minHeight), maxHeight)}px`;
   map.invalidateSize(); // Update map size
 }
 
-function stopResize() {
+function stopResize(e) {
   isResizing = false;
   document.removeEventListener('mousemove', resize);
   document.removeEventListener('mouseup', stopResize);
 
-    
-  // Prevent default behaviors
-  e.preventDefault();
-  e.stopPropagation();
+  // Only try to prevent default if e is defined
+  if (e) {
+    // Prevent default behaviors
+    e.preventDefault();
+    e.stopPropagation();
+  }
 }
 
-// Initialize with a default date range (e.g., from August 1, 2024, to today)
-const startDate = moment('2024-08-01', 'YYYY-MM-DD');
-const endDate = moment();
-loadProfiles(startDate, endDate);
-attachMarkerHandlers();
-
-let zoom = map.getZoom(); 
-
-// Add test zoom listener
-map.on('zoomend', () => {
-  // console.log('Zoom event fired - current zoom level:', map.getZoom());
-  zoom = map.getZoom(); 
-});
-
-// Export the map for use in other modules
-export { map, zoom };
+// Export only the map
+export { map };

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!-- ccocean.whoi.edu -->
 
+  <!-- ccocean.whoi.edu -->
   <!-- Google tag (gtag.js) -->
   <script async
   src="https://nam02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.googletagmanager.com%2Fgtag%2Fjs%3Fid%3DG-Y8VTYMEZFJ&data=05%7C02%7Cfinn.wimberly%40whoi.edu%7C2fafeeb5229340d221e308dd528d9d86%7Cd44c5cc6d18c46cc8abd4fdf5b6e5944%7C0%7C0%7C638757490367993760%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=QfQKbw%2FBIDkK0NrdArhbqxjWfVbEmrI1pk2WcVPYXik%3D&reserved=0"></script>
@@ -13,7 +13,7 @@
 
     gtag('config', 'G-Y8VTYMEZFJ');
   </script>
-
+  
   <title>Cape Cod Ocean</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,7 +61,9 @@
     <p>
       Since August 2024, fishermen have been equipped with CTD (Conductivity-Temperature-Depth) sensors, which can be 
       deployed from their vessels to provide profiles of ocean temperature, salinity, and density throughout the water 
-      column at various locations off the Cape Cod coast.
+      column at various locations off the Cape Cod coast. The CFRF's eMOLT (Environmental Monitors on Lobster Traps and Large 
+      Trawlers) program has attached temperature sensors to fishing equipment, providing an additional large data set of temperature profiles
+      all throughout the region.  
     </p>
 
     <p>This website provides an interactive tool to visualize the collected data while also providing additional information 
@@ -72,11 +74,14 @@
 
   <div id="usage">
     <p>
-      <strong>How to Use:</strong> All CTD profiles are represented by black markers on the map. Hovering over a marker displays the date on which the profile
+      <strong>How to Use:</strong> All CTD profiles are represented by the black circular markers on the map while eMOLT profiles
+       are indicated by the smaller, triangular markers. Hovering over a marker displays the date on which the profile
       was taken. Clicking on a marker opens a pop-up with summary statistics and plots of temperature, salinity, and density 
-      beneath the map. To filter profiles by date, use the "Observation Range" filter in the "Time Control" panel. To view 
-      satellite imagery, switch to the "Layer Date" input and select a day of interest, then choose a dataset (SSS, SST, or Chlorophyll-a) in the 
-      "Layer Selection" panel. Note: SSS (a rolling average) and Chlorophyll-a (daily imagery) layers are available every day, while the
+      beneath the map. To focus in on profiles from only a certain time or project and remove all other profiles, use the "Filter Profiles" panel. 
+      The "Select Profiles by Area" button can be used to plot all profiles within a region. To use this feature, click the button, outline the area of interest
+      on the map, confirm the selection be clicking the bottun and the data will populate on the plots. To view 
+      satellite imagery, select a "Layer Date" and then choose a dataset (SSS, SST, or Chlorophyll-a) in the 
+      "Layer Control" panel. Note: SSS (a rolling average) and Chlorophyll-a (daily imagery) layers are available every day, while the
       SST layer (a three day average) is available once every three days.
     </p>
   </div>
