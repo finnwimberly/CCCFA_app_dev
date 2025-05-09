@@ -195,31 +195,31 @@ function createLegend(layerType, date) {
   let rangeFile;
   if (layerType === 'SST') {
     rangeFile = zoomLevel >= 8
-      ? `/data/processed_data/SST/tiles/${date}/sst_range_local.json`
-      : `/data/processed_data/SST/tiles/${date}/sst_range_global.json`;
+      ? `../data/SST/tiles/${date}/sst_range_local.json`
+      : `../data/SST/tiles/${date}/sst_range_global.json`;
   } else if (layerType === 'SSS') {
     rangeFile = zoomLevel >= 8
-      ? `/data/processed_data/SSS/tiles_mirrored/${date}/sss_range_local.json`
-      : `/data/processed_data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+      ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
+      : `../data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
   } else if (layerType === 'CHL') {
     rangeFile = zoomLevel >= 8
-      ? `/data/processed_data/CHL/tiles/${date}/chl_range_local.json`
-      : `/data/processed_data/CHL/tiles/${date}/chl_range_global.json`;
+      ? `../data/CHL/tiles/${date}/chl_range_local.json`
+      : `../data/CHL/tiles/${date}/chl_range_global.json`;
   } else if (layerType === 'OSTIA_SST') {
     rangeFile = zoomLevel >= 8
-      ? `/data/processed_data/OSTIA_SST/tiles/${date}/sst_range_local.json`
-      : `/data/processed_data/OSTIA_SST/tiles/${date}/sst_range_global.json`;
+      ? `../data/OSTIA_SST/tiles/${date}/sst_range_local.json`
+      : `../data/OSTIA_SST/tiles/${date}/sst_range_global.json`;
   } else if (layerType === 'OSTIA_anomaly') {
     rangeFile = zoomLevel >= 8
-      ? `/data/processed_data/OSTIA_anomaly/tiles/${date}/ssta_range_local.json`
-      : `/data/processed_data/OSTIA_anomaly/tiles/${date}/ssta_range_global.json`;
+      ? `../data/OSTIA_anomaly/tiles/${date}/ssta_range_local.json`
+      : `../data/OSTIA_anomaly/tiles/${date}/ssta_range_global.json`;
   }
 
   const colormapFile = layerType === 'OSTIA_anomaly' 
-    ? `/data/processed_data/OSTIA_anomaly/thermal_colormap.txt`
+    ? `../data/OSTIA_anomaly/thermal_colormap.txt`
     : layerType === 'OSTIA_SST'
-    ? `/data/processed_data/OSTIA_SST/thermal_colormap.txt`
-    : `/data/processed_data/${layerType}/thermal_colormap.txt`;
+    ? `../data/OSTIA_SST/thermal_colormap.txt`
+    : `../data/${layerType}/thermal_colormap.txt`;
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -410,11 +410,11 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable
 
-  const sstPath = `/data/processed_data/SST/tiles/${date}/{z}/{x}/{y}.png`;
-  const sssPath = `/data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
-  const chlPath = `/data/processed_data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
-  const ostiaSstPath = `/data/processed_data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
-  const ostiaAnomalyPath = `/data/processed_data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
+  const sstPath = `../data/SST/tiles/${date}/{z}/{x}/{y}.png`;
+  const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+  const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
+  const ostiaSstPath = `../data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
+  const ostiaAnomalyPath = `../data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
 
   console.log('Constructed SST path:', sstPath);
   console.log('Constructed SSS path:', sssPath);
