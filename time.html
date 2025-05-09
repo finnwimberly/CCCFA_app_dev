@@ -88,12 +88,12 @@
             <div id="sst">
                 <h3>Sea Surface Temperature (SST)</h3>
                 <p class="caption">Monthly average sea surface temperature from OSTIA satellite data.</p>
-                <img src="/data/processed_data/monthly_avg_pngs/OSTIA_SST_monthly_averages.png" 
+                <img src="../data/monthly_avg_pngs/OSTIA_SST_monthly_averages.png" 
                      alt="Monthly SST Averages" 
                      class="data-image">
             
                 <p class="caption">Monthly SST anomalies using OSTIA monthly averages relative to a 2007-2024 OSTIA-derived climatology.</p>
-                <img src="/data/processed_data/monthly_avg_pngs/OSTIA_SST_combined_anomalies_2007_2024.png" 
+                <img src="../data/monthly_avg_pngs/OSTIA_SST_combined_anomalies_2007_2024.png" 
                      alt="Monthly SST Anomaly Averages" 
                      class="data-image">
                             </div>
@@ -103,7 +103,7 @@
                 <p class="caption">Monthly average sea surface salinity from SMAP satellite data. Salinity is measured 
                     in Practical Salinity Units (PSU), where 1 PSU is approximately 1 gram of salt per kilogram of 
                     seawater. The plots include contour lines at PSU levels of 34 and 35.</p>
-                <img src="/data/processed_data/monthly_avg_pngs/SMAP_SSS_monthly_averages.png" 
+                <img src="../data/monthly_avg_pngs/SMAP_SSS_monthly_averages.png" 
                      alt="SSS:" 
                      class="data-image">
                         </div>
@@ -114,7 +114,7 @@
                     is measured in milligrams per cubic meter (mg/m³) and serves as a proxy for phytoplankton biomass. 
                     Note the plots employ a log scale – slight changes in color can represent large changes in chlorophyll-a 
                     concentration.</p>
-                <img src="/data/processed_data/monthly_avg_pngs/GlobColour_CHL_monthly_averages.png" 
+                <img src="../data/monthly_avg_pngs/GlobColour_CHL_monthly_averages.png" 
                      alt="CHL:" 
                      class="data-image">
             </div>
@@ -135,7 +135,7 @@
             <!-- Region Map -->
             <div class="map-container">
                 <div class="map-wrapper">
-                    <img src="../data/processed_data/OSTIA_SST/time_series/region_map.png" 
+                    <img src="../data/OSTIA_SST/time_series/region_map.png" 
                          alt="Region Map" class="region-map">
                 </div>
             </div>
@@ -351,7 +351,7 @@
         async function createTimeSeriesPlot() {
             try {
                 // Fetch the data
-                const response = await fetch('../data/processed_data/OSTIA_SST/time_series/sst_timeseries.json');
+                const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
