@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ccocean.whoi.edu -->
+    <!-- Google tag (gtag.js) -->
+    <script async
+    src="https://nam02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.googletagmanager.com%2Fgtag%2Fjs%3Fid%3DG-Y8VTYMEZFJ&data=05%7C02%7Cfinn.wimberly%40whoi.edu%7C2fafeeb5229340d221e308dd528d9d86%7Cd44c5cc6d18c46cc8abd4fdf5b6e5944%7C0%7C0%7C638757490367993760%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIklQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=QfQKbw%2FBIDkK0NrdArhbqxjWfVbEmrI1pk2WcVPYXik%3D&reserved=0"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Y8VTYMEZFJ');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observing the Cape Cod Ocean</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Add Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="data-access-page">
+
+    <header>
+        <div class="title">
+            <h1>Observing the Cape Cod Ocean</h1>
+        </div>
+        <div class="logos">
+            <a href="https://capecodfishermen.org/" target="_blank">
+                <img src="/logos/CCCFA_logo-removebg-preview.png" alt="Cape Cod Commercial Fishermen's Alliance Logo" class="cccfa-logo">
+            </a>
+            <a href="https://www.cfrfoundation.org" target="_blank">
+                <img src="/logos/CFRF_logo.png" alt="CFRF Logo" class="cfrf-logo">
+            </a>
+            <a href="https://seagrant.whoi.edu/" target="_blank">
+                <img src="/logos/seagrant_logo.png" alt="Sea Grant Logo" class="seagrant-logo">
+            </a>
+            <a href="https://www.whoi.edu/" target="_blank">
+                <img src="/logos/WHOI_Tagline-Logo-1.png" alt="Woods Hole Oceanographic Institution Logo" class="whoi-logo">
+            </a>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">About</a></li>
+            <li><a href="map.html">Mapped Profiles</a></li>
+            <li><a href="time.html">Time Series</a></li>
+            <li><a href="data-access.html" class="active">Data Access</a></li>
+        </ul>
+    </nav>
+
+    <main class="content-container" style="max-width: 95%;">
+        <section class="data-card">
+            <h2>In-Situ Profiles</h2>
+            <p>CTD profiles are collected by CCCFA and CFRF vessels while eMOLT profiles are collected by over 100 different fishing vessels
+                throughout the Norteast. All profiles are processed by the CFRF team and made available 
+               via their <a href="https://erddap.ondeckdata.com/erddap/tabledap/index.html?page=1&itemsPerPage=1000">ERDDAP 
+               server</a>. Our dashboard uses the <a href="https://erddap.ondeckdata.com/erddap/tabledap/shelf_fleet_profiles_1m_binned.html"> 
+               1-meter binned CTD profiles </a> (distinct salinity, temperature, and density values at 1-meter intervals), but complete, 
+               continuous CTD profiles are also available on the ERDDAP page. The eMOLT profiles can be downloaded 
+               <a href="https://erddap.ondeckdata.com/erddap/tabledap/emolt_data.html">here</a>. 
+           </p>
+        </section>
+
+        <section class="data-card">
+            <h2>Satellite Data </h2>
+            <p>Our dashboard uses multiple satellite datasets for different purposes. New data are downloaded nightly, and imagery is automatically generated for visualization.</p>
+            
+            <ul class="data-list">
+
+                <li><strong><span class="emoji">🌊</span> VIIRS SST:</strong> This SST dataset is Sourced from NOAA's 
+                    <a href="https://www.nesdis.noaa.gov/our-satellites/currently-flying/joint-polar-satellite-system/visible-infrared-imaging-radiometer-suite-viirs">VIIRS satellite</a>. 
+                    This dataset is used on the dashboard to generate the primary SST layer (non-gapfilled). The dataset is a 3-day rolling mean and 
+                    is of substantially higher resolution than the gapfilled product. Because of the higher resolution, cloud cover can cause blind spots.
+                    The dataset displayed is accessible here: 
+                    <a href="https://www.star.nesdis.noaa.gov/pub/socd1/ecn/data/avhrr-viirs/sst-ngt/3day/ec/">VIIRS SST data</a>.</li>
+
+                <li><strong><span class="emoji">🌡️</span> OSTIA SST:</strong> We use the OSTIA SST dataset to offer gapfilled and 
+                    anomaly layers on the map. We also use this dataset (as opposed to VIIRS) to generate the monthly average SST and anomaly plots on the Time Series page. 
+                    This dataset is made available through the <a href="https://data.marine.copernicus.eu/product/SST_GLO_SST_L4_NRT_OBSERVATIONS_010_001/description">Copernicus Marine Service</a>.</li>
+
+                <li><strong><span class="emoji">🧂</span> SMAP SSS:</strong> Used for monthly averages and map visualization. Provided by NASA's 
+                    <a href="https://podaac.jpl.nasa.gov/smap">SMAP mission</a>.
+                    Our visualization uses an 8-day rolling mean. More details can be found here: 
+                    <a href="https://podaac.jpl.nasa.gov/dataset/SMAP_RSS_L3_SSS_SMI_8DAY-RUNNINGMEAN_V6">SSS data</a>.</li>
+
+                <li><strong><span class="emoji">🌿</span> GlobColour:</strong> Used for monthly averages and map visualization. Sourced from the Copernicus GlobColour processor. 
+                    Dataset description and download instructions are available 
+                    <a href="https://data.marine.copernicus.eu/product/OCEANCOLOUR_GLO_BGC_L3_MY_009_103/description">here</a>.
+                    This is a daily product rather than a multi-day mean, so it is often impacted by cloud cover.</li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section left">
+                For data questions: 
+                <a href="mailto:finn.wimberly@whoi.edu">finn.wimberly@whoi.edu</a>
+            </div>
+            <div class="footer-section center">
+                All code available @
+                <a href="https://github.com/finnwimberly/CCCFA_app_dev" target="_blank">
+                    <img src="/logos/GitHub-Mark-removebg-preview.png" alt="GitHub">
+                </a>
+            </div>
+            <div class="footer-section right">
+                For science questions: 
+                <a href="mailto:svenja.ryan@whoi.edu">sryan@whoi.edu</a>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .content-container {
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 95%;
+            box-sizing: border-box;
+        }
+
+        .data-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .data-list li {
+            margin-bottom: 1em;
+            line-height: 1.5;
+        }
+
+        .emoji {
+            margin-right: 0.5em;
+        }
+    </style>
+</body>
+</html>

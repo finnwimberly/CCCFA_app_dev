@@ -21,6 +21,7 @@ function initializePlots() {
       l: 60   // left margin for axis labels
     },
     autosize: true,
+    responsive: true,
     showlegend: true, // Enable legend
     legend: {
       x: 0.5,       // Center horizontally
@@ -37,14 +38,32 @@ function initializePlots() {
       bordercolor: '#ddd',
       borderwidth: 1
     },
-    height: 350,
+    height: null, // Remove fixed height
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)'
   };
 
-  // Temperature vs Depth plot
-  Plotly.newPlot('temp-plot', [], {
-    ...commonLayout,
+  // Function to handle plot resizing
+  function resizePlots() {
+    const plotContainers = document.querySelectorAll('.plot-container');
+    plotContainers.forEach(container => {
+      const plotId = container.getAttribute('data-plot-id');
+      if (!plotId) return; // Skip if no plot ID is set
+      
+      const width = container.offsetWidth;
+      const height = width * (3/4); // Maintain 4:3 aspect ratio
+      
+      Plotly.relayout(plotId, {
+        'width': width,
+        'height': height
+      });
+    });
+  }
+
+  // Initialize each plot
+  const plotConfigs = [
+    {
+      id: 'temp-plot',
     xaxis: { 
       title: 'Temperature (°F)',
       titlefont: { size: 14 }
@@ -54,11 +73,9 @@ function initializePlots() {
       autorange: 'reversed',
       titlefont: { size: 14 }
     }
-  });
-
-  // Salinity vs Depth plot
-  Plotly.newPlot('sal-plot', [], {
-    ...commonLayout,
+    },
+    {
+      id: 'sal-plot',
     xaxis: { 
       title: 'Salinity (PSU)',
       titlefont: { size: 14 }
@@ -68,11 +85,9 @@ function initializePlots() {
       autorange: 'reversed',
       titlefont: { size: 14 }
     }
-  });
-
-  // Density vs Depth plot
-  Plotly.newPlot('dens-plot', [], {
-    ...commonLayout,
+    },
+    {
+      id: 'dens-plot',
     xaxis: { 
       title: 'Density (kg/m³)',
       titlefont: { size: 14 }
@@ -82,7 +97,42 @@ function initializePlots() {
       autorange: 'reversed',
       titlefont: { size: 14 }
     }
+    }
+  ];
+
+  // Initialize each plot and set up its container
+  plotConfigs.forEach(config => {
+    const container = document.getElementById(config.id);
+    if (!container) {
+      console.warn(`Container for ${config.id} not found`);
+      return;
+    }
+    
+    // Set the data-plot-id attribute
+    container.setAttribute('data-plot-id', config.id);
+    
+    // Initialize the plot
+    Plotly.newPlot(config.id, [], {
+      ...commonLayout,
+      ...config
+    });
   });
+
+  // Add resize observer to handle container size changes
+  const resizeObserver = new ResizeObserver(entries => {
+    resizePlots();
+  });
+
+  // Observe all plot containers
+  document.querySelectorAll('.plot-container').forEach(container => {
+    resizeObserver.observe(container);
+  });
+
+  // Also listen for window resize events
+  window.addEventListener('resize', resizePlots);
+
+  // Initial resize
+  resizePlots();
 }
 
 async function plotCTDMeasurements(profileId, measurements, color) {

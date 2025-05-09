@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Series</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Add Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="title">
+            <h1>Observing the Cape Cod Ocean</h1>
+        </div>
+        <div class="logos">
+            <a href="https://capecodfishermen.org/" target="_blank">
+                <img src="/logos/CCCFA_logo-removebg-preview.png" alt="Cape Cod Commercial Fishermen's Alliance Logo" class="cccfa-logo">
+            </a>
+            <a href="https://www.cfrfoundation.org" target="_blank">
+                <img src="/logos/CFRF_logo.png" alt="CFRF Logo" class="cfrf-logo">
+            </a>
+            <a href="https://seagrant.whoi.edu/" target="_blank">
+                <img src="/logos/seagrant_logo.png" alt="Sea Grant Logo" class="seagrant-logo">
+            </a>
+            <a href="https://www.whoi.edu/" target="_blank">
+                <img src="/logos/WHOI_Tagline-Logo-1.png" alt="Woods Hole Oceanographic Institution Logo" class="whoi-logo">
+            </a>
+        </div>
+    </header>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html">About</a></li>
+            <li><a href="map.html">Mapped Profiles</a></li>
+            <li><a href="time.html" class="active">Time Series</a></li>
+            <li><a href="data-access.html">Data Access</a></li>
+        </ul>
+      </nav>
+
+    <main class="content-container">
+        <!-- Navigation Menu -->
+        <nav class="page-nav">
+            <h3 class="nav-title">Contents</h3>
+            <div class="nav-section">
+                <div class="nav-header" onclick="toggleNavSection(this)">
+                    <h3>Average Monthly Surface Conditions</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="nav-content">
+                    <a href="#sst">Sea Surface Temperature</a>
+                    <a href="#sss">Sea Surface Salinity</a>
+                    <a href="#chl">Chlorophyll-a</a>
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-header" onclick="toggleNavSection(this)">
+                    <h3>Long Term Temperature Trends</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="nav-content">
+                    <a href="#temperature-trend">Map of Regions</a>
+                    <a href="#sst-anomaly-plots">SST Anomaly Plots</a>
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-header" onclick="toggleNavSection(this)">
+                    <h3>Monthly Profiles</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="nav-content">
+                    <a href="#ctd-profiles">CTD Profiles</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Section 1: Monthly Averages -->
+        <section id="monthly-averages" class="data-card">
+            <h2>Monthly Averages</h2>
+            
+            <div id="sst">
+                <h3>Sea Surface Temperature (SST)</h3>
+                <p class="caption">Monthly average sea surface temperature from OSTIA satellite data.</p>
+                <img src="/data/processed_data/monthly_avg_pngs/OSTIA_SST_monthly_averages.png" 
+                     alt="Monthly SST Averages" 
+                     class="data-image">
+            
+                <p class="caption">Monthly SST anomalies using OSTIA monthly averages relative to a 2007-2024 OSTIA-derived climatology.</p>
+                <img src="/data/processed_data/monthly_avg_pngs/OSTIA_SST_combined_anomalies_2007_2024.png" 
+                     alt="Monthly SST Anomaly Averages" 
+                     class="data-image">
+                            </div>
+
+            <div id="sss">
+                <h3>Sea Surface Salinity (SSS)</h3>
+                <p class="caption">Monthly average sea surface salinity from SMAP satellite data. Salinity is measured 
+                    in Practical Salinity Units (PSU), where 1 PSU is approximately 1 gram of salt per kilogram of 
+                    seawater. The plots include contour lines at PSU levels of 34 and 35.</p>
+                <img src="/data/processed_data/monthly_avg_pngs/SMAP_SSS_monthly_averages.png" 
+                     alt="SSS:" 
+                     class="data-image">
+                        </div>
+
+            <div id="chl">
+                <h3>Chlorophyll-a</h3>
+                <p class="caption">Monthly average chlorophyll-a concentration from GlobColour satellite data. Chlorophyll-a 
+                    is measured in milligrams per cubic meter (mg/m³) and serves as a proxy for phytoplankton biomass. 
+                    Note the plots employ a log scale – slight changes in color can represent large changes in chlorophyll-a 
+                    concentration.</p>
+                <img src="/data/processed_data/monthly_avg_pngs/GlobColour_CHL_monthly_averages.png" 
+                     alt="CHL:" 
+                     class="data-image">
+            </div>
+        </section>
+
+        <!-- Section 2: Long Term Temperature Trend -->
+        <section id="temperature-trend" class="data-card">
+            <h2>Long Term Temperature Trends</h2>
+            
+            <p class="caption">We define four regions of interest, shown in the map below, which we refer to 
+                (from north to south) as the Gulf of Maine, Outer Cape, Rhode Island, and New Jersey regions. The anomaly 
+                plots further below correspond to these regions. For each, the daily anomaly is calculated as the difference between
+                the region's spatially averaged daily SST and the long-term mean for that calendar day, based on the 
+                combined spatial and temporal average across 2007–2024.
+            </p>
+
+            <h3>Regions:</h3>
+            <!-- Region Map -->
+            <div class="map-container">
+                <div class="map-wrapper">
+                    <img src="../data/processed_data/OSTIA_SST/time_series/region_map.png" 
+                         alt="Region Map" class="region-map">
+                </div>
+            </div>
+
+            <h3>Anomaly Plots:</h3>
+            <p class="caption">The plots below show both daily anomaly values (blue) as well as a 130-day rolling mean (red).</p>
+            <!-- Time Series Plots -->
+            <div id="sst-anomaly-plots" class="plot-grid">
+                <div id="sstPlotOC" class="plot-container"></div>
+                <div id="sstPlotGoM" class="plot-container"></div>
+                <div id="sstPlotRI" class="plot-container"></div>
+                <div id="sstPlotNJ" class="plot-container"></div>
+            </div>
+
+            <!-- Unit Selector -->
+            <div id="unit-selector" class="unit-selector">
+                <label>Select Unit System:</label>
+                <input type="radio" id="imperial" name="unit" value="imperial" checked />
+                <label for="imperial">Imperial (°F)</label>
+                <input type="radio" id="metric" name="unit" value="metric" />
+                <label for="metric">Metric (°C)</label>
+            </div>
+        </section>
+
+        <!-- Section 3: CTD Profiles by Region -->
+        <section id="ctd-profiles" class="data-card">
+            <h2>CTD Profiles by Region</h2>
+            <p class="caption">Select a region to view monthly CTD profiles for temperature, salinity, and density.
+                The regions referenced here are the same as those used in the anomaly plots above.
+            </p>
+            
+            <!-- Region Selector -->
+            <div class="region-selector">
+                <label for="region-select">Select Region:</label>
+                <select id="region-select">
+                    <option value="GoM">Gulf of Maine</option>
+                    <option value="OC">Outer Cape</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="NJ">New Jersey</option>
+                </select>
+            </div>
+
+            <!-- Plot Grid -->
+            <div class="ctd-plot-grid">
+                <!-- Temperature Row -->
+                <div class="plot-row">
+                    <h3>Temperature</h3>
+                    <div class="monthly-plots" id="temp-plots"></div>
+                </div>
+                
+                <!-- Salinity Row -->
+                <div class="plot-row">
+                    <h3>Salinity</h3>
+                    <div class="monthly-plots" id="sal-plots"></div>
+                </div>
+                
+                <!-- Density Row -->
+                <div class="plot-row">
+                    <h3>Density</h3>
+                    <div class="monthly-plots" id="dens-plots"></div>
+                </div>
+            </div>
+
+            <!-- Unit Selector for CTD Profiles -->
+            <div id="ctd-unit-selector" class="unit-selector">
+                <label>Select Unit System:</label>
+                <input type="radio" id="ctd-imperial" name="ctd-unit" value="imperial" checked />
+                <label for="ctd-imperial">Imperial (°F, fathoms)</label>
+                <input type="radio" id="ctd-metric" name="ctd-unit" value="metric" />
+                <label for="ctd-metric">Metric (°C, meters)</label>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section left">
+                For data questions: 
+                <a href="mailto:finn.wimberly@whoi.edu">finn.wimberly@whoi.edu</a>
+            </div>
+            <div class="footer-section center">
+                All code available @
+                <a href="https://github.com/finnwimberly/CCCFA_app_dev" target="_blank">
+                    <img src="/logos/GitHub-Mark-removebg-preview.png" alt="GitHub">
+                </a>
+            </div>
+            <div class="footer-section right">
+                For science questions: 
+                <a href="mailto:svenja.ryan@whoi.edu">sryan@whoi.edu</a>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Only keep styles specific to this page that aren't in styles.css */
+        .content-container {
+            max-width: 95%;
+        }
+        
+        /* CTD Profile Styles */
+        .region-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .region-selector select {
+            padding: 8px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .ctd-plot-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .plot-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plot-row h3 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .monthly-plots {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .monthly-plot {
+            min-width: 300px;
+            height: 400px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        /* Navigation menu styles */
+        .nav-section {
+            margin-bottom: 10px;
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nav-header:hover {
+            background-color: #e9e9e9;
+        }
+
+        .nav-content {
+            display: none;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .nav-content a {
+            display: block;
+            padding: 5px 10px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .nav-content a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-content a.active {
+            background-color: #e9e9e9;
+            font-weight: bold;
+        }
+
+        .nav-header i {
+            transition: transform 0.3s ease;
+        }
+    </style>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script type="module">
+        import { loadProfilesMetadata, loadMeasurementData } from './scripts/data-loading.js';
+
+        // Function to convert temperature anomaly
+        function convertTemperatureAnomaly(value, toImperial) {
+            if (toImperial) {
+                return value * 1.8;  // °C to °F (just scaling)
+            } else {
+                return value / 1.8;  // °F to °C (just scaling)
+            }
+        }
+
+        // Function to create the time series plot
+        async function createTimeSeriesPlot() {
+            try {
+                // Fetch the data
+                const response = await fetch('../data/processed_data/OSTIA_SST/time_series/sst_timeseries.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Loaded data:', data); // Debug log
+
+                // Create plots for each region
+                const regions = {
+                    'OC': { name: 'Outer Cape', container: 'sstPlotOC' },
+                    'GoM': { name: 'Gulf of Maine', container: 'sstPlotGoM' },
+                    'RI': { name: 'Rhode Island', container: 'sstPlotRI' },
+                    'NJ': { name: 'New Jersey', container: 'sstPlotNJ' }
+                };
+
+                // Function to update plots with current unit selection
+                function updatePlots() {
+                    const isImperial = document.getElementById('imperial').checked;
+                    const unit = isImperial ? '°F' : '°C';
+
+                    for (const [region, info] of Object.entries(regions)) {
+                        if (!data[region]) {
+                            console.error(`No data found for region ${region}`);
+                            continue;
+                        }
+
+                        const sstaData = data[region].ssta;
+
+                        // Convert data to arrays for Plotly
+                        const times = Object.keys(sstaData);
+                        const values = Object.values(sstaData).map(v => convertTemperatureAnomaly(v, isImperial));
+
+                        // Calculate 130-day rolling mean
+                        const windowSize = 130;
+                        const rollingMean = [];
+                        for (let i = 0; i < values.length; i++) {
+                            const start = Math.max(0, i - Math.floor(windowSize / 2));
+                            const end = Math.min(values.length, i + Math.floor(windowSize / 2) + 1);
+                            const window = values.slice(start, end);
+                            rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                        }
+
+                        // Create traces
+                        const rawTrace = {
+                            x: times,
+                            y: values,
+                            name: 'Raw Data',
+                            type: 'scatter',
+                            mode: 'lines',
+                            line: { 
+                                color: '#1f77b4',
+                                width: 1
+                            }
+                        };
+
+                        const meanTrace = {
+                            x: times,
+                            y: rollingMean,
+                            name: '130-day Mean',
+                            type: 'scatter',
+                            mode: 'lines',
+                            line: { 
+                                color: '#ff4444',
+                                width: 2
+                            }
+                        };
+
+                        // Create the layout
+                        const layout = {
+                            height: 400,
+                            showlegend: false,
+                            title: {
+                                text: `${info.name}`,
+                                font: { size: 16 },
+                                x: 0.05,
+                                xanchor: 'left',
+                                y: 0.95
+                            },
+                            xaxis: {
+                                title: 'Time',
+                                showgrid: true,
+                                gridcolor: 'lightgray'
+                            },
+                            yaxis: {
+                                title: `Temperature Anomaly (${unit})`,
+                                showgrid: true,
+                                gridcolor: 'lightgray'
+                            },
+                            plot_bgcolor: 'white',
+                            paper_bgcolor: 'white',
+                            font: {
+                                family: 'Inter, sans-serif'
+                            },
+                            margin: { t: 60, b: 50, l: 50, r: 50 }
+                        };
+
+                        // Create the figure
+                        const config = {
+                            responsive: true,
+                            displayModeBar: true,
+                            modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+                            modeBarButtonsToRemove: ['lasso2d']
+                        };
+
+                        Plotly.newPlot(info.container, [rawTrace, meanTrace], layout, config);
+                    }
+                }
+
+                // Initial plot creation
+                updatePlots();
+
+                // Add event listeners for unit changes
+                document.getElementById('imperial').addEventListener('change', updatePlots);
+                document.getElementById('metric').addEventListener('change', updatePlots);
+            } catch (error) {
+                console.error('Error creating time series plots:', error);
+            }
+        }
+
+        // Create the plots when the page loads
+        document.addEventListener('DOMContentLoaded', createTimeSeriesPlot);
+
+        // CTD Profile Plotting
+        async function loadCTDProfiles() {
+            try {
+                // Set start date to August 2024
+                const startDate = '2024-08-01';
+                
+                // Set end date to the last day of the current month
+                const now = new Date();
+                const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+                
+                console.log('Loading profiles from:', startDate, 'to', endDate);
+                
+                const profiles = await loadProfilesMetadata(
+                    startDate,
+                    endDate,
+                    'CTD'
+                );
+
+                // Log the first profile to see its structure
+                if (profiles.length > 0) {
+                    console.log('First profile structure:', profiles[0]);
+                    console.log('Available fields:', Object.keys(profiles[0]));
+                }
+
+                // Load measurement data for each profile
+                const profilesWithData = await Promise.all(
+                    profiles.map(async (profile) => {
+                        // Get profile ID and validate it
+                        const profileId = profile['Profile ID'];
+                        if (!profileId) {
+                            console.error('Missing Profile ID in profile:', profile);
+                            return null;
+                        }
+
+                        console.log('Loading measurements for profile:', profileId);
+                        try {
+                            const measurements = await loadMeasurementData(profileId, 'CTD');
+                            if (!measurements || !measurements.temperature || measurements.temperature.length === 0) {
+                                console.error('No valid measurements for profile:', profileId);
+                                return null;
+                            }
+                            return {
+                                ...profile,  // Include all profile metadata
+                                ...measurements
+                            };
+                        } catch (error) {
+                            console.error('Error loading measurements for profile:', profileId, error);
+                            return null;
+                        }
+                    })
+                );
+
+                // Filter out any failed profile loads
+                const validProfiles = profilesWithData.filter(profile => profile !== null);
+                console.log('Successfully loaded profiles:', validProfiles.length, 'out of', profiles.length);
+
+                if (validProfiles.length === 0) {
+                    console.error('No valid profiles were loaded');
+                    return null;
+                }
+
+                return validProfiles;
+            } catch (error) {
+                console.error('Error loading CTD profiles:', error);
+                return null;
+            }
+        }
+
+        function createMonthlyPlots(data, region) {
+            if (!data || data.length === 0) {
+                console.error('No data available for plotting');
+                return;
+            }
+
+            console.log('Total profiles to process:', data.length);
+            console.log('Sample profile:', data[0]);
+
+            // Filter profiles for the selected region
+            const regionProfiles = data.filter(profile => {
+                const regions = profile.Regions.split(',').map(r => r.trim());
+                return regions.includes(region);
+            });
+
+            console.log(`Found ${regionProfiles.length} profiles in region ${region}`);
+
+            // Group profiles by month and year
+            const monthlyProfiles = {};
+            regionProfiles.forEach(profile => {
+                const date = new Date(profile.Date);
+                const month = date.toLocaleString('default', { month: 'long' });
+                const year = date.getFullYear();
+                const key = `${year}-${month}`;  // Create a key that includes year
+                if (!monthlyProfiles[key]) {
+                    monthlyProfiles[key] = [];
+                }
+                monthlyProfiles[key].push(profile);
+            });
+
+            // Get all months in chronological order
+            const startDate = new Date('2024-08-01');
+            const endDate = new Date();
+            const allMonths = [];
+            
+            // Set the current date to August 2024
+            let currentDate = new Date(startDate);
+            // Ensure we start from August by setting the month explicitly
+            currentDate.setMonth(7); // 7 is August (0-based index)
+            currentDate.setFullYear(2024);
+            
+            while (currentDate <= endDate) {
+                const month = currentDate.toLocaleString('default', { month: 'long' });
+                const year = currentDate.getFullYear();
+                allMonths.push(`${year}-${month}`);
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+
+            // Function to convert units
+            function convertUnits(value, type, toImperial) {
+                if (type === 'temperature') {
+                    return toImperial ? (value * 9/5) + 32 : (value - 32) * 5/9;
+                } else if (type === 'depth') {
+                    return toImperial ? value * 0.546807 : value / 0.546807; // meters to fathoms and vice versa
+                }
+                return value; // Return unchanged for other types
+            }
+
+            // Get current unit system
+            const isImperial = document.getElementById('ctd-imperial').checked;
+            const tempUnit = isImperial ? '°F' : '°C';
+            const depthUnit = isImperial ? 'fathoms' : 'm';
+
+            // Create plots for each variable
+            const variables = {
+                temp: { 
+                    data: 'temperature', 
+                    title: `Temperature (${tempUnit})`,
+                    convert: (v) => convertUnits(v, 'temperature', isImperial)
+                },
+                sal: { 
+                    data: 'salinity', 
+                    title: 'Salinity (PSU)',
+                    convert: (v) => v // No conversion needed for salinity
+                },
+                dens: { 
+                    data: 'density', 
+                    title: 'Density (kg/m³)',
+                    convert: (v) => v // No conversion needed for density
+                }
+            };
+
+            // Get all plot containers
+            const plotContainers = {
+                temp: document.getElementById('temp-plots'),
+                sal: document.getElementById('sal-plots'),
+                dens: document.getElementById('dens-plots')
+            };
+
+            // Add scroll event listeners to synchronize scrolling
+            Object.values(plotContainers).forEach(container => {
+                container.addEventListener('scroll', (e) => {
+                    // Get the scroll position of the scrolled container
+                    const scrollLeft = e.target.scrollLeft;
+                    
+                    // Set the same scroll position for all other containers
+                    Object.values(plotContainers).forEach(otherContainer => {
+                        if (otherContainer !== e.target) {
+                            otherContainer.scrollLeft = scrollLeft;
+                        }
+                    });
+                });
+            });
+
+            Object.entries(variables).forEach(([key, info]) => {
+                const container = document.getElementById(`${key}-plots`);
+                container.innerHTML = ''; // Clear existing plots
+
+                // Create a plot for each month, even if no data
+                allMonths.forEach(monthKey => {
+                    const [year, month] = monthKey.split('-');
+                    const plotDiv = document.createElement('div');
+                    plotDiv.className = 'monthly-plot';
+                    container.appendChild(plotDiv);
+
+                    const profiles = monthlyProfiles[monthKey] || [];
+                    
+                    if (profiles.length === 0) {
+                        // Create empty plot with "No data" message
+                        const layout = {
+                            title: `${month} ${year}`,
+                            xaxis: { 
+                                title: info.title,
+                                range: [0, 1]  // Set a small range for empty plot
+                            },
+                            yaxis: { 
+                                title: `Depth (${depthUnit})`,
+                                range: [0, 1]  // Set a small range for empty plot
+                            },
+                            annotations: [{
+                                text: 'No CTDs collected',
+                                xref: 'paper',
+                                yref: 'paper',
+                                x: 0.5,
+                                y: 0.5,
+                                showarrow: false,
+                                font: {
+                                    size: 16,
+                                    color: 'gray'
+                                }
+                            }],
+                            margin: { t: 40, r: 20, b: 40, l: 60 }
+                        };
+                        Plotly.newPlot(plotDiv, [], layout);
+                    } else {
+                        const traces = profiles.map(profile => ({
+                            y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
+                            x: profile[info.data].map(v => info.convert(v)),
+                            type: 'scatter',
+                            mode: 'lines',
+                            name: new Date(profile.Date).toLocaleDateString(),
+                            line: { width: 1 }
+                        }));
+
+                        const layout = {
+                            title: `${month} ${year}`,
+                            xaxis: { title: info.title },
+                            yaxis: { 
+                                title: `Depth (${depthUnit})`,
+                                autorange: 'reversed'
+                            },
+                            showlegend: false,
+                            margin: { t: 40, r: 20, b: 40, l: 60 }
+                        };
+
+                        Plotly.newPlot(plotDiv, traces, layout);
+                    }
+                });
+            });
+        }
+
+        // Initialize CTD profiles
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Initializing CTD profiles...');
+            const ctdData = await loadCTDProfiles();
+            if (ctdData) {
+                console.log('Successfully loaded CTD data');
+                const regionSelect = document.getElementById('region-select');
+                
+                // Add event listeners for both region and unit changes
+                regionSelect.addEventListener('change', (e) => {
+                    createMonthlyPlots(ctdData, e.target.value);
+                });
+                
+                // Add event listeners for unit changes
+                document.getElementById('ctd-imperial').addEventListener('change', () => {
+                    createMonthlyPlots(ctdData, regionSelect.value);
+                });
+                document.getElementById('ctd-metric').addEventListener('change', () => {
+                    createMonthlyPlots(ctdData, regionSelect.value);
+                });
+                
+                // Initial plot with first region
+                createMonthlyPlots(ctdData, regionSelect.value);
+            } else {
+                console.error('Failed to load CTD data');
+            }
+        });
+
+        // Navigation menu functionality
+        function toggleNavSection(header) {
+            const section = header.parentElement;
+            const content = section.querySelector('.nav-content');
+            const icon = header.querySelector('i');
+            
+            // Toggle active class
+            section.classList.toggle('active');
+            
+            // Toggle content visibility
+            if (section.classList.contains('active')) {
+                content.style.display = 'block';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Initialize navigation menu
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial state of navigation sections
+            document.querySelectorAll('.nav-section').forEach(section => {
+                const content = section.querySelector('.nav-content');
+                const icon = section.querySelector('.nav-header i');
+                
+                if (section.classList.contains('active')) {
+                    content.style.display = 'block';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    content.style.display = 'none';
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+
+            // Add click handlers to all nav headers
+            document.querySelectorAll('.nav-header').forEach(header => {
+                header.addEventListener('click', () => toggleNavSection(header));
+            });
+        });
+    </script>
+</body>
+</html>

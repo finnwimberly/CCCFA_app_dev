@@ -183,7 +183,16 @@ async function selectProfile(id, marker, date) {
 
     if (!marker.getPopup()) {
       const popupContent = generatePopupContent(date, measurements, dataType);
-      marker.bindPopup(popupContent, {autoClose: false, closeOnClick: false}).openPopup();
+      marker.bindPopup(popupContent, {
+        autoClose: false, 
+        closeOnClick: false,
+        offset: [0, -10],  // Offset the popup 10 pixels up from the marker
+        className: 'profile-popup',  // Add a custom class for styling
+        maxWidth: 300,  // Set maximum width
+        maxHeight: 200,  // Set maximum height
+        autoPan: true,  // Automatically pan the map to show the popup
+        keepInView: true  // Keep the popup in view when panning
+      }).openPopup();
     }
   } catch (error) {
     console.error(`Error processing profile ${id}:`, error);
