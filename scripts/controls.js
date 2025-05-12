@@ -359,14 +359,14 @@ $(function () {
           if (ostiaSstSet.has(formattedDate) && 
               ostiaAnomalySet.has(formattedDate) && 
               sstSet.has(formattedDate) && 
-              sssSet.has(formattedDate)) {
+              chloroSet.has(formattedDate)) {
             return 'highlight-all-no-sss';
           }
 
           // Yellow without stripe: All layers except CHL and SST (both OSTIA SSTs and SSS)
           if (ostiaSstSet.has(formattedDate) && 
               ostiaAnomalySet.has(formattedDate) && 
-              sssSet.has(formattedDate)) {
+              chloroSet.has(formattedDate)) {
             return 'highlight-all-no-sss-sst';
           }
 
