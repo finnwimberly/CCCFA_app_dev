@@ -880,10 +880,10 @@ footer {
 
 /* Hide stripe for other classes */
 .highlight-all-no-sst::after,
-.highlight-all-no-chloro-sst::after,
+.highlight-all-no-sss-sst::after,
 .highlight-ostia-only::after,
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
-.daterangepicker .calendar-table td.highlight-all-no-chloro-sst::after,
+.daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
 .daterangepicker .calendar-table td.highlight-ostia-only::after {
   display: none;
 }
@@ -1055,14 +1055,14 @@ footer {
 
 /* Only show stripe for specific classes */
 .daterangepicker .calendar-table td.highlight-all::after,
-.daterangepicker .calendar-table td.highlight-all-no-chloro::after,
+.daterangepicker .calendar-table td.highlight-all-no-sss::after,
 .daterangepicker .calendar-table td.highlight-all-sst::after {
   display: block;
 }
 
 /* Hide stripe for other classes */
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
-.daterangepicker .calendar-table td.highlight-all-no-chloro-sst::after,
+.daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
 .daterangepicker .calendar-table td.highlight-ostia-only::after {
   display: none;
 }

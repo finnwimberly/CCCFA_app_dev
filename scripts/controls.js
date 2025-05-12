@@ -151,8 +151,10 @@ const infoModal = `
       SST anomaly,SSS, and CHL)</li>
       <li><span class="color-block highlight-all-no-sst"></span> All layers except HR SST (gapfilled SST, 
       SST anomaly, SSS and CHL)</li>
-      <li><span class="color-block highlight-all-no-sss"></span> All layers except CHL (HR SST, gapfilled SST, SST anomaly, 
-      and SSS)</li>
+      <li><span class="color-block highlight-all-no-sss"></span> All layers except SSS (HR SST, gapfilled SST, SST anomaly, 
+      and CHL)</li>
+      <li><span class="color-block highlight-all-no-sss-sst"></span> All layers except SSS and HR SST (gapfilled SST, SST anomaly, 
+      and CHL)</li>
       <li><span class="color-block highlight-all-sst"></span> All SST layers but no SSS or CHL</li>
       <li><span class="color-block highlight-ostia-only"></span> Only gapfilled and anomaly SST layers available</li>
     </ul>
