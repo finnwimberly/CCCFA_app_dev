@@ -863,8 +863,8 @@ footer {
 /* Highlight Classes */
 .highlight-all { background-color: #4CAF50; }
 .highlight-all-no-sst { background-color: #4CAF50; }
-.highlight-all-no-chloro { background-color: #FFC107; }
-.highlight-all-no-chloro-sst { background-color: #FFC107; }
+.highlight-all-no-sss { background-color: #FFC107; }
+.highlight-all-no-sss-sst { background-color: #FFC107; }
 .highlight-all-sst { background-color: #FF9800; }
 .highlight-ostia-only { background-color: #FF9800; }
 

@@ -151,7 +151,7 @@ const infoModal = `
       SST anomaly,SSS, and CHL)</li>
       <li><span class="color-block highlight-all-no-sst"></span> All layers except HR SST (gapfilled SST, 
       SST anomaly, SSS and CHL)</li>
-      <li><span class="color-block highlight-all-no-chloro"></span> All layers except CHL (HR SST, gapfilled SST, SST anomaly, 
+      <li><span class="color-block highlight-all-no-sss"></span> All layers except CHL (HR SST, gapfilled SST, SST anomaly, 
       and SSS)</li>
       <li><span class="color-block highlight-all-sst"></span> All SST layers but no SSS or CHL</li>
       <li><span class="color-block highlight-ostia-only"></span> Only gapfilled and anomaly SST layers available</li>
@@ -358,14 +358,14 @@ $(function () {
               ostiaAnomalySet.has(formattedDate) && 
               sstSet.has(formattedDate) && 
               sssSet.has(formattedDate)) {
-            return 'highlight-all-no-chloro';
+            return 'highlight-all-no-sss';
           }
 
           // Yellow without stripe: All layers except CHL and SST (both OSTIA SSTs and SSS)
           if (ostiaSstSet.has(formattedDate) && 
               ostiaAnomalySet.has(formattedDate) && 
               sssSet.has(formattedDate)) {
-            return 'highlight-all-no-chloro-sst';
+            return 'highlight-all-no-sss-sst';
           }
 
           // Orange with stripe: All SSTs but no SSS or CHL (both OSTIAs and SST)
