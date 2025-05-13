@@ -22,19 +22,48 @@
 # 
 # m h  dom mon dow   command
 
-#Download/process new CTD profiles (1x a week)
-0 2 * * 1 /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_CTDs.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CTD_profiles.log 2>&1
-#Download raw SSS data every night
-0 0 * * * /home/finn.wimberly/mambaforge/bin/podaac-data-subscriber -c SMAP_RSS_L3_SSS_SMI_8DAY-RUNNINGMEAN_V6 -d /vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data/ -m 1440 >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_download.log 2>&1
-#Download raw SST data every night
-0 3 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/SST_readin.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SST_download.log 2>&1
-#Download raw ERRDAP profiles to /vast 1x/week
-0 1 * * 1 /home/finn.wimberly/Documents/CCCFA_app_dev/Project/data/run_update_profs.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/update_ERRDAP_profiles.log
 
-#Generate new SSS tiles from new raw SSS files
+#DOWNLOADS:
+
+# Download/process new CTD profiles (1x/week)
+0 2 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_CTDs.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CTD_profiles.log 2>&1
+
+# Download raw SSS data every night at midnight
+0 0 * * * /home/finn.wimberly/mambaforge/bin/podaac-data-subscriber -c SMAP_RSS_L3_SSS_SMI_8DAY-RUNNINGMEAN_V6 -d /vast/clidex/data/obs/SSS/SMAP/SMAP_RSS_v6.0/data/8daily -m 1440 >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_download.log
+
+# Download raw SST data every night at 3 AM
+0 3 * * * /bin/bash /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/SST_readin.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SST_download.log 2>&1
+
+# Download raw ERDDAP profiles to /vast (1x/week) (Svenja's script)
+0 1 * * 1 /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_update_profs.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/ERDDAP_profiles.log 2>&1
+
+#Download chlorophyll-a data every night 
+30 4 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/CHL_readin.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CHL_download.log
+
+#Download OSTIA data every night
+0 6 * * * /home/finn.wimberly/Documents/Misc_data_processing/OSTIA_download.sh  >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/OSTIA_download.log
+
+# Update NOAA PSL climate indices (1st day of each month at 2 AM)
+0 2 5 * * /vast/clidex/data/obs/climate_indices/update_indices_monthly.sh
+
+# Download NOAA OLR data (3rd day of each month at 2:30 AM)
+30 2 3 * * /vast/clidex/data/obs/NOAA_OLR/run_update_NOAA_OLR.sh
+
+
+#TILE GENERATION:
+
+# Generate new SSS tiles from new raw SSS files
 0 4 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_SSS.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_tiles.log 2>&1
-#Generate new SST tiles from new SST files
-0 5 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_SST.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SST_tiles.log 2&>1
 
+# Generate new SST tiles from new SST files
+0 5 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_SST.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SST_tiles.log 2>&1
 
+#Generate new CHL tiles from new CHL data
+30 5 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_CHL.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CHL_tiles.log 2>&1 
+
+#Generate OSTIA SST tiles
+15 6 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_OSTIA.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/OSTIA_tiles.log 2>&1
+
+#Generate OSTIA anomaly tiles
+30 6 * * * /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/run_OSTIA_anomaly.sh >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/OSTIA_anomaly_tiles.log 2>&1
 

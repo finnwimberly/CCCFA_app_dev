@@ -10,9 +10,9 @@ conda activate spyder_salinity
 cd /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/
 
 # Run the Python script and suppress verbose output, keeping only errors and key logs
-python SSS_processing_revised.py >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_tiles.log 2>/dev/null
+python CHL_processing_log.py >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CHL_tiles.log 2>/dev/null
 
 # Deactivate the environment (optional)
 conda deactivate
 
-echo "Script completed at $(date)" >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/SSS_tiles.log
+echo "Script completed at $(date)" >> /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/logs/CHL_tiles.log
