@@ -613,7 +613,7 @@ footer {
   background: var(--surface);
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
-  box-shadow: 0 2px 4px var(--shadow);
+  /* box-shadow: 0 2px 4px var(--shadow); */
   z-index: 1000;
   min-width: 120px;
   max-width: 150px;
