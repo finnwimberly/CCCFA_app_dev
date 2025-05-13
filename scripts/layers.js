@@ -155,6 +155,15 @@ function createLegend(layerType, date) {
   
   const legendContainer = document.getElementById(legendId);
   
+  // Hide all other legend containers first
+  const allLegendContainers = document.querySelectorAll('[id$="-legend"]');
+  allLegendContainers.forEach(container => {
+    if (container.id !== legendId) {
+      container.style.display = 'none';
+      container.innerHTML = ''; // Clear their contents
+    }
+  });
+
   // Determine the active overlay layer
   const overlay = layerType === 'SST' ? sstOverlay 
                  : layerType === 'SSS' ? sssOverlay 
