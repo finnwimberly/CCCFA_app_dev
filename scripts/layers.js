@@ -155,14 +155,29 @@ function createLegend(layerType, date) {
   
   const legendContainer = document.getElementById(legendId);
   
-  // Hide all other legend containers first
+  // Hide all other legend containers first and remove their styling
   const allLegendContainers = document.querySelectorAll('[id$="-legend"]');
   allLegendContainers.forEach(container => {
     if (container.id !== legendId) {
       container.style.display = 'none';
       container.innerHTML = ''; // Clear their contents
+      container.style.background = 'none';
+      container.style.border = 'none';
+      container.style.boxShadow = 'none';
+      container.style.padding = '0';
+      container.style.margin = '0';
     }
   });
+
+  // Reset the current container's styling before creating new content
+  if (legendContainer) {
+    legendContainer.style.background = 'white';
+    legendContainer.style.border = '1px solid #ddd';
+    legendContainer.style.borderRadius = '4px';
+    legendContainer.style.padding = '10px';
+    legendContainer.style.margin = '10px';
+    legendContainer.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+  }
 
   // Determine the active overlay layer
   const overlay = layerType === 'SST' ? sstOverlay 
