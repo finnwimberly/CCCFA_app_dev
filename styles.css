@@ -619,10 +619,41 @@ footer {
   max-width: 150px;
   height: auto;
   min-height: 300px;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* When display is set to block/flex, show the container */
+#sst-legend[style*="display: block"],
+#sss-legend[style*="display: block"],
+#chl-legend[style*="display: block"],
+#ostia-sst-legend[style*="display: block"],
+#ostia-anomaly-legend[style*="display: block"] {
+  display: flex !important;
+  background: var(--surface);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* When display is none, remove all styling */
+#sst-legend[style*="display: none"],
+#sss-legend[style*="display: none"],
+#chl-legend[style*="display: none"],
+#ostia-sst-legend[style*="display: none"],
+#ostia-anomaly-legend[style*="display: none"] {
+  background: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Ensure the Plotly container fills the legend container */
