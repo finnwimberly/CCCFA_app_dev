@@ -1,8 +1,14 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 import pandas as pd
 import os
 
 # Define the URL
-url = 'https://erddap.ondeckdata.com/erddap/tabledap/shelf_fleet_profiles_1m_binned.htmlTable?sea_pressure%2Clatitude%2Clongitude%2Ctemperature%2Cconductivity%2Cchlorophyll%2Cdescent_rate%2Cacceleration%2Cpractical_salinity%2Cabsolute_salinity%2Cconservative_temperature%2Cdensity%2Cprofile_id%2Cproject_id%2Ctime&project_id=%22cccfa_outer_cape%22&time>=2024-08-01T00%3A00%3A00Z'
+url = 'https://erddap.ondeckdata.com/erddap/tabledap/shelf_fleet_profiles_1m_binned.htmlTable?sea_pressure%2Clatitude%2Clongitude%2Ctemperature%2Cconductivity%2Cchlorophyll%2Cdescent_rate%2Cacceleration%2Cpractical_salinity%2Cabsolute_salinity%2Cconservative_temperature%2Cdensity%2Cprofile_id%2Cproject_id%2Ctime&time>=2024-08-01T00%3A00%3A00Z'
 
 # Read the HTML table
 temp_df = pd.read_html(url)
@@ -21,7 +27,8 @@ columns_of_interest = [
     'density_kg/m-3',
     'latitude_degrees_north', 
     'longitude_degrees_east', 
-    'profile_id_Unnamed: 12_level_1'
+    'profile_id_Unnamed: 12_level_1',
+    'project_id_Unnamed: 13_level_1'
 ]
 
 # Group the data by profile_id and create a DataFrame for each
@@ -43,12 +50,15 @@ for profile in df['profile_id_Unnamed: 12_level_1'].unique():
     date_str = profile.split('_')[2]  # Extract '20240912'
     date_formatted = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"  # Format as 'YYYY-MM-DD'
 
+    group = df_filtered['project_id_Unnamed: 13_level_1'].iloc[0]
+
     # Store metadata in a separate dictionary or variable
     metadata[profile] = {
         'Latitude': latitude,
         'Longitude': longitude,
         'Profile ID': profile,
-        'Date': date_formatted  # Add the date to the metadata
+        'Date': date_formatted,
+        'Group' : group
     }
 
     # Store the measurements DataFrame in the dictionary
@@ -58,28 +68,65 @@ for profile in df['profile_id_Unnamed: 12_level_1'].unique():
 output_dir = '/vast/clidex/data/obs/CCCFA/processed_data/CTD_profiles'
 os.makedirs(output_dir, exist_ok=True)
 
-# Create a list to store metadata entries
+#Define regions
+region_bounds = {
+    'GoM': {'lat': [42, 44], 'lon': [-71, -68]},      # Gulf of Maine
+    'OC':  {'lat': [41.5, 42.3], 'lon': [-70, -69.5]},  # Outer Cape
+    'RI':  {'lat': [40.5, 41.5], 'lon': [-72, -70.75]}, # Rhode Island
+    'NJ':  {'lat': [39.25, 40.25], 'lon': [-74.5, -73]} # New Jersey
+}
+
+# # Function to determine region based on coordinates
+# def get_region(lat, lon):
+#     for region, bounds in region_bounds.items():
+#         if (bounds['lat'][0] <= lat <= bounds['lat'][1] and 
+#             bounds['lon'][0] <= lon <= bounds['lon'][1]):
+#             return region
+#     return 'Unknown'
+
+# Updated function to return all matching regions
+def get_regions(lat, lon):
+    matching_regions = []
+    for region, bounds in region_bounds.items():
+        if (bounds['lat'][0] <= lat <= bounds['lat'][1] and 
+            bounds['lon'][0] <= lon <= bounds['lon'][1]):
+            matching_regions.append(region)
+    return matching_regions if matching_regions else ['Unknown']
+
+# Prepare metadata list
 metadata_list = []
 
-# Save each profile's data and gather metadata
 for profile in processed_data.keys():
-    # Save the measurements DataFrame to a CSV file
-    measurements_df = processed_data[profile]
-    measurements_filename = f"{output_dir}/{profile}_measurements.csv"
-    measurements_df.to_csv(measurements_filename, index=True)
-
-    # Append metadata to the list
+    lat = metadata[profile]['Latitude']
+    lon = metadata[profile]['Longitude']
+    
+    # Determine regions (can be multiple)
+    regions = get_regions(lat, lon)
+    regions_str = ', '.join(regions)
+    
+    # Get month from date
+    date = metadata[profile]['Date']
+    month = pd.to_datetime(date).strftime('%B')
+    
+    # File path for the measurement CSV
+    file_path = f"{output_dir}/{profile}_measurements.csv"
+    
+    # Save measurements CSV
+    processed_data[profile].to_csv(file_path)
+    
+    # Add metadata entry
     metadata_list.append({
         'Profile ID': profile,
-        'Latitude': metadata[profile]['Latitude'],
-        'Longitude': metadata[profile]['Longitude'],
-        'Date' : metadata[profile]['Date'],
-        'File Name': measurements_filename
+        'Latitude': lat,
+        'Longitude': lon,
+        'Date': date,
+        'Group': metadata[profile]['Group'],
+        'Regions': regions_str,  # Note plural here
+        'Month': month,
+        'File Name': file_path
     })
 
-# Create a DataFrame from the metadata list
+# Save combined metadata CSV
 metadata_df = pd.DataFrame(metadata_list)
-
-# Save the metadata DataFrame to a CSV file
 metadata_filename = f"{output_dir}/metadata.csv"
 metadata_df.to_csv(metadata_filename, index=False)
