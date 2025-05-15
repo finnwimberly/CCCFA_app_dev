@@ -72,17 +72,10 @@ os.makedirs(output_dir, exist_ok=True)
 region_bounds = {
     'GoM': {'lat': [42, 44], 'lon': [-71, -68]},      # Gulf of Maine
     'OC':  {'lat': [41.5, 42.3], 'lon': [-70, -69.5]},  # Outer Cape
+    'IC':  {'lat': [41.7, 42.33], 'lon': [-70.5, -70]},  # Outer Cape
     'RI':  {'lat': [40.5, 41.5], 'lon': [-72, -70.75]}, # Rhode Island
     'NJ':  {'lat': [39.25, 40.25], 'lon': [-74.5, -73]} # New Jersey
 }
-
-# # Function to determine region based on coordinates
-# def get_region(lat, lon):
-#     for region, bounds in region_bounds.items():
-#         if (bounds['lat'][0] <= lat <= bounds['lat'][1] and 
-#             bounds['lon'][0] <= lon <= bounds['lon'][1]):
-#             return region
-#     return 'Unknown'
 
 # Updated function to return all matching regions
 def get_regions(lat, lon):
