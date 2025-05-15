@@ -176,7 +176,7 @@ function createLegend(layerType, date) {
     legendContainer.style.borderRadius = '4px';
     legendContainer.style.padding = '10px';
     legendContainer.style.margin = '10px';
-    legendContainer.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+    legendContainer.style.boxShadow = '0 2px 4px rgba(0,0,0,0)';
   }
 
   // Determine the active overlay layer
