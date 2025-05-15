@@ -387,6 +387,7 @@ footer {
   .logos {
     -webkit-box-align: center;
     -webkit-align-items: center;
+    align-items: center;
   }
   
   /* Fix for Safari transform issues */
@@ -631,7 +632,7 @@ footer {
 #chl-legend .plotly,
 #ostia-sst-legend .plotly,
 #ostia-anomaly-legend .plotly {
-  width: 100% !important;
+  width: 40% !important;
   height: 100% !important;
 }
 
