@@ -627,13 +627,35 @@ footer {
 }
 
 /* Ensure the Plotly container fills the legend container */
+/* #sst-legend .plotly,
+#sss-legend .plotly,
+#chl-legend .plotly,
+#ostia-sst-legend .plotly,
+#ostia-anomaly-legend .plotly {
+  width: 120px !important;
+  height: 280px !important;
+  overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+} */
+
+/* Ensure the Plotly container respects the legend bounds */
 #sst-legend .plotly,
 #sss-legend .plotly,
 #chl-legend .plotly,
 #ostia-sst-legend .plotly,
 #ostia-anomaly-legend .plotly {
-  width: 40% !important;
-  height: 100% !important;
+  width: 100%; /* Ensure it scales with the parent */
+  max-width: 120px; /* Constrain to legend width */
+  height: 100%; /* Ensure it scales with the parent */
+  max-height: 280px; /* Constrain to legend height */
+  overflow: hidden; /* Prevent content overflow */
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
 }
 
 /* Adjust legend container for mobile */
