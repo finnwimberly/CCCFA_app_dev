@@ -514,19 +514,13 @@ document.getElementById('ostia-anomaly-toggle').addEventListener('change', () =>
 document.getElementById('sss-toggle').addEventListener('change', () => toggleLayer('SSS'));
 document.getElementById('chl-toggle').addEventListener('change', () => toggleLayer('CHL'));
 
-// Bathymetry toggle listener 
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the bathymetry toggle element
-    const bathymetryToggle = document.getElementById('bathymetry-toggle');
-
-    // Automatically check the toggle
-    if (bathymetryToggle) {
-        bathymetryToggle.checked = true;
-
-        // Trigger the logic to display the bathymetry layer
-        // Assuming there's a function that handles this
-        bathymetryToggle.dispatchEvent(new Event('change'));
-    }
+// // Bathymetry toggle listener 
+document.getElementById('bathymetry-toggle').addEventListener('change', (event) => {
+  if (event.target.checked) {
+    map.addLayer(bathymetryLayer);
+  } else {
+    map.removeLayer(bathymetryLayer);
+  }
 });
 
 // Initialize plots after controls are added
