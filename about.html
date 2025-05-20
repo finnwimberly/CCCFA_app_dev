@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y8VTYMEZFJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Y8VTYMEZFJ');
+  </script>
+  
+  <title>About - Cape Cod Ocean</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Add Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- External Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="title">
+        <h1>Observing the Cape Cod Ocean</h1>
+    </div>
+  
+    <div class="logos">
+        <a href="https://capecodfishermen.org/" target="_blank">
+            <img src="/logos/CCCFA_logo-removebg-preview.png" alt="Cape Cod Commercial Fishermen's Alliance Logo" class="cccfa-logo">
+        </a>
+        <a href="https://www.cfrfoundation.org" target="_blank">
+            <img src="/logos/CFRF_logo.png" alt="CFRF Logo" class="cfrf-logo">
+        </a>
+        <a href="https://seagrant.whoi.edu/" target="_blank">
+            <img src="/logos/seagrant_logo.png" alt="Sea Grant Logo" class="seagrant-logo">
+        </a>
+        <a href="https://www.whoi.edu/" target="_blank">
+            <img src="/logos/WHOI_Tagline-Logo-1.png" alt="Woods Hole Oceanographic Institution Logo" class="whoi-logo">
+        </a>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <ul>
+        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="index.html">Mapped Profiles</a></li>
+        <li><a href="time.html">Monthly Summaries</a></li>
+        <li><a href="data-access.html">Data Access</a></li>
+    </ul>
+  </nav>
+
+  <main class="content-container" style="max-width: 95%;">
+    <section class="data-card">
+      <h2>About the Project</h2>
+      <p>
+        A collaboration between the Cape Cod Commercial Fishermen's Alliance (<a href="https://capecodfishermen.org/">CCCFA</a>), 
+        Commercial Fisheries Research Foundation (<a href="https://www.cfrfoundation.org/">CFRF</a>), and the Woods 
+        Hole Oceanographic Institution (<a href="https://www.whoi.edu/">WHOI</a>) supports joint observational efforts to study oceanographic conditions around Cape Cod 
+        and the broader continental shelf. This partnership aims to enhance our understanding of the connections between 
+        oceanographic and fishing conditions. 
+      </p>
+      <p>
+        Since August 2024, fishermen have been equipped with CTD (Conductivity-Temperature-Depth) sensors, which can be 
+        deployed from their vessels to provide profiles of ocean temperature, salinity, and density throughout the water 
+        column at various locations off the Cape Cod coast. The CFRF's eMOLT (Environmental Monitors on Lobster Traps and Large 
+        Trawlers) program has attached temperature sensors to fishing equipment, providing an additional large data set of temperature profiles
+        all throughout the region.  
+      </p>
+      <p>
+        This website provides an interactive tool to visualize the collected data while also providing additional information 
+        about current conditions, such as maps of sea surface temperature and salinity in the region, measured by satellite.
+      </p>
+    </section>
+
+    <section class="data-card">
+      <h2>Available Features</h2>
+      <p>Navigate to the subpages to do the following:</p>
+
+        <ul class="data-list">
+            <li><strong><span class="emoji">📍</span> Mapped Profiles:</strong> Use our interactive map to examine 
+              where CTD and eMOLT profiles have been taken; generate plots of the salinity, temperature, and density 
+              measurements; and overlay satellite imagery of sea surface temperature obervations, temperature anomalies, 
+              salinity values, and Chlorophyll-a concentrations.</li>
+            
+            <li><strong><span class="emoji">⏰</span> Time Series:</strong> See monthly averages for sea surface 
+              temperature values, surface temperature anomalies, saliniy values, and Chlorophyll-a concentrations;
+              examine year-to-year temperature changes in the cape cod ocean; and explore ctd profiles from each month 
+              of observations for 5 areas in the Cape's waters.</li>
+
+            <li><strong><span class="emoji">📈</span> Data Acess:</strong> Access descriptions of and hyperlinks to all 
+            data sets used by the website.</li>
+        </ul>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-section left">
+        For data questions: 
+        <a href="mailto:finn.wimberly@whoi.edu">finn.wimberly@whoi.edu</a>
+      </div>
+      <div class="footer-section center">
+        All code available @
+        <a href="https://github.com/finnwimberly/CCCFA_app_dev" target="_blank">
+          <img src="/logos/GitHub-Mark-removebg-preview.png" alt="GitHub">
+        </a>
+      </div>
+      <div class="footer-section right">
+        For science questions: 
+        <a href="mailto:svenja.ryan@whoi.edu">sryan@whoi.edu</a>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+    .content-container {
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 95%;
+      box-sizing: border-box;
+    }
+  </style>
+</body>
+</html> 
