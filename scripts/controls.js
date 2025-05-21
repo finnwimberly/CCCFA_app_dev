@@ -286,313 +286,152 @@ async function fetchAvailableDates(filePath) {
   }
 }
 
-// Add event listeners for profile source checkboxes
-const sourceToggles = {
-    'EMOLT': 'emolt-toggle',
-    'CCCFA': 'cccfa-toggle',
-    'CFRF': 'cfrf-toggle'
-};
+// Unified checkbox handler function
+function setupCheckboxToggle(id, onChangeCallback) {
+    const checkbox = document.getElementById(id);
+    if (!checkbox) return;
 
-Object.entries(sourceToggles).forEach(([sourceType, toggleId]) => {
-    const toggle = document.getElementById(toggleId);
-    if (toggle) {
-        // Use both mousedown and change events for better Safari support
-        toggle.addEventListener('mousedown', (event) => {
-            console.log('mousedown event on source toggle:', toggleId);
-            event.preventDefault(); // Prevent default to handle state ourselves
-            const newState = !toggle.checked;
-            toggle.checked = newState;
-            console.log('New state for', toggleId, ':', newState);
+    // Change event (standard for most browsers)
+    checkbox.addEventListener('change', (event) => {
+        onChangeCallback(event, checkbox.checked);
+    });
+
+    // Mousedown fallback for Safari
+    checkbox.addEventListener('mousedown', (event) => {
+        // Safari fix: manually toggle state
+        if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+            event.preventDefault();
+            checkbox.checked = !checkbox.checked;
+            onChangeCallback(event, checkbox.checked);
+        }
+    });
+}
+
+// Layer toggle functionality - refactored to use a single function
+function toggleLayer(layerType, event, isChecked) {
+    console.log('toggleLayer called for:', layerType, 'checked:', isChecked);
+  
+    // Define the layer types and their corresponding elements
+    const layerTypes = {
+        'SST': {
+            overlay: sstOverlay,
+            toggleId: 'sst-toggle',
+            legendId: 'sst-legend'
+        },
+        'OSTIA_SST': {
+            overlay: ostiaSstOverlay,
+            toggleId: 'ostia-sst-toggle',
+            legendId: 'ostia-sst-legend'
+        },
+        'OSTIA_anomaly': {
+            overlay: ostiaAnomalyOverlay,
+            toggleId: 'ostia-anomaly-toggle',
+            legendId: 'ostia-anomaly-legend'
+        },
+        'SSS': {
+            overlay: sssOverlay,
+            toggleId: 'sss-toggle',
+            legendId: 'sss-legend'
+        },
+        'CHL': {
+            overlay: chlOverlay,
+            toggleId: 'chl-toggle',
+            legendId: 'chl-legend'
+        }
+    };
+  
+    if (isChecked) {
+        // Check if a layer date is selected
+        if (!tileDate) {
+            // Uncheck the toggle
+            document.getElementById(layerTypes[layerType].toggleId).checked = false;
+            
+            // Show the layer date modal
+            document.getElementById('layer-date-overlay').style.display = 'block';
+            document.getElementById('layer-date-modal').style.display = 'block';
+            
+            return;
+        }
+
+        // Deactivate other layer types
+        Object.keys(layerTypes).forEach(type => {
+            if (type !== layerType) {
+                const toggle = document.getElementById(layerTypes[type].toggleId);
+                if (toggle.checked) {
+                    toggle.checked = false;
+                    map.removeLayer(layerTypes[type].overlay);
+                    document.getElementById(layerTypes[type].legendId).style.display = 'none';
+                    if (activeLayerType === type) {
+                        activeLayerType = null;
+                    }
+                }
+            }
         });
         
-        toggle.addEventListener('change', (event) => {
-            console.log('change event on source toggle:', toggleId, 'checked:', event.target.checked);
-        });
+        // Update layer paths before activating the layer
+        updateLayerPaths(tileDate);
+        
+        // Activate selected layer
+        map.addLayer(layerTypes[layerType].overlay);
+        document.getElementById(layerTypes[layerType].legendId).style.display = 'block';
+        activeLayerType = layerType;
+        createLegend(layerType, tileDate);
+    } else {
+        // Deactivate selected layer
+        map.removeLayer(layerTypes[layerType].overlay);
+        document.getElementById(layerTypes[layerType].legendId).style.display = 'none';
+        if (activeLayerType === layerType) {
+            activeLayerType = null;
+        }
+    }
+}
+
+// Setup layer toggles
+setupCheckboxToggle('sst-toggle', (event, checked) => toggleLayer('SST', event, checked));
+setupCheckboxToggle('ostia-sst-toggle', (event, checked) => toggleLayer('OSTIA_SST', event, checked));
+setupCheckboxToggle('ostia-anomaly-toggle', (event, checked) => toggleLayer('OSTIA_anomaly', event, checked));
+setupCheckboxToggle('sss-toggle', (event, checked) => toggleLayer('SSS', event, checked));
+setupCheckboxToggle('chl-toggle', (event, checked) => toggleLayer('CHL', event, checked));
+setupCheckboxToggle('bathymetry-toggle', (event, checked) => {
+    if (checked) {
+        map.addLayer(bathymetryLayer);
+    } else {
+        map.removeLayer(bathymetryLayer);
     }
 });
 
-$(function () {
-    // Paths for SST, SSS, and Chloro dates
-    const sstDatesPath = '../data/SST/sst_dates.txt';
-    const sssDatesPath = '../data/SSS/sss_dates.txt';
-    const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
-    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+// Setup profile source toggles
+setupCheckboxToggle('emolt-toggle', () => {});
+setupCheckboxToggle('cccfa-toggle', () => {});
+setupCheckboxToggle('cfrf-toggle', () => {});
 
-    // Fetch available dates for highlighting
-    Promise.all([
-        fetchAvailableDates(sstDatesPath),
-        fetchAvailableDates(sssDatesPath),
-        fetchAvailableDates(chloroDatesPath),
-        fetchAvailableDates(ostiaSstDatesPath),
-        fetchAvailableDates(ostiaAnomalyDatesPath)
-    ])
-    .then(([sstDates, sssDates, chloroDates, ostiaSstDates, ostiaAnomalyDates]) => {
-        const sstSet = new Set(sstDates);
-        const sssSet = new Set(sssDates);
-        const chloroSet = new Set(chloroDates);
-        const ostiaSstSet = new Set(ostiaSstDates);
-        const ostiaAnomalySet = new Set(ostiaAnomalyDates);
-        const allDatesSet = new Set([...sstDates, ...sssDates, ...chloroDates, ...ostiaSstDates, ...ostiaAnomalyDates]);
-
-        // Initialize the date range picker for profiles
-        $('#daterange').daterangepicker({
-            opens: 'right',  // Open aligned to the right side
-            maxDate: moment().format("MM/DD/YYYY"),
-            startDate: '08/01/2024',
-            endDate: moment().format("MM/DD/YYYY"),
-            showDropdowns: true,  // Allow year/month dropdown selection
-            autoApply: true,  // Apply the selection immediately
-            ranges: {
-                'Last 30 Days': [moment().subtract(30, 'days'), moment()],
-                'Last 60 Days': [moment().subtract(60, 'days'), moment()],
-                'Last 90 Days': [moment().subtract(90, 'days'), moment()],
-                'All Available Data': ['08/01/2024', moment()]
-            }
-        });
-
-        // Initialize the layer date picker
-        $('#layer-date').daterangepicker({
-                opens: 'left',
-                maxDate: moment().format("MM/DD/YYYY"),
-            singleDatePicker: true,
-          autoApply: true,
-          showDropdowns: true,
-                isInvalidDate: function (date) {
-                    const formattedDate = date.format('YYYY-MM-DD');
-                    return !allDatesSet.has(formattedDate);
-                },
-                isCustomDate: function (date) {
-                    const formattedDate = date.format('YYYY-MM-DD');
-
-            // Green with stripe: All layers (both OSTIA SSTs, SST, SSS, and CHL)
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate) && 
-                sstSet.has(formattedDate) && 
-                sssSet.has(formattedDate) && 
-                chloroSet.has(formattedDate)) {
-              return 'highlight-all';
-            }
-
-            // Green without stripe: All layers except SST (both OSTIA SSTs, SSS, and CHL)
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate) && 
-                sssSet.has(formattedDate) && 
-                chloroSet.has(formattedDate)) {
-              return 'highlight-all-no-sst';
-            }
-
-            // Yellow with stripe: All layers except CHL (both OSTIA SSTs, SST, and SSS)
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate) && 
-                sstSet.has(formattedDate) && 
-                chloroSet.has(formattedDate)) {
-              return 'highlight-all-no-sss';
-            }
-
-            // Yellow without stripe: All layers except CHL and SST (both OSTIA SSTs and SSS)
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate) && 
-                chloroSet.has(formattedDate)) {
-              return 'highlight-all-no-sss-sst';
-            }
-
-            // Orange with stripe: All SSTs but no SSS or CHL (both OSTIAs and SST)
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate) && 
-                sstSet.has(formattedDate)) {
-              return 'highlight-all-sst';
-            }
-
-            // Orange without stripe: Both OSTIAs but no SST, SSS, or CHL
-            if (ostiaSstSet.has(formattedDate) && 
-                ostiaAnomalySet.has(formattedDate)) {
-              return 'highlight-ostia-only';
-                      }
-              
-              return ''; // No highlight
-          }
-      });
-
-      // Add callback for date selection
-      $('#layer-date').on('apply.daterangepicker', function(ev, picker) {
-        const date = picker.startDate;
-          const year = date.year();
-          const dayOfYear = date.dayOfYear().toString().padStart(3, '0');
-          const layerDate = `${year}_${dayOfYear}`;
-          updateLayerPaths(layerDate);
-      });
-
-      // Apply Filters button
-      document.getElementById('apply-filters').addEventListener('click', function() {
-          const dateRange = $('#daterange').data('daterangepicker');
-          // Format dates in ISO format (YYYY-MM-DD) for consistent handling
-          const startDate = dateRange.startDate.format('YYYY-MM-DD');
-          const endDate = dateRange.endDate.format('YYYY-MM-DD');
-          
-          // Get selected sources
-          const selectedSources = [];
-          if (document.getElementById('emolt-toggle').checked) {
-              selectedSources.push('EMOLT');
-          }
-          if (document.getElementById('cccfa-toggle').checked) {
-              selectedSources.push('cccfa_outer_cape');
-          }
-          if (document.getElementById('cfrf-toggle').checked) {
-              selectedSources.push('shelf_research_fleet');
-          }
-          
-          console.log('Applying filters with dates:', startDate, 'to', endDate);
-          console.log('Selected sources:', selectedSources);
-          
-          // Call loadProfiles with date range and sources
-          loadProfiles(startDate, endDate, selectedSources);
-      });
-    })
-    .catch(error => console.error('Error loading available dates:', error));
+// Apply Filters button
+document.getElementById('apply-filters').addEventListener('click', function() {
+    const dateRange = $('#daterange').data('daterangepicker');
+    // Format dates in ISO format (YYYY-MM-DD) for consistent handling
+    const startDate = dateRange.startDate.format('YYYY-MM-DD');
+    const endDate = dateRange.endDate.format('YYYY-MM-DD');
+    
+    // Get selected sources
+    const selectedSources = [];
+    if (document.getElementById('emolt-toggle').checked) {
+        selectedSources.push('EMOLT');
+    }
+    if (document.getElementById('cccfa-toggle').checked) {
+        selectedSources.push('cccfa_outer_cape');
+    }
+    if (document.getElementById('cfrf-toggle').checked) {
+        selectedSources.push('shelf_research_fleet');
+    }
+    
+    console.log('Applying filters with dates:', startDate, 'to', endDate);
+    console.log('Selected sources:', selectedSources);
+    
+    // Call loadProfiles with date range and sources
+    loadProfiles(startDate, endDate, selectedSources);
 });
 
 let activeLayerType = null; // Track the currently active layer
-
-// Layer toggle functionality - refactored to use a single function
-function toggleLayer(layerType, event) {
-  console.log('toggleLayer called for:', layerType, 'event:', event);
-  
-  // Define the layer types and their corresponding elements
-  const layerTypes = {
-    'SST': {
-      overlay: sstOverlay,
-      toggleId: 'sst-toggle',
-      legendId: 'sst-legend'
-    },
-    'OSTIA_SST': {
-      overlay: ostiaSstOverlay,
-      toggleId: 'ostia-sst-toggle',
-      legendId: 'ostia-sst-legend'
-    },
-    'OSTIA_anomaly': {
-      overlay: ostiaAnomalyOverlay,
-      toggleId: 'ostia-anomaly-toggle',
-      legendId: 'ostia-anomaly-legend'
-    },
-    'SSS': {
-      overlay: sssOverlay,
-      toggleId: 'sss-toggle',
-      legendId: 'sss-legend'
-    },
-    'CHL': {
-      overlay: chlOverlay,
-      toggleId: 'chl-toggle',
-      legendId: 'chl-legend'
-    }
-  };
-  
-  // Get the toggle element that triggered the event
-  const activeToggle = document.getElementById(layerTypes[layerType].toggleId);
-  console.log('Active toggle element:', activeToggle);
-  console.log('Current checked state:', activeToggle.checked);
-  
-  // Force the checked state to be the opposite of current state
-  const newCheckedState = !activeToggle.checked;
-  activeToggle.checked = newCheckedState;
-  console.log('New checked state:', activeToggle.checked);
-  
-  if (newCheckedState) {
-    // Check if a layer date is selected
-    if (!tileDate) {
-      // Uncheck the toggle
-      activeToggle.checked = false;
-      
-      // Show the layer date modal
-      document.getElementById('layer-date-overlay').style.display = 'block';
-      document.getElementById('layer-date-modal').style.display = 'block';
-      
-      return;
-    }
-
-    // Deactivate other layer types
-    Object.keys(layerTypes).forEach(type => {
-      if (type !== layerType) {
-        const toggle = document.getElementById(layerTypes[type].toggleId);
-        if (toggle.checked) {
-          toggle.checked = false;
-          map.removeLayer(layerTypes[type].overlay);
-          document.getElementById(layerTypes[type].legendId).style.display = 'none';
-          if (activeLayerType === type) {
-            activeLayerType = null;
-          }
-        }
-      }
-    });
-    
-    // Update layer paths before activating the layer
-    updateLayerPaths(tileDate);
-    
-    // Activate selected layer
-    map.addLayer(layerTypes[layerType].overlay);
-    document.getElementById(layerTypes[layerType].legendId).style.display = 'block';
-    activeLayerType = layerType;
-    createLegend(layerType, tileDate);
-  } else {
-    // Deactivate selected layer
-    map.removeLayer(layerTypes[layerType].overlay);
-    document.getElementById(layerTypes[layerType].legendId).style.display = 'none';
-    if (activeLayerType === layerType) {
-      activeLayerType = null;
-    }
-  }
-}
-
-// Add event listeners for layer toggles
-const layerToggles = {
-  'SST': 'sst-toggle',
-  'OSTIA_SST': 'ostia-sst-toggle',
-  'OSTIA_anomaly': 'ostia-anomaly-toggle',
-  'SSS': 'sss-toggle',
-  'CHL': 'chl-toggle'
-};
-
-Object.entries(layerToggles).forEach(([layerType, toggleId]) => {
-  const toggle = document.getElementById(toggleId);
-  if (toggle) {
-    // Use both mousedown and change events for better Safari support
-    toggle.addEventListener('mousedown', (event) => {
-      console.log('mousedown event on:', toggleId);
-      event.preventDefault(); // Prevent default to handle state ourselves
-      toggleLayer(layerType, event);
-    });
-    
-    toggle.addEventListener('change', (event) => {
-      console.log('change event on:', toggleId);
-      toggleLayer(layerType, event);
-    });
-  }
-});
-
-// Bathymetry toggle listener 
-const bathymetryToggle = document.getElementById('bathymetry-toggle');
-if (bathymetryToggle) {
-  bathymetryToggle.addEventListener('mousedown', (event) => {
-    console.log('mousedown event on bathymetry toggle');
-    event.preventDefault();
-    const newState = !bathymetryToggle.checked;
-    bathymetryToggle.checked = newState;
-    if (newState) {
-      map.addLayer(bathymetryLayer);
-    } else {
-      map.removeLayer(bathymetryLayer);
-    }
-  });
-  
-  bathymetryToggle.addEventListener('change', (event) => {
-    console.log('change event on bathymetry toggle');
-    if (event.target.checked) {
-      map.addLayer(bathymetryLayer);
-    } else {
-      map.removeLayer(bathymetryLayer);
-    }
-  });
-}
 
 // Initialize plots after controls are added
 initializePlots();
