@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible v7 active');
+console.log('Controls.js loaded - Safari-compatible legend toggle');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -360,7 +360,10 @@ function toggleLayer(layerType, event, isChecked) {
                 if (toggle.checked) {
                     toggle.checked = false;
                     map.removeLayer(layerTypes[type].overlay);
-                    document.getElementById(layerTypes[type].legendId).style.display = 'none';
+                    const legendElement = document.getElementById(layerTypes[type].legendId);
+                    if (legendElement) {
+                        legendElement.style.display = 'none';
+                    }
                     if (activeLayerType === type) {
                         activeLayerType = null;
                     }
@@ -373,13 +376,19 @@ function toggleLayer(layerType, event, isChecked) {
         
         // Activate selected layer
         map.addLayer(layerTypes[layerType].overlay);
-        document.getElementById(layerTypes[layerType].legendId).style.display = 'block';
+        const legendElement = document.getElementById(layerTypes[layerType].legendId);
+        if (legendElement) {
+            legendElement.style.display = 'block';
+        }
         activeLayerType = layerType;
         createLegend(layerType, tileDate);
     } else {
         // Deactivate selected layer
         map.removeLayer(layerTypes[layerType].overlay);
-        document.getElementById(layerTypes[layerType].legendId).style.display = 'none';
+        const legendElement = document.getElementById(layerTypes[layerType].legendId);
+        if (legendElement) {
+            legendElement.style.display = 'none';
+        }
         if (activeLayerType === layerType) {
             activeLayerType = null;
         }
