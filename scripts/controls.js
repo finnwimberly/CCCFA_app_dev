@@ -538,6 +538,8 @@ style.textContent = `
         width: 280px;
         max-height: 80vh;
         overflow-y: auto;
+        -webkit-user-select: none;
+        user-select: none;
     }
 
     .control-section {
@@ -583,11 +585,54 @@ style.textContent = `
 
     .checkbox-group {
         margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        margin: 0;
+        position: relative;
+        cursor: pointer;
+        background-color: white;
+    }
+
+    .checkbox-group input[type="checkbox"]:checked {
+        background-color: var(--secondary);
+        border-color: var(--secondary);
+    }
+
+    .checkbox-group input[type="checkbox"]:checked::after {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 1px;
+        width: 6px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .checkbox-group input[type="checkbox"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
     }
 
     .control-label {
         font-size: 12px;
         color: var(--text-secondary);
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .collapsible-header {
@@ -596,6 +641,7 @@ style.textContent = `
         align-items: center;
         cursor: pointer;
         padding: 4px 0;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .sub-header {
@@ -633,6 +679,7 @@ style.textContent = `
         border-radius: 4px;
         cursor: pointer;
         transition: background-color 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .control-button:last-child {
