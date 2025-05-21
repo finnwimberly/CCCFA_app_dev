@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - layer legend safari removal');
+console.log('Controls.js loaded - layer legend safari removal v2');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -339,6 +339,9 @@ function toggleLayer(layerType, event, isChecked) {
             legendId: 'chl-legend'
         }
     };
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    console.log('Is Safari:', isSafari);
   
     if (isChecked) {
         // Check if a layer date is selected
@@ -361,7 +364,17 @@ function toggleLayer(layerType, event, isChecked) {
                     map.removeLayer(layerTypes[type].overlay);
                     const legendElement = document.getElementById(layerTypes[type].legendId);
                     if (legendElement) {
-                        legendElement.style.display = 'none';
+                        console.log('Hiding legend for:', type);
+                        if (isSafari) {
+                            // For Safari, try multiple approaches
+                            legendElement.style.display = 'none';
+                            legendElement.style.visibility = 'hidden';
+                            legendElement.style.opacity = '0';
+                            legendElement.style.position = 'absolute';
+                            legendElement.style.pointerEvents = 'none';
+                        } else {
+                            legendElement.style.display = 'none';
+                        }
                     }
                     if (activeLayerType === type) {
                         activeLayerType = null;
@@ -377,7 +390,17 @@ function toggleLayer(layerType, event, isChecked) {
         map.addLayer(layerTypes[layerType].overlay);
         const legendElement = document.getElementById(layerTypes[layerType].legendId);
         if (legendElement) {
-            legendElement.style.display = 'block';
+            console.log('Showing legend for:', layerType);
+            if (isSafari) {
+                // Reset all Safari-specific styles
+                legendElement.style.display = 'block';
+                legendElement.style.visibility = 'visible';
+                legendElement.style.opacity = '1';
+                legendElement.style.position = '';
+                legendElement.style.pointerEvents = '';
+            } else {
+                legendElement.style.display = 'block';
+            }
         }
         activeLayerType = layerType;
         createLegend(layerType, tileDate);
@@ -386,7 +409,17 @@ function toggleLayer(layerType, event, isChecked) {
         map.removeLayer(layerTypes[layerType].overlay);
         const legendElement = document.getElementById(layerTypes[layerType].legendId);
         if (legendElement) {
-            legendElement.style.display = 'none';
+            console.log('Hiding legend for:', layerType);
+            if (isSafari) {
+                // For Safari, try multiple approaches
+                legendElement.style.display = 'none';
+                legendElement.style.visibility = 'hidden';
+                legendElement.style.opacity = '0';
+                legendElement.style.position = 'absolute';
+                legendElement.style.pointerEvents = 'none';
+            } else {
+                legendElement.style.display = 'none';
+            }
         }
         if (activeLayerType === layerType) {
             activeLayerType = null;
