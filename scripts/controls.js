@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible v2 active');
+console.log('Controls.js loaded - Safari-compatible v3 active');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -431,6 +431,8 @@ let activeLayerType = null; // Track the currently active layer
 
 // Layer toggle functionality - refactored to use a single function
 function toggleLayer(layerType, event) {
+  console.log('toggleLayer called for:', layerType, 'event:', event);
+  
   // Define the layer types and their corresponding elements
   const layerTypes = {
     'SST': {
@@ -462,13 +464,15 @@ function toggleLayer(layerType, event) {
   
   // Get the toggle element that triggered the event
   const activeToggle = document.getElementById(layerTypes[layerType].toggleId);
+  console.log('Active toggle element:', activeToggle);
+  console.log('Current checked state:', activeToggle.checked);
   
-  // For Safari, we need to manually toggle the checked state
-  if (event && event.type === 'click') {
-    activeToggle.checked = !activeToggle.checked;
-  }
+  // Force the checked state to be the opposite of current state
+  const newCheckedState = !activeToggle.checked;
+  activeToggle.checked = newCheckedState;
+  console.log('New checked state:', activeToggle.checked);
   
-  if (activeToggle.checked) {
+  if (newCheckedState) {
     // Check if a layer date is selected
     if (!tileDate) {
       // Uncheck the toggle
@@ -526,15 +530,37 @@ const layerToggles = {
 Object.entries(layerToggles).forEach(([layerType, toggleId]) => {
   const toggle = document.getElementById(toggleId);
   if (toggle) {
-    // Only use change event for better Safari compatibility
-    toggle.addEventListener('change', (event) => toggleLayer(layerType, event));
+    // Use both mousedown and change events for better Safari support
+    toggle.addEventListener('mousedown', (event) => {
+      console.log('mousedown event on:', toggleId);
+      event.preventDefault(); // Prevent default to handle state ourselves
+      toggleLayer(layerType, event);
+    });
+    
+    toggle.addEventListener('change', (event) => {
+      console.log('change event on:', toggleId);
+      toggleLayer(layerType, event);
+    });
   }
 });
 
 // Bathymetry toggle listener 
 const bathymetryToggle = document.getElementById('bathymetry-toggle');
 if (bathymetryToggle) {
+  bathymetryToggle.addEventListener('mousedown', (event) => {
+    console.log('mousedown event on bathymetry toggle');
+    event.preventDefault();
+    const newState = !bathymetryToggle.checked;
+    bathymetryToggle.checked = newState;
+    if (newState) {
+      map.addLayer(bathymetryLayer);
+    } else {
+      map.removeLayer(bathymetryLayer);
+    }
+  });
+  
   bathymetryToggle.addEventListener('change', (event) => {
+    console.log('change event on bathymetry toggle');
     if (event.target.checked) {
       map.addLayer(bathymetryLayer);
     } else {
