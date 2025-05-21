@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible v6 active');
+console.log('Controls.js loaded - Safari-compatible v7 active');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -404,6 +404,122 @@ setupCheckboxToggle('bathymetry-toggle', (event, checked) => {
 setupCheckboxToggle('emolt-toggle', () => {});
 setupCheckboxToggle('cccfa-toggle', () => {});
 setupCheckboxToggle('cfrf-toggle', () => {});
+
+// Initialize date pickers
+$(function () {
+    // Paths for SST, SSS, and Chloro dates
+    const sstDatesPath = '../data/SST/sst_dates.txt';
+    const sssDatesPath = '../data/SSS/sss_dates.txt';
+    const chloroDatesPath = '../data/CHL/chl_dates.txt';
+    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+
+    // Fetch available dates for highlighting
+    Promise.all([
+        fetchAvailableDates(sstDatesPath),
+        fetchAvailableDates(sssDatesPath),
+        fetchAvailableDates(chloroDatesPath),
+        fetchAvailableDates(ostiaSstDatesPath),
+        fetchAvailableDates(ostiaAnomalyDatesPath)
+    ])
+    .then(([sstDates, sssDates, chloroDates, ostiaSstDates, ostiaAnomalyDates]) => {
+        const sstSet = new Set(sstDates);
+        const sssSet = new Set(sssDates);
+        const chloroSet = new Set(chloroDates);
+        const ostiaSstSet = new Set(ostiaSstDates);
+        const ostiaAnomalySet = new Set(ostiaAnomalyDates);
+        const allDatesSet = new Set([...sstDates, ...sssDates, ...chloroDates, ...ostiaSstDates, ...ostiaAnomalyDates]);
+
+        // Initialize the date range picker for profiles
+        $('#daterange').daterangepicker({
+            opens: 'right',  // Open aligned to the right side
+            maxDate: moment().format("MM/DD/YYYY"),
+            startDate: '08/01/2024',
+            endDate: moment().format("MM/DD/YYYY"),
+            showDropdowns: true,  // Allow year/month dropdown selection
+            autoApply: true,  // Apply the selection immediately
+            ranges: {
+                'Last 30 Days': [moment().subtract(30, 'days'), moment()],
+                'Last 60 Days': [moment().subtract(60, 'days'), moment()],
+                'Last 90 Days': [moment().subtract(90, 'days'), moment()],
+                'All Available Data': ['08/01/2024', moment()]
+            }
+        });
+
+        // Initialize the layer date picker
+        $('#layer-date').daterangepicker({
+            opens: 'left',
+            maxDate: moment().format("MM/DD/YYYY"),
+            singleDatePicker: true,
+            autoApply: true,
+            showDropdowns: true,
+            isInvalidDate: function (date) {
+                const formattedDate = date.format('YYYY-MM-DD');
+                return !allDatesSet.has(formattedDate);
+            },
+            isCustomDate: function (date) {
+                const formattedDate = date.format('YYYY-MM-DD');
+
+                // Green with stripe: All layers (both OSTIA SSTs, SST, SSS, and CHL)
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate) && 
+                    sstSet.has(formattedDate) && 
+                    sssSet.has(formattedDate) && 
+                    chloroSet.has(formattedDate)) {
+                    return 'highlight-all';
+                }
+
+                // Green without stripe: All layers except SST (both OSTIA SSTs, SSS, and CHL)
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate) && 
+                    sssSet.has(formattedDate) && 
+                    chloroSet.has(formattedDate)) {
+                    return 'highlight-all-no-sst';
+                }
+
+                // Yellow with stripe: All layers except CHL (both OSTIA SSTs, SST, and SSS)
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate) && 
+                    sstSet.has(formattedDate) && 
+                    chloroSet.has(formattedDate)) {
+                    return 'highlight-all-no-sss';
+                }
+
+                // Yellow without stripe: All layers except CHL and SST (both OSTIA SSTs and SSS)
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate) && 
+                    chloroSet.has(formattedDate)) {
+                    return 'highlight-all-no-sss-sst';
+                }
+
+                // Orange with stripe: All SSTs but no SSS or CHL (both OSTIAs and SST)
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate) && 
+                    sstSet.has(formattedDate)) {
+                    return 'highlight-all-sst';
+                }
+
+                // Orange without stripe: Both OSTIAs but no SST, SSS, or CHL
+                if (ostiaSstSet.has(formattedDate) && 
+                    ostiaAnomalySet.has(formattedDate)) {
+                    return 'highlight-ostia-only';
+                }
+                
+                return ''; // No highlight
+            }
+        });
+
+        // Add callback for date selection
+        $('#layer-date').on('apply.daterangepicker', function(ev, picker) {
+            const date = picker.startDate;
+            const year = date.year();
+            const dayOfYear = date.dayOfYear().toString().padStart(3, '0');
+            const layerDate = `${year}_${dayOfYear}`;
+            updateLayerPaths(layerDate);
+        });
+    })
+    .catch(error => console.error('Error loading available dates:', error));
+});
 
 // Apply Filters button
 document.getElementById('apply-filters').addEventListener('click', function() {
