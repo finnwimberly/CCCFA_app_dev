@@ -15,6 +15,8 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
+console.log('Controls.js loaded - Safari-compatible version active');
+
 // Add these variables at the top level
 let drawingPolygon = false;
 let polygon = null;
@@ -428,7 +430,7 @@ $(function () {
 let activeLayerType = null; // Track the currently active layer
 
 // Layer toggle functionality - refactored to use a single function
-function toggleLayer(layerType) {
+function toggleLayer(layerType, event) {
   // Define the layer types and their corresponding elements
   const layerTypes = {
     'SST': {
@@ -460,6 +462,11 @@ function toggleLayer(layerType) {
   
   // Get the toggle element that triggered the event
   const activeToggle = document.getElementById(layerTypes[layerType].toggleId);
+  
+  // For Safari, we need to manually toggle the checked state
+  if (event && event.type === 'click') {
+    activeToggle.checked = !activeToggle.checked;
+  }
   
   if (activeToggle.checked) {
     // Check if a layer date is selected
@@ -508,20 +515,61 @@ function toggleLayer(layerType) {
 }
 
 // Add event listeners for layer toggles
-document.getElementById('sst-toggle').addEventListener('change', () => toggleLayer('SST'));
-document.getElementById('ostia-sst-toggle').addEventListener('change', () => toggleLayer('OSTIA_SST'));
-document.getElementById('ostia-anomaly-toggle').addEventListener('change', () => toggleLayer('OSTIA_anomaly'));
-document.getElementById('sss-toggle').addEventListener('change', () => toggleLayer('SSS'));
-document.getElementById('chl-toggle').addEventListener('change', () => toggleLayer('CHL'));
+const layerToggles = {
+  'SST': 'sst-toggle',
+  'OSTIA_SST': 'ostia-sst-toggle',
+  'OSTIA_anomaly': 'ostia-anomaly-toggle',
+  'SSS': 'sss-toggle',
+  'CHL': 'chl-toggle'
+};
 
-// Bathymetry toggle listener 
-document.getElementById('bathymetry-toggle').addEventListener('change', (event) => {
-  if (event.target.checked) {
-    map.addLayer(bathymetryLayer);
-  } else {
-    map.removeLayer(bathymetryLayer);
+Object.entries(layerToggles).forEach(([layerType, toggleId]) => {
+  const toggle = document.getElementById(toggleId);
+  if (toggle) {
+    // Add both change and click events for better Safari support
+    toggle.addEventListener('change', (event) => toggleLayer(layerType, event));
+    toggle.addEventListener('click', (event) => toggleLayer(layerType, event));
+    
+    // Add click event to the label as well
+    const label = toggle.nextElementSibling;
+    if (label) {
+      label.addEventListener('click', (event) => {
+        event.preventDefault();
+        toggle.click();
+      });
+    }
   }
 });
+
+// Bathymetry toggle listener 
+const bathymetryToggle = document.getElementById('bathymetry-toggle');
+if (bathymetryToggle) {
+  bathymetryToggle.addEventListener('change', (event) => {
+    if (event.target.checked) {
+      map.addLayer(bathymetryLayer);
+    } else {
+      map.removeLayer(bathymetryLayer);
+    }
+  });
+  
+  // Add click event for Safari
+  bathymetryToggle.addEventListener('click', (event) => {
+    if (event.target.checked) {
+      map.addLayer(bathymetryLayer);
+    } else {
+      map.removeLayer(bathymetryLayer);
+    }
+  });
+  
+  // Add click event to the label
+  const label = bathymetryToggle.nextElementSibling;
+  if (label) {
+    label.addEventListener('click', (event) => {
+      event.preventDefault();
+      bathymetryToggle.click();
+    });
+  }
+}
 
 // Initialize plots after controls are added
 initializePlots();
