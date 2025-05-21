@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible v4 active');
+console.log('Controls.js loaded - Safari-compatible v5 active');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -300,11 +300,13 @@ Object.entries(sourceToggles).forEach(([sourceType, toggleId]) => {
         toggle.addEventListener('mousedown', (event) => {
             console.log('mousedown event on source toggle:', toggleId);
             event.preventDefault(); // Prevent default to handle state ourselves
-            toggle.checked = !toggle.checked;
+            const newState = !toggle.checked;
+            toggle.checked = newState;
+            console.log('New state for', toggleId, ':', newState);
         });
         
         toggle.addEventListener('change', (event) => {
-            console.log('change event on source toggle:', toggleId);
+            console.log('change event on source toggle:', toggleId, 'checked:', event.target.checked);
         });
     }
 });
