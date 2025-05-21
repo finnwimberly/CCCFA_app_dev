@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible version active');
+console.log('Controls.js loaded - Safari-compatible v2 active');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -526,18 +526,8 @@ const layerToggles = {
 Object.entries(layerToggles).forEach(([layerType, toggleId]) => {
   const toggle = document.getElementById(toggleId);
   if (toggle) {
-    // Add both change and click events for better Safari support
+    // Only use change event for better Safari compatibility
     toggle.addEventListener('change', (event) => toggleLayer(layerType, event));
-    toggle.addEventListener('click', (event) => toggleLayer(layerType, event));
-    
-    // Add click event to the label as well
-    const label = toggle.nextElementSibling;
-    if (label) {
-      label.addEventListener('click', (event) => {
-        event.preventDefault();
-        toggle.click();
-      });
-    }
   }
 });
 
@@ -551,24 +541,6 @@ if (bathymetryToggle) {
       map.removeLayer(bathymetryLayer);
     }
   });
-  
-  // Add click event for Safari
-  bathymetryToggle.addEventListener('click', (event) => {
-    if (event.target.checked) {
-      map.addLayer(bathymetryLayer);
-    } else {
-      map.removeLayer(bathymetryLayer);
-    }
-  });
-  
-  // Add click event to the label
-  const label = bathymetryToggle.nextElementSibling;
-  if (label) {
-    label.addEventListener('click', (event) => {
-      event.preventDefault();
-      bathymetryToggle.click();
-    });
-  }
 }
 
 // Initialize plots after controls are added
@@ -641,6 +613,7 @@ style.textContent = `
     }
 
     .checkbox-group input[type="checkbox"] {
+        /* Temporarily commenting out custom styling for Safari compatibility testing
         -webkit-appearance: none;
         appearance: none;
         width: 16px;
@@ -651,14 +624,18 @@ style.textContent = `
         position: relative;
         cursor: pointer;
         background-color: white;
+        */
     }
 
     .checkbox-group input[type="checkbox"]:checked {
+        /* Temporarily commenting out custom styling for Safari compatibility testing
         background-color: var(--secondary);
         border-color: var(--secondary);
+        */
     }
 
     .checkbox-group input[type="checkbox"]:checked::after {
+        /* Temporarily commenting out custom styling for Safari compatibility testing
         content: '';
         position: absolute;
         left: 4px;
@@ -668,6 +645,7 @@ style.textContent = `
         border: solid white;
         border-width: 0 2px 2px 0;
         transform: rotate(45deg);
+        */
     }
 
     .checkbox-group input[type="checkbox"]:focus {
