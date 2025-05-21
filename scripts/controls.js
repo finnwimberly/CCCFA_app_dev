@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - Safari-compatible legend toggle');
+console.log('Controls.js loaded - CTD legend removal w/filtering udpate');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -347,8 +347,7 @@ function toggleLayer(layerType, event, isChecked) {
             document.getElementById(layerTypes[layerType].toggleId).checked = false;
             
             // Show the layer date modal
-            document.getElementById('layer-date-overlay').style.display = 'block';
-            document.getElementById('layer-date-modal').style.display = 'block';
+            showLayerDateModal();
             
             return;
         }
@@ -551,6 +550,16 @@ document.getElementById('apply-filters').addEventListener('click', function() {
     
     console.log('Applying filters with dates:', startDate, 'to', endDate);
     console.log('Selected sources:', selectedSources);
+    
+    // Clear all legend items
+    const legendItems = document.getElementById('profile-legend-items');
+    if (legendItems) {
+        legendItems.innerHTML = '';
+    }
+    const legendContainer = document.getElementById('profile-legend-container');
+    if (legendContainer) {
+        legendContainer.style.display = 'none';
+    }
     
     // Call loadProfiles with date range and sources
     loadProfiles(startDate, endDate, selectedSources);
@@ -1078,3 +1087,26 @@ function isMarkerInsidePolygon(markerLatLng, polygon) {
   
   return inside;
 }
+
+// Modify the layer date modal behavior
+function showLayerDateModal() {
+    const overlay = document.getElementById('layer-date-overlay');
+    const modal = document.getElementById('layer-date-modal');
+    if (overlay && modal) {
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+    }
+}
+
+function hideLayerDateModal() {
+    const overlay = document.getElementById('layer-date-overlay');
+    const modal = document.getElementById('layer-date-modal');
+    if (overlay && modal) {
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+    }
+}
+
+// Update the layer date modal event listeners
+document.getElementById('layer-date-modal-close').addEventListener('click', hideLayerDateModal);
+document.getElementById('layer-date-overlay').addEventListener('click', hideLayerDateModal);
