@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - CTD legend removal w/filtering udpate');
+console.log('Controls.js loaded - layer legend safari removal');
 
 // Add these variables at the top level
 let drawingPolygon = false;
@@ -362,10 +362,6 @@ function toggleLayer(layerType, event, isChecked) {
                     const legendElement = document.getElementById(layerTypes[type].legendId);
                     if (legendElement) {
                         legendElement.style.display = 'none';
-                        // Also remove the legend from the map
-                        if (legendElement.parentNode) {
-                            legendElement.parentNode.removeChild(legendElement);
-                        }
                     }
                     if (activeLayerType === type) {
                         activeLayerType = null;
@@ -391,10 +387,6 @@ function toggleLayer(layerType, event, isChecked) {
         const legendElement = document.getElementById(layerTypes[layerType].legendId);
         if (legendElement) {
             legendElement.style.display = 'none';
-            // Also remove the legend from the map
-            if (legendElement.parentNode) {
-                legendElement.parentNode.removeChild(legendElement);
-            }
         }
         if (activeLayerType === layerType) {
             activeLayerType = null;
