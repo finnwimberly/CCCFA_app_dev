@@ -362,6 +362,10 @@ function toggleLayer(layerType, event, isChecked) {
                     const legendElement = document.getElementById(layerTypes[type].legendId);
                     if (legendElement) {
                         legendElement.style.display = 'none';
+                        // Also remove the legend from the map
+                        if (legendElement.parentNode) {
+                            legendElement.parentNode.removeChild(legendElement);
+                        }
                     }
                     if (activeLayerType === type) {
                         activeLayerType = null;
@@ -387,6 +391,10 @@ function toggleLayer(layerType, event, isChecked) {
         const legendElement = document.getElementById(layerTypes[layerType].legendId);
         if (legendElement) {
             legendElement.style.display = 'none';
+            // Also remove the legend from the map
+            if (legendElement.parentNode) {
+                legendElement.parentNode.removeChild(legendElement);
+            }
         }
         if (activeLayerType === layerType) {
             activeLayerType = null;
