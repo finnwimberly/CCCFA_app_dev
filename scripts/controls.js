@@ -114,7 +114,7 @@ const CombinedControl = L.Control.extend({
                             <label for="chl-toggle" class="control-label">CHL</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="bathymetry-toggle">
+                            <input type="checkbox" id="bathymetry-toggle" checked>
                             <label for="bathymetry-toggle" class="control-label">Bathymetry</label>
                         </div>
                     </div>
@@ -514,7 +514,7 @@ document.getElementById('ostia-anomaly-toggle').addEventListener('change', () =>
 document.getElementById('sss-toggle').addEventListener('change', () => toggleLayer('SSS'));
 document.getElementById('chl-toggle').addEventListener('change', () => toggleLayer('CHL'));
 
-// // Bathymetry toggle listener 
+// Bathymetry toggle listener 
 document.getElementById('bathymetry-toggle').addEventListener('change', (event) => {
   if (event.target.checked) {
     map.addLayer(bathymetryLayer);

@@ -104,6 +104,9 @@ let bathymetryLayer = L.tileLayer(bathymetryPaths[getSelectedUnitSystem()], {
   className: 'bathymetryLayer'
 });
 
+// Add the bathymetry layer to the map by default
+map.addLayer(bathymetryLayer);
+
 // Add event listener to unit selector to reload bathymetry layer when changed
 document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', updateBathymetryLayer);
