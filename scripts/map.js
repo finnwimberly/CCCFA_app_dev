@@ -34,7 +34,7 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      disableClusteringAtZoom: 10
+      disableClusteringAtZoom: 11
     });
     map.addLayer(emoltClusterGroup);
 
