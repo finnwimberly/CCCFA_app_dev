@@ -34,7 +34,7 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      disableClusteringAtZoom: 12
+      disableClusteringAtZoom: 10
     });
     map.addLayer(emoltClusterGroup);
 
@@ -487,7 +487,6 @@ document.addEventListener('DOMContentLoaded', setupZoomHandler);
 // Create a zoom-responsive icon for EMOLT markers
 function createEmoltIcon(zoomLevel, color = 'black') {
   // Calculate size based on zoom level - small at low zoom, larger at high zoom
-  // Increase the size by multiplying by 1.2 to make markers larger
   const size = Math.max(4, Math.min(12, (zoomLevel - 2) * 1.05));
   
   // Add opacity to the color for transparency
