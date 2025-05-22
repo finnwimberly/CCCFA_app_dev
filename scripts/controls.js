@@ -15,7 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 
-console.log('Controls.js loaded - layer legend safari removal v2');
+console.log('Controls.js loaded - layer date modal for safari');
 
 // Add these variables at the top level
 let drawingPolygon = false;
