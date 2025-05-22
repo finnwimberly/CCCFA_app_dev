@@ -487,8 +487,8 @@ document.addEventListener('DOMContentLoaded', setupZoomHandler);
 // Create a zoom-responsive icon for EMOLT markers
 function createEmoltIcon(zoomLevel, color = 'black') {
   // Calculate size based on zoom level - small at low zoom, larger at high zoom
-  // Reduce the size by multiplying by 0.8 to make markers smaller
-  const size = Math.max(3, Math.min(10, (zoomLevel - 2) * 0.8));
+  // Increase the size by multiplying by 1.2 to make markers larger
+  const size = Math.max(4, Math.min(12, (zoomLevel - 2) * 1.05));
   
   // Add opacity to the color for transparency
   const colorWithOpacity = color === 'black' ? 'rgba(0, 0, 0, 0.7)' : color.replace(')', ', 0.7)').replace('rgb', 'rgba');
