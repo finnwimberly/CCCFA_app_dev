@@ -194,15 +194,52 @@ document.getElementById('info-overlay').addEventListener('click', () => {
   document.getElementById('info-modal').style.display = 'none';
 });
 
-// Layer Date Modal Logic
-document.getElementById('layer-date-modal-close').addEventListener('click', () => {
-  document.getElementById('layer-date-overlay').style.display = 'none';
-  document.getElementById('layer-date-modal').style.display = 'none';
+// Modify the layer date modal behavior
+function showLayerDateModal() {
+    const overlay = document.getElementById('layer-date-overlay');
+    const modal = document.getElementById('layer-date-modal');
+    if (overlay && modal) {
+        // Prevent any existing event handlers
+        overlay.style.pointerEvents = 'none';
+        modal.style.pointerEvents = 'none';
+        
+        // Show the modal
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        
+        // Re-enable pointer events after a small delay
+        setTimeout(() => {
+            overlay.style.pointerEvents = 'auto';
+            modal.style.pointerEvents = 'auto';
+        }, 100);
+    }
+}
+
+function hideLayerDateModal(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const overlay = document.getElementById('layer-date-overlay');
+    const modal = document.getElementById('layer-date-modal');
+    if (overlay && modal) {
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+    }
+}
+
+// Update the layer date modal event listeners
+document.getElementById('layer-date-modal-close').addEventListener('click', (event) => {
+    hideLayerDateModal(event);
 });
 
-document.getElementById('layer-date-overlay').addEventListener('click', () => {
-  document.getElementById('layer-date-overlay').style.display = 'none';
-  document.getElementById('layer-date-modal').style.display = 'none';
+document.getElementById('layer-date-overlay').addEventListener('click', (event) => {
+    hideLayerDateModal(event);
+});
+
+// Prevent clicks inside the modal from closing it
+document.getElementById('layer-date-modal').addEventListener('click', (event) => {
+    event.stopPropagation();
 });
 
 // Define showModal function before it's used
@@ -1120,26 +1157,3 @@ function isMarkerInsidePolygon(markerLatLng, polygon) {
   
   return inside;
 }
-
-// Modify the layer date modal behavior
-function showLayerDateModal() {
-    const overlay = document.getElementById('layer-date-overlay');
-    const modal = document.getElementById('layer-date-modal');
-    if (overlay && modal) {
-        overlay.style.display = 'block';
-        modal.style.display = 'block';
-    }
-}
-
-function hideLayerDateModal() {
-    const overlay = document.getElementById('layer-date-overlay');
-    const modal = document.getElementById('layer-date-modal');
-    if (overlay && modal) {
-        overlay.style.display = 'none';
-        modal.style.display = 'none';
-    }
-}
-
-// Update the layer date modal event listeners
-document.getElementById('layer-date-modal-close').addEventListener('click', hideLayerDateModal);
-document.getElementById('layer-date-overlay').addEventListener('click', hideLayerDateModal);
