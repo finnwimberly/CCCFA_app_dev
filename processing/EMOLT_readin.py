@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# This notebook develops an automated workflow for reading in ERDDAP research fleet data sets (both CCCFA and Shelf fleet). The code will be used as template for WHOI/CCCFA joint collection efforts. 
-# 
-# Last update: 20 Feb 2025 | FFW
+# Last update: 22 May 2025 | FFW
 
-# In[1]:
+# In[34]:
 
 
 import erddapy
 print(erddapy.__version__)
 
 
-# In[2]:
+# In[35]:
 
 
 from erddapy import ERDDAP
 import pandas as pd
 import os
+import random
 
 # Initialize ERDDAP server connection
 e = ERDDAP(
@@ -31,7 +30,7 @@ e.dataset_id = 'emolt_data'
 # Set filters correctly (no extra quotes around string values)
 e.constraints = {
     'time>=': '2024-08-01T00:00:00Z',
-    'segment_type=': 'Profiling Down',
+    'segment_type=': 1,  # Note: string that parses to int
 }
 
 # Choose variables to retrieve
@@ -56,18 +55,8 @@ for col in ['latitude', 'longitude', 'depth', 'temperature']:
 
 #df.head()
 
-
-# In[3]:
-
-
-#Fix column names
-#df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in df.columns]
-
 #Ensure datetime
 df.loc[:, 'time'] = pd.to_datetime(df['time'])
-
-
-# In[4]:
 
 
 # Create a dictionary to hold DataFrames for each tow_id (profile)
@@ -88,27 +77,39 @@ for tow_id in df['tow_id'].unique():
     # Filter the DataFrame for the current tow_id
     df_filtered = df[df['tow_id'] == tow_id][columns_of_interest]
 
+    # Skip if fewer than 5 rows
+    if len(df_filtered) < 5:
+        continue
+
+    # Skip if max depth is not greater than 5 meters
+    if df_filtered['depth'].max() <= 5:
+        continue
+
     # Create a new DataFrame with only the measurements
-    measurements_df = df_filtered[['depth', 'temperature']]
+    measurements_df = df_filtered[['depth', 'temperature']].copy()
     measurements_df.columns = ['Depth (m)', 'Temperature (°C)']
     measurements_df.set_index('Depth (m)', inplace=True)
-    
-    # Store metadata
-    latitude = df_filtered['latitude'].iloc[0]
-    longitude = df_filtered['longitude'].iloc[0]
+    measurements_df.sort_index(inplace=True)
 
-    # Extract the date from time_UTC
-    date_formatted = df_filtered['time'].iloc[0].strftime('%Y-%m-%d')  # Convert datetime to 'YYYY-MM-DD'
+    # Store metadata
+    base_latitude = round(df_filtered['latitude'].iloc[0], 3)
+    base_longitude = round(df_filtered['longitude'].iloc[0], 3)
+
+    latitude = round(base_latitude + random.uniform(-0.0005, 0.0005), 4)
+    longitude = round(base_longitude + random.uniform(-0.0005, 0.0005), 4)
+
+    # Extract the date
+    date_formatted = df_filtered['time'].iloc[0].strftime('%Y-%m-%d')
 
     # Store metadata in a dictionary
     metadata[tow_id] = {
         'Latitude': latitude,
         'Longitude': longitude,
         'Tow ID': tow_id,
-        'Date': date_formatted  # Extracted from time_UTC
+        'Date': date_formatted
     }
 
-    # Store the measurements DataFrame in the dictionary
+    # Store the measurements
     processed_data[tow_id] = measurements_df
 
 
@@ -144,9 +145,6 @@ metadata_df = pd.DataFrame(metadata_list)
 # Save the metadata DataFrame to a CSV file
 metadata_filename = f"{output_dir}/metadata.csv"
 metadata_df.to_csv(metadata_filename, index=False)
-
-
-# In[ ]:
 
 
 
