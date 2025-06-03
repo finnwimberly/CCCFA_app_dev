@@ -143,7 +143,7 @@ const CombinedControl = L.Control.extend({
                         </div>
                     </div>
                     <div class="tolerance-control">
-                        <label class="control-section-label">Date Tolerance: <span id="tolerance-value">2</span> days</label>
+                        <label class="control-section-label">Date Tolerance: ±<span id="tolerance-value">2</span> days</label>
                         <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
                         <div class="slider-labels">
                             <span>0</span>
@@ -595,8 +595,7 @@ $(function () {
     const sstDatesPath = '../data/SST/sst_dates.txt';
     const sssDatesPath = '../data/SSS/sss_dates.txt';
     const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    // const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
-    const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
+    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
     const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
 
     // Fetch available dates for highlighting
