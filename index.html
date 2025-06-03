@@ -87,9 +87,11 @@
         create a polygon outlining area of interest on the map, and confirm the selection by clicking the button once more.
       </p>
       <p>
-        To view satellite imagery, select a "Layer Date" and then choose a dataset (SSS, SST, or Chlorophyll-a) in the 
-        "Layer Control" panel. There may be a delay between the current date and the availability of the most recent satellite dataset, as processing times vary.
-        Use the info icon to see which satellite products are available for which dates.
+        To view satellite imagery, select a "Layer Date" and then choose a layer to apply. Our dashboard provides sea surface imagery (SSS, SST, or Chlorophyll-a) 
+        obtained by satellites as well as FIShBOT datasets. FIShBOT is a recently developed in-situ gridded bottom product derived from the profiles obtained by
+        the research efforts of eMOLT, the CFRF, and the CCCFA. For all surface layers, there may be a delay between the current date and the availability of the most recent 
+       dataset, as processing times vary. FIShBOT data is generally less complete closer to real time due to lag between when a profile is
+       taken and when it is uploaded. You can use the info icon within the controls to check the availability of satellite products on different dates.
       </p>
     </section> 
 
@@ -111,6 +113,9 @@
 
           <!-- OSTIA Anomaly Legend Container -->
           <div id="ostia-anomaly-legend" style="display: none;"></div>
+
+          <!-- FishBot Legend Container -->
+          <div id="fishbot-legend" style="display: none;"></div>
         </div>
         <div class="resize-handle"></div>
       </div>
@@ -171,6 +176,7 @@
   <!-- Include Custom JavaScript Files -->
   <script src="scripts/map-setup.js" type="module"></script>
   <script src="scripts/layers.js" type="module"></script>
+  <script src="scripts/fishbot.js" type="module"></script>
   <script src="scripts/controls.js" type="module"></script>
   <script src="scripts/plots.js" type="module"></script>
   <script src="scripts/data-loading.js" type="module"></script>

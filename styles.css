@@ -607,7 +607,8 @@ footer {
 #sss-legend,
 #chl-legend,
 #ostia-sst-legend,
-#ostia-anomaly-legend {
+#ostia-anomaly-legend,
+#fishbot-legend {
   position: absolute;
   bottom: 20px;
   left: 10px;
@@ -626,27 +627,13 @@ footer {
   justify-content: center;
 }
 
-/* Ensure the Plotly container fills the legend container */
-/* #sst-legend .plotly,
-#sss-legend .plotly,
-#chl-legend .plotly,
-#ostia-sst-legend .plotly,
-#ostia-anomaly-legend .plotly {
-  width: 120px !important;
-  height: 280px !important;
-  overflow: hidden;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  background: none !important;
-} */
-
 /* Ensure the Plotly container respects the legend bounds */
 #sst-legend .plotly,
 #sss-legend .plotly,
 #chl-legend .plotly,
 #ostia-sst-legend .plotly,
-#ostia-anomaly-legend .plotly {
+#ostia-anomaly-legend .plotly,
+#fishbot-legend .plotly {
   width: 100%; /* Ensure it scales with the parent */
   max-width: 120px; /* Constrain to legend width */
   height: 100%; /* Ensure it scales with the parent */
@@ -664,7 +651,8 @@ footer {
   #sss-legend,
   #chl-legend,
   #ostia-sst-legend,
-  #ostia-anomaly-legend {
+  #ostia-anomaly-legend,
+  #fishbot-legend {
     min-width: 100px;
     max-width: 130px;
     min-height: 300px;
@@ -678,7 +666,8 @@ footer {
   #sss-legend,
   #chl-legend,
   #ostia-sst-legend,
-  #ostia-anomaly-legend {
+  #ostia-anomaly-legend,
+  #fishbot-legend {
     min-width: 90px;
     max-width: 120px;
     min-height: 300px;

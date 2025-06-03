@@ -473,6 +473,11 @@ function updateLayerPaths(date) {
   } else if (map.hasLayer(ostiaAnomalyOverlay)) {
     createLegend('OSTIA_anomaly', date);
   }
+
+  // Update fishbot layer if it's active (using dynamic import to avoid circular dependency)
+  if (typeof window !== 'undefined' && window.updateFishbotForDate) {
+    window.updateFishbotForDate(date);
+  }
 }
 
 map.on('zoomend', () => {
@@ -486,4 +491,4 @@ map.on('zoomend', () => {
 });
 
 // Export necessary variables and functions
-export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend };
+export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend, getSelectedUnitSystem };

@@ -14,6 +14,7 @@ import { initializePlots, removeCTDMeasurements } from './plots.js';
 import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
+import { toggleFishbotLayer, updateFishbotForDate } from './fishbot.js';
 
 console.log('Controls.js loaded - layer date modal for safari');
 
@@ -44,7 +45,6 @@ const CombinedControl = L.Control.extend({
                     <input type="text" id="daterange" name="daterange" 
                         value="08/01/2024 - ${moment().format("MM/DD/YYYY")}" 
                         class="control-input" />
-                    <i id="reset-daterange" class="fas fa-undo" style="position: absolute; bottom: 2px; right: 4px; cursor: pointer; font-size: 12px; color: #007bff;" title="Reset to default date range"></i>
                 </div>
             </div>
             <div class="control-item">
@@ -90,7 +90,7 @@ const CombinedControl = L.Control.extend({
             </div>
                     <div class="control-item">
                         <div class="collapsible-header sub-header">
-                    <label class="control-section-label">Layers:</label>
+                    <label class="control-section-label">Surface Layers:</label>
                     <i class="fas fa-chevron-down collapse-icon"></i>
                 </div>
                 <div class="collapsible-content" id="layers-content">
@@ -122,6 +122,36 @@ const CombinedControl = L.Control.extend({
                     </div>
                 </div>
             </div>
+                    <div class="control-item">
+                        <div class="collapsible-header sub-header">
+                    <label class="control-section-label">FishBot:</label>
+                    <i class="fas fa-chevron-down collapse-icon"></i>
+                </div>
+                <div class="collapsible-content" id="fishbot-content">
+                    <div class="fishbot-variables">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="fishbot-temperature-toggle">
+                            <label for="fishbot-temperature-toggle" class="control-label">Temperature</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="fishbot-salinity-toggle">
+                            <label for="fishbot-salinity-toggle" class="control-label">Salinity</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="fishbot-oxygen-toggle">
+                            <label for="fishbot-oxygen-toggle" class="control-label">Dissolved Oxygen</label>
+                        </div>
+                    </div>
+                    <div class="tolerance-control">
+                        <label class="control-section-label">Date Tolerance: <span id="tolerance-value">2</span> days</label>
+                        <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
+                        <div class="slider-labels">
+                            <span>0</span>
+                            <span>8</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
       </div>
             </div>
 
@@ -146,7 +176,7 @@ const infoModal = `
     <span id="info-modal-close">&times;</span>
     <h4>Layer Selection Color Scheme</h4>
     <p class="modal-subtitle">
-      The color of each date indicates which data layers are available. A diagonal stripe indicates that SST data is available for that date.
+      The color of each date indicates which data layers are available. A diagonal stripe indicates that high-resolution SST data is available for that date.
     </p>
     <ul>
       <li><span class="color-block highlight-all"></span> All layers available (High resolution (HR) SST, gapfilled SST,
@@ -392,6 +422,16 @@ function toggleLayer(layerType, event, isChecked) {
             return;
         }
 
+        // Deactivate fishbot layer if it's active
+        const fishbotToggles = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
+        fishbotToggles.forEach(toggleId => {
+            const toggle = document.getElementById(toggleId);
+            if (toggle && toggle.checked) {
+                toggle.checked = false;
+                toggleFishbotLayer(false);
+            }
+        });
+
         // Deactivate other layer types
         Object.keys(layerTypes).forEach(type => {
             if (type !== layerType) {
@@ -477,6 +517,72 @@ setupCheckboxToggle('bathymetry-toggle', (event, checked) => {
         map.removeLayer(bathymetryLayer);
     }
 });
+setupCheckboxToggle('fishbot-temperature-toggle', (event, checked) => {
+    // Deactivate other fishbot variables
+    if (checked) {
+        document.getElementById('fishbot-oxygen-toggle').checked = false;
+        document.getElementById('fishbot-salinity-toggle').checked = false;
+    }
+    
+    // Get the current layer date and tolerance
+    const currentTileDate = tileDate;
+    const toleranceSlider = document.getElementById('date-tolerance-slider');
+    const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+    toggleFishbotLayer(checked, currentTileDate, tolerance, 'temperature');
+});
+setupCheckboxToggle('fishbot-oxygen-toggle', (event, checked) => {
+    // Deactivate other fishbot variables
+    if (checked) {
+        document.getElementById('fishbot-temperature-toggle').checked = false;
+        document.getElementById('fishbot-salinity-toggle').checked = false;
+    }
+    
+    // Get the current layer date and tolerance
+    const currentTileDate = tileDate;
+    const toleranceSlider = document.getElementById('date-tolerance-slider');
+    const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+    toggleFishbotLayer(checked, currentTileDate, tolerance, 'oxygen');
+});
+setupCheckboxToggle('fishbot-salinity-toggle', (event, checked) => {
+    // Deactivate other fishbot variables
+    if (checked) {
+        document.getElementById('fishbot-temperature-toggle').checked = false;
+        document.getElementById('fishbot-oxygen-toggle').checked = false;
+    }
+    
+    // Get the current layer date and tolerance
+    const currentTileDate = tileDate;
+    const toleranceSlider = document.getElementById('date-tolerance-slider');
+    const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+    toggleFishbotLayer(checked, currentTileDate, tolerance, 'salinity');
+});
+
+// Setup date tolerance slider
+document.getElementById('date-tolerance-slider').addEventListener('input', function(e) {
+    const toleranceValue = parseInt(e.target.value);
+    document.getElementById('tolerance-value').textContent = toleranceValue;
+    
+    // Update fishbot layer if any fishbot variable is currently active
+    const fishbotToggles = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
+    
+    for (const toggleId of fishbotToggles) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle && toggle.checked && tileDate) {
+            // Determine variable type from toggle ID
+            const variableType = toggleId.replace('fishbot-', '').replace('-toggle', '');
+            toggleFishbotLayer(true, tileDate, toleranceValue, variableType);
+            break; // Only one should be active at a time
+        }
+    }
+});
+
+// Prevent slider from dragging the map using Leaflet's DOM event methods
+const toleranceSlider = document.getElementById('date-tolerance-slider');
+L.DomEvent.disableClickPropagation(toleranceSlider);
+L.DomEvent.disableScrollPropagation(toleranceSlider);
 
 // Setup profile source toggles
 setupCheckboxToggle('emolt-toggle', () => {});
@@ -489,7 +595,8 @@ $(function () {
     const sstDatesPath = '../data/SST/sst_dates.txt';
     const sssDatesPath = '../data/SSS/sss_dates.txt';
     const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    // const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
     const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
 
     // Fetch available dates for highlighting
@@ -848,6 +955,65 @@ style.textContent = `
             width: 200px;
             max-height: 60vh;
         }
+    }
+
+    /* Tolerance slider styling */
+    .tolerance-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: #ddd;
+        outline: none;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        margin: 8px 0 4px 0;
+    }
+
+    .tolerance-slider:hover {
+        opacity: 1;
+    }
+
+    .tolerance-slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        padding: 10px;
+        border-radius: 50%;
+        background: var(--secondary);
+        cursor: pointer;
+    }
+
+    .tolerance-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--secondary);
+        cursor: pointer;
+        border: none;
+    }
+
+    .slider-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        padding: 0 5px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-top: 2px;
+    }
+
+    /* FishBot subsection styling */
+    .fishbot-variables {
+        margin-bottom: 8px;
+    }
+
+    .tolerance-control {
+        padding-top: 4px;
+    }
+
+    .tolerance-control .control-section-label {
+        font-size: 12px;
+        margin-bottom: 4px;
     }
 `;
 document.head.appendChild(style);
