@@ -9,7 +9,7 @@ const sstBounds = [
 
 // Initialize with null paths - we'll set these when we know the latest date
 let sstOverlay = L.tileLayer('', {
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: 'SST Data',
   maxZoom: 10,
   bounds: sstBounds,
@@ -17,7 +17,7 @@ let sstOverlay = L.tileLayer('', {
 });
 
 let sssOverlay = L.tileLayer('', {
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: 'SSS Data',
   maxZoom: 10,
   bounds: sstBounds,
@@ -25,7 +25,7 @@ let sssOverlay = L.tileLayer('', {
 });
 
 let chlOverlay = L.tileLayer('', {
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: 'Chlorophyll-a Data',
   maxZoom: 10,
   bounds: sstBounds, // Assuming same bounds as SST/SSS
@@ -34,7 +34,7 @@ let chlOverlay = L.tileLayer('', {
 
 // Add OSTIA SST and anomaly layers
 let ostiaSstOverlay = L.tileLayer('', {
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: 'OSTIA SST Data',
   maxZoom: 10,
   bounds: sstBounds,
@@ -42,7 +42,7 @@ let ostiaSstOverlay = L.tileLayer('', {
 });
 
 let ostiaAnomalyOverlay = L.tileLayer('', {
-  opacity: 0.6,
+  opacity: 0.9,
   attribution: 'OSTIA SST Anomaly Data',
   maxZoom: 10,
   bounds: sstBounds,
