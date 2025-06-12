@@ -30,7 +30,7 @@ e.dataset_id = 'emolt_data'
 # Set filters correctly (no extra quotes around string values)
 e.constraints = {
     'time>=': '2024-08-01T00:00:00Z',
-    'segment_type=': 1,  # Note: string that parses to int
+    'segment_type=': 2,  #change to haulback
 }
 
 # Choose variables to retrieve
