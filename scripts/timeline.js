@@ -19,27 +19,33 @@ function convertDateFormat(date, toLayerFormat = true) {
 
 // Helper function to convert folder date (YYYY_DDD or YYYYDDD) to MM/DD/YYYY
 function folderDateToDisplay(date) {
+    console.log('=== FIXED VERSION ACTIVE === folderDateToDisplay called with:', date);
     let y = date.slice(0, 4);
     let d = parseInt(date.slice(-3), 10);
     // Create date by adding days to January 1st of the year
     let jsDate = new Date(y, 0, 1); // January 1st
-    jsDate.setDate(jsDate.getDate() + d - 1); // Add days (subtract 1 because day 1 is January 1st)
+    jsDate.setDate(jsDate.getDate() + d); // Add the full day number
     let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
     let dd = String(jsDate.getDate()).padStart(2, '0');
     let yyyy = jsDate.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
+    const result = `${mm}/${dd}/${yyyy}`;
+    console.log('=== FIXED VERSION === folderDateToDisplay result:', result);
+    return result;
 }
 
 // Helper to convert MM/DD/YYYY to YYYY_DDD
 function displayToFolderDate(displayDate) {
+    console.log('=== FIXED VERSION ACTIVE === displayToFolderDate called with:', displayDate);
     // displayDate: MM/DD/YYYY
     const [mm, dd, yyyy] = displayDate.split(/[\/]/);
     const date = new Date(`${yyyy}-${mm}-${dd}`);
     const start = new Date(date.getFullYear(), 0, 1); // January 1st of the year
     const diff = date - start;
     const oneDay = 1000 * 60 * 60 * 24;
-    const day = Math.floor(diff / oneDay) + 1; // Add 1 because day 1 is January 1st
-    return `${yyyy}_${String(day).padStart(3, '0')}`;
+    const day = Math.floor(diff / oneDay); // Remove the +1
+    const result = `${yyyy}_${String(day).padStart(3, '0')}`;
+    console.log('=== FIXED VERSION === displayToFolderDate result:', result);
+    return result;
 }
 
 // Fetch available dates from the JSON file
@@ -256,7 +262,9 @@ function updateTimelineDisplay() {
     // Convert YYYYDDD to a proper date for display
     const year = currentDate.slice(0, 4);
     const dayOfYear = parseInt(currentDate.slice(4));
-    const date = new Date(year, 0, dayOfYear); // Month is 0-based
+    // Create date by adding days to January 1st of the year
+    const date = new Date(year, 0, 1); // January 1st
+    date.setDate(date.getDate() + dayOfYear); // Add the full day number
     timelineDate.textContent = moment(date).format('MMM D, YYYY');
     
     // Make the date clickable with hover effects

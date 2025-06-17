@@ -1348,7 +1348,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function folderDateToDisplay(date) {
     let y = date.slice(0, 4);
     let d = parseInt(date.slice(-3), 10);
-    let jsDate = new Date(y, 0, d);
+    // Create date by adding days to January 1st of the year
+    let jsDate = new Date(y, 0, 1); // January 1st
+    jsDate.setDate(jsDate.getDate() + d); // Add the full day number
     let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
     let dd = String(jsDate.getDate()).padStart(2, '0');
     let yyyy = jsDate.getFullYear();
@@ -1362,6 +1364,6 @@ function displayToFolderDate(displayDate) {
     const start = new Date(date.getFullYear(), 0, 1); // January 1st of the year
     const diff = date - start;
     const oneDay = 1000 * 60 * 60 * 24;
-    const day = Math.floor(diff / oneDay) + 1; // Add 1 because day 1 is January 1st
+    const day = Math.floor(diff / oneDay); // Remove the +1
     return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
