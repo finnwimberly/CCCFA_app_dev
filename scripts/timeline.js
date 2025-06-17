@@ -21,7 +21,9 @@ function convertDateFormat(date, toLayerFormat = true) {
 function folderDateToDisplay(date) {
     let y = date.slice(0, 4);
     let d = parseInt(date.slice(-3), 10);
-    let jsDate = new Date(y, 0, d);
+    // Create date by adding days to January 1st of the year
+    let jsDate = new Date(y, 0, 1); // January 1st
+    jsDate.setDate(jsDate.getDate() + d - 1); // Add days (subtract 1 because day 1 is January 1st)
     let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
     let dd = String(jsDate.getDate()).padStart(2, '0');
     let yyyy = jsDate.getFullYear();
