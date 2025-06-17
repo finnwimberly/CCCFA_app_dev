@@ -23,7 +23,7 @@ const oceanBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/
 }).addTo(map);
 
 // Move attribution control to bottom left
-map.attributionControl.setPosition('bottomleft');
+map.attributionControl.setPosition('topleft');
 
 // Initialize resize functionality
 const mapContainer = document.getElementById('map-container');

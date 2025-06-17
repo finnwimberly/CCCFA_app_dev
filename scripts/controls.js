@@ -15,6 +15,7 @@ import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 import { toggleFishbotLayer, updateFishbotForDate } from './fishbot.js';
+import { initializeTimeline } from './timeline.js';
 
 console.log('Controls.js loaded - layer date modal for safari');
 
@@ -85,7 +86,6 @@ const CombinedControl = L.Control.extend({
             <div class="control-item">
                 <label class="control-section-label">Layer date:</label>
                 <input type="text" id="layer-date" name="layer-date" 
-                    value="${moment().format("MM/DD/YYYY")}" 
                     class="control-input" />
             </div>
                     <div class="control-item">
@@ -635,7 +635,8 @@ $(function () {
             opens: 'left',
             maxDate: moment().format("MM/DD/YYYY"),
             singleDatePicker: true,
-            autoApply: true,
+            autoApply: false,
+            autoUpdateInput: false,
             showDropdowns: true,
             isInvalidDate: function (date) {
                 const formattedDate = date.format('YYYY-MM-DD');
@@ -693,13 +694,27 @@ $(function () {
             }
         });
 
-        // Add callback for date selection
+        // Date selection will only happen when user explicitly selects a date
         $('#layer-date').on('apply.daterangepicker', function(ev, picker) {
             const date = picker.startDate;
             const year = date.year();
             const dayOfYear = date.dayOfYear().toString().padStart(3, '0');
             const layerDate = `${year}_${dayOfYear}`;
+            const layerDateInput = document.getElementById('layer-date');
+            console.log('[DATERANGEPICKER] About to set input value.');
+            console.log('  Selected date (moment):', date.format());
+            console.log('  Folder date:', layerDate);
+            console.log('  Display date:', date.format('MM/DD/YYYY'));
+            layerDateInput.value = date.format('MM/DD/YYYY');
+            // Store folder date for logic
+            layerDateInput.setAttribute('data-folder-date', layerDate);
+            // Update layer paths (use folder format)
             updateLayerPaths(layerDate);
+            // Trigger a change event to update the timeline (use folder format)
+            const event = new Event('change');
+            layerDateInput.dispatchEvent(event);
+            // Log the value after setting
+            console.log('  Input value after set:', layerDateInput.value);
         });
     })
     .catch(error => console.error('Error loading available dates:', error));
@@ -1321,4 +1336,32 @@ function isMarkerInsidePolygon(markerLatLng, polygon) {
   }
   
   return inside;
+}
+
+// Initialize timeline when the document is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initializeTimeline();
+    // ... any other initialization code ...
+});
+
+// Helper function to convert folder date (YYYY_DDD or YYYYDDD) to MM/DD/YYYY
+function folderDateToDisplay(date) {
+    let y = date.slice(0, 4);
+    let d = parseInt(date.slice(-3), 10);
+    let jsDate = new Date(y, 0, d);
+    let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
+    let dd = String(jsDate.getDate()).padStart(2, '0');
+    let yyyy = jsDate.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+}
+// Helper to convert MM/DD/YYYY to YYYY_DDD
+function displayToFolderDate(displayDate) {
+    // displayDate: MM/DD/YYYY
+    const [mm, dd, yyyy] = displayDate.split(/[\/]/);
+    const date = new Date(`${yyyy}-${mm}-${dd}`);
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const day = Math.floor(diff / oneDay);
+    return `${yyyy}_${String(day).padStart(3, '0')}`;
 }

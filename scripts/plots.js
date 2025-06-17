@@ -15,32 +15,32 @@ let plotData = {
 function initializePlots() {
   const commonLayout = {
     margin: {
-      t: 60,  // reduced top margin
-      r: 60,  // increased right margin for legend
-      b: 60,  // bottom margin
-      l: 60   // left margin for axis labels
+      t: 60,  // top margin for title
+      r: 60,  // right margin for legend
+      b: 60,  // bottom margin for x-axis
+      l: 60   // left margin for y-axis
     },
     autosize: true,
     responsive: true,
-    showlegend: true, // Enable legend
+    showlegend: true,
     legend: {
-      x: 0.5,       // Center horizontally
-      y: 1.3,       // Position above the plot
+      x: 0.5,
+      y: 1.1,       // Moved up slightly
       xanchor: 'center',
       yanchor: 'top',
-      orientation: 'h',    // Horizontal layout
+      orientation: 'h',
       traceorder: 'normal',
-      itemwidth: 80,      // Control width of each legend item
+      itemwidth: 80,
       itemsizing: 'constant',
-      xgap: 10,          // Add space between legend items
-      font: { size: 9 }, // Slightly smaller font
+      xgap: 10,
+      font: { size: 10 }, // Slightly larger font
       bgcolor: 'rgba(255,255,255,0.8)',
       bordercolor: '#ddd',
       borderwidth: 1
     },
-    height: null, // Remove fixed height
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)'
+    height: null,
+    paper_bgcolor: 'white',
+    plot_bgcolor: 'white'
   };
 
   // Function to handle plot resizing
@@ -48,14 +48,21 @@ function initializePlots() {
     const plotContainers = document.querySelectorAll('.plot-container');
     plotContainers.forEach(container => {
       const plotId = container.getAttribute('data-plot-id');
-      if (!plotId) return; // Skip if no plot ID is set
+      if (!plotId) return;
       
-      const width = container.offsetWidth;
-      const height = width * (3/4); // Maintain 4:3 aspect ratio
+      // Get the container's dimensions
+      const rect = container.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
       
+      // Update the plot size
       Plotly.relayout(plotId, {
         'width': width,
-        'height': height
+        'height': height,
+        'margin.t': Math.min(60, height * 0.1),  // Responsive margins
+        'margin.b': Math.min(60, height * 0.1),
+        'margin.l': Math.min(60, width * 0.1),
+        'margin.r': Math.min(60, width * 0.1)
       });
     });
   }
@@ -64,39 +71,51 @@ function initializePlots() {
   const plotConfigs = [
     {
       id: 'temp-plot',
-    xaxis: { 
-      title: 'Temperature (°F)',
-      titlefont: { size: 14 }
-    },
-    yaxis: { 
-      title: 'Depth (ftm)', 
-      autorange: 'reversed',
-      titlefont: { size: 14 }
-    }
+      xaxis: { 
+        title: 'Temperature (°F)',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      },
+      yaxis: { 
+        title: 'Depth (ftm)', 
+        autorange: 'reversed',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      }
     },
     {
       id: 'sal-plot',
-    xaxis: { 
-      title: 'Salinity (PSU)',
-      titlefont: { size: 14 }
-    },
-    yaxis: { 
-      title: 'Depth (ftm)', 
-      autorange: 'reversed',
-      titlefont: { size: 14 }
-    }
+      xaxis: { 
+        title: 'Salinity (PSU)',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      },
+      yaxis: { 
+        title: 'Depth (ftm)', 
+        autorange: 'reversed',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      }
     },
     {
       id: 'dens-plot',
-    xaxis: { 
-      title: 'Density (kg/m³)',
-      titlefont: { size: 14 }
-    },
-    yaxis: { 
-      title: 'Depth (ftm)', 
-      autorange: 'reversed',
-      titlefont: { size: 14 }
-    }
+      xaxis: { 
+        title: 'Density (kg/m³)',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      },
+      yaxis: { 
+        title: 'Depth (ftm)', 
+        autorange: 'reversed',
+        titlefont: { size: 14 },
+        showgrid: true,
+        gridcolor: '#f0f0f0'
+      }
     }
   ];
 
@@ -111,16 +130,23 @@ function initializePlots() {
     // Set the data-plot-id attribute
     container.setAttribute('data-plot-id', config.id);
     
-    // Initialize the plot
+    // Initialize the plot with empty data
     Plotly.newPlot(config.id, [], {
       ...commonLayout,
       ...config
+    }, {
+      responsive: true,
+      displayModeBar: true,
+      displaylogo: false,
+      modeBarButtonsToRemove: ['lasso2d', 'select2d']
     });
   });
 
   // Add resize observer to handle container size changes
   const resizeObserver = new ResizeObserver(entries => {
-    resizePlots();
+    requestAnimationFrame(() => {
+      resizePlots();
+    });
   });
 
   // Observe all plot containers
@@ -129,10 +155,16 @@ function initializePlots() {
   });
 
   // Also listen for window resize events
-  window.addEventListener('resize', resizePlots);
+  window.addEventListener('resize', () => {
+    requestAnimationFrame(() => {
+      resizePlots();
+    });
+  });
 
   // Initial resize
-  resizePlots();
+  requestAnimationFrame(() => {
+    resizePlots();
+  });
 }
 
 async function plotCTDMeasurements(profileId, measurements, color) {

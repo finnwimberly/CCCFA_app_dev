@@ -96,7 +96,7 @@
 
 
     <section class="data-card">
-      <div id="map-container" style="height: 80vh;">
+      <div id="map-container">
         <div id="map">
           <!-- SST Legend Container -->
           <div id="sst-legend" style="display: none;"></div>
@@ -115,17 +115,34 @@
 
           <!-- FishBot Legend Container -->
           <div id="fishbot-legend" style="display: none;"></div>
+
+          <!-- Timeline Control -->
+          <div class="timeline-control" style="display: none;">
+              <div class="timeline-container">
+                  <div class="timeline-controls">
+                      <button id="timeline-prev" class="timeline-button" title="Previous Day">
+                          <i class="fas fa-chevron-left"></i>
+                      </button>
+                      <span id="timeline-date" class="timeline-date"></span>
+                      <button id="timeline-next" class="timeline-button" title="Next Day">
+                          <i class="fas fa-chevron-right"></i>
+                      </button>
+                  </div>
+              </div>
+          </div>
         </div>
         <div class="resize-handle"></div>
       </div>
 
-      <!-- Unit Selector -->
-      <div id="unit-selector" style="text-align: center; font-size: 16px; margin-top: 20px;">
-        <label style="font-weight: bold;">Select Unit System:</label>
-        <input type="radio" id="imperial" name="unit" value="imperial" checked />
-        <label for="imperial">Imperial (°F, fathoms)</label>
-        <input type="radio" id="metric" name="unit" value="metric" />
-        <label for="metric">Metric (°C, meters)</label>
+      <!-- Combined Timeline and Unit Selector -->
+      <div class="combined-control">
+          <div id="unit-selector" class="unit-selector">
+              <label>Select Unit System:</label>
+              <input type="radio" id="imperial" name="unit" value="imperial" checked />
+              <label for="imperial">Imperial (°F, fathoms)</label>
+              <input type="radio" id="metric" name="unit" value="metric" />
+              <label for="metric">Metric (°C, meters)</label>
+          </div>
       </div>
     </section>
 
@@ -180,6 +197,7 @@
   <script src="scripts/plots.js" type="module"></script>
   <script src="scripts/data-loading.js" type="module"></script>
   <script src="scripts/utils.js" type="module"></script>
+  <script src="scripts/timeline.js" type="module"></script>
 
   <style>
     .content-container {

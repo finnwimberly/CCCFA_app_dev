@@ -50,7 +50,7 @@ let ostiaAnomalyOverlay = L.tileLayer('', {
 });
 
 // Define bathymetry tile paths
-const bathymetryPaths = {
+const bathymetryLayers = {
   metric: '../data/bathymetry_tiles_m/{z}/{x}/{y}.png',
   imperial: '../data/bathymetry_tiles/{z}/{x}/{y}.png'
 };
@@ -64,7 +64,7 @@ function getSelectedUnitSystem() {
 
 function updateBathymetryLayer() {
   const unitSystem = getSelectedUnitSystem(); // Get selected unit
-  const newPath = bathymetryPaths[unitSystem]; // Determine new path
+  const newPath = bathymetryLayers[unitSystem]; // Determine new path
 
   console.log(`Updating bathymetry layer: ${unitSystem} -> ${newPath}`);
 
@@ -84,7 +84,8 @@ function updateBathymetryLayer() {
     opacity: 1,
     attribution: 'Bathymetry Data',
     noWrap: true,
-    className: 'bathymetryLayer'
+    className: 'bathymetryLayer',
+    zIndex: 1000
   });
 
   // **Only add back the bathymetry layer if it was already active**
@@ -94,14 +95,15 @@ function updateBathymetryLayer() {
 }
 
 // Initialize bathymetry layer with the default selection
-let bathymetryLayer = L.tileLayer(bathymetryPaths[getSelectedUnitSystem()], {
+let bathymetryLayer = L.tileLayer(bathymetryLayers[getSelectedUnitSystem()], {
   minZoom: 0,
   maxZoom: 11,
   tms: false,
   opacity: 1,
   attribution: 'Bathymetry Data',
   noWrap: true,
-  className: 'bathymetryLayer'
+  className: 'bathymetryLayer',
+  zIndex: 1000
 });
 
 // Add the bathymetry layer to the map by default
@@ -222,31 +224,27 @@ function createLegend(layerType, date) {
   let rangeFile;
   if (layerType === 'SST') {
     rangeFile = zoomLevel >= 8
-      ? `../data/SST/tiles/${date}/sst_range_local.json`
-      : `../data/SST/tiles/${date}/sst_range_global.json`;
+      ? getRangePath(layerType, date, true)
+      : getRangePath(layerType, date, false);
   } else if (layerType === 'SSS') {
     rangeFile = zoomLevel >= 8
-      ? `../data/SSS/tiles_mirrored/${date}/sss_range_local.json`
-      : `../data/SSS/tiles_mirrored/${date}/sss_range_global.json`;
+      ? getRangePath(layerType, date, true)
+      : getRangePath(layerType, date, false);
   } else if (layerType === 'CHL') {
     rangeFile = zoomLevel >= 8
-      ? `../data/CHL/tiles/${date}/chl_range_local.json`
-      : `../data/CHL/tiles/${date}/chl_range_global.json`;
+      ? getRangePath(layerType, date, true)
+      : getRangePath(layerType, date, false);
   } else if (layerType === 'OSTIA_SST') {
     rangeFile = zoomLevel >= 8
-      ? `../data/OSTIA_SST/tiles/${date}/sst_range_local.json`
-      : `../data/OSTIA_SST/tiles/${date}/sst_range_global.json`;
+      ? getRangePath(layerType, date, true)
+      : getRangePath(layerType, date, false);
   } else if (layerType === 'OSTIA_anomaly') {
     rangeFile = zoomLevel >= 8
-      ? `../data/OSTIA_anomaly/tiles/${date}/ssta_range_local.json`
-      : `../data/OSTIA_anomaly/tiles/${date}/ssta_range_global.json`;
+      ? getRangePath(layerType, date, true)
+      : getRangePath(layerType, date, false);
   }
 
-  const colormapFile = layerType === 'OSTIA_anomaly' 
-    ? `../data/OSTIA_anomaly/thermal_colormap.txt`
-    : layerType === 'OSTIA_SST'
-    ? `../data/OSTIA_SST/thermal_colormap.txt`
-    : `../data/${layerType}/thermal_colormap.txt`;
+  const colormapFile = getColormapPath(layerType, true);
 
   Promise.all([
     fetch(colormapFile).then((res) => res.text()),
@@ -433,6 +431,42 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
     }
   });
 });
+
+function getRangePath(layerType, date, isLocal = true) {
+    const basePath = '../data';
+    switch (layerType) {
+        case 'SST':
+            return `${basePath}/SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
+        case 'SSS':
+            return `${basePath}/SSS/tiles_mirrored/${date}/sss_range_${isLocal ? 'local' : 'global'}.json`;
+        case 'CHL':
+            return `${basePath}/CHL/tiles/${date}/chl_range_${isLocal ? 'local' : 'global'}.json`;
+        case 'OSTIA_SST':
+            return `${basePath}/OSTIA_SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
+        case 'OSTIA_anomaly':
+            return `${basePath}/OSTIA_anomaly/tiles/${date}/ssta_range_${isLocal ? 'local' : 'global'}.json`;
+        default:
+            return null;
+    }
+}
+
+function getColormapPath(layerType, isLocal = true) {
+    const basePath = '../data';
+    switch (layerType) {
+        case 'SST':
+            return isLocal ? `${basePath}/SST/thermal_colormap.txt` : `${basePath}/OSTIA_SST/thermal_map.txt`;
+        case 'SSS':
+            return `${basePath}/SSS/thermal_colormap.txt`;
+        case 'CHL':
+            return `${basePath}/CHL/thermal_colormap.txt`;
+        case 'OSTIA_SST':
+            return `${basePath}/OSTIA_SST/thermal_colormap.txt`;
+        case 'OSTIA_anomaly':
+            return `${basePath}/OSTIA_anomaly/thermal_colormap.txt`;
+        default:
+            return null;
+    }
+}
 
 function updateLayerPaths(date) {
   tileDate = date; // Update the global tileDate variable

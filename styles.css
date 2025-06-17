@@ -570,7 +570,7 @@ footer {
   position: relative;
   width: 100%;
   height: 80vh;
-  margin: var(--spacing-lg) 0;
+  margin-bottom: 0;
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: 0 4px 6px var(--shadow);
@@ -610,8 +610,8 @@ footer {
 #ostia-anomaly-legend,
 #fishbot-legend {
   position: absolute;
-  bottom: 20px;
-  left: 10px;
+  bottom: 0px;
+  left: 2px;
   background: var(--surface);
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
@@ -620,7 +620,8 @@ footer {
   min-width: 120px;
   max-width: 150px;
   height: auto;
-  min-height: 300px;
+  min-height: 250px;
+  max-height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -718,14 +719,20 @@ footer {
   padding: 6px;
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-  margin: 8px;
+  margin: 20px 8px 10px 8px; /* 20px top, 10px bottom */
   width: 25vw;
   min-width: 120px;
   max-width: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .control-container {
   width: 100%;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: calc(80vh - 30px); /* 20px top + 10px bottom */
+  padding: 10px 0;
 }
 
 .control-title {
@@ -783,6 +790,12 @@ footer {
   .leaflet-control.custom-control {
     width: 35vw; /* Increase width on smaller screens */
     min-width: 180px;
+    margin: 15px 8px 15px 8px; /* Normal margins for smaller screens */
+    max-height: calc(60vh - 60px); /* Use mobile map height (60vh) minus margins (30px each) */
+  }
+  
+  .control-container {
+    padding-bottom: 8px; /* Reduced internal padding */
   }
   
   .source-filters, .layer-grid {
@@ -795,6 +808,12 @@ footer {
   .leaflet-control.custom-control {
     width: 45vw; /* Further increase width on very small screens */
     min-width: 160px;
+    margin: 10px 8px 10px 8px; /* Normal margins for very small screens */
+    max-height: calc(50vh - 40px); /* Use small screen map height (50vh) minus margins (20px each) */
+  }
+  
+  .control-container {
+    padding-bottom: 6px; /* Minimal internal padding */
   }
 }
 
@@ -991,39 +1010,62 @@ footer {
   margin-right: 5px;
 }
 
-.plot-container {
+/* .plot-container {
   width: 100%;
   aspect-ratio: 4/3;
   min-height: 250px;
   position: relative;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 4px var(--shadow);
+} */
+
+.plot-container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+  background: white;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 /* Plots layout */
 #plots {
   margin-top: 10px;
   margin-bottom: 25px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   width: 100%;
   height: fit-content;
 }
 
-.plot-container {
-  flex: 0 0 calc(33.333% - 14px);
-  min-width: 300px;
-  max-width: 600px;
-  aspect-ratio: 4/3;
-  box-sizing: border-box;
-  margin: 0 auto;
-}
-
-/* Ensure plots maintain aspect ratio and scale properly */
+/* Ensure plots fill their containers */
 .plot-container .js-plotly-plot {
   width: 100% !important;
   height: 100% !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  #plots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  #plots {
+    grid-template-columns: 1fr;
+  }
+  
+  .plot-container {
+    min-height: 350px;
+  }
 }
 
 /* Daterangepicker calendar styles */
@@ -1208,14 +1250,20 @@ footer {
     margin: 0;
     height: 400px;
     border-radius: var(--radius-md);
-    box-shadow: 0 2px 4px var(--shadow);
+    overflow: hidden;
 }
 
 /* Unit Selector Styles */
-.unit-selector {
+#unit-selector {
+    position: relative;
     text-align: center;
-    font-size: 1rem;
-    margin: var(--spacing-lg) 0;
+    font-size: 16px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 4px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
 }
 
 .unit-selector label {
@@ -1261,4 +1309,230 @@ footer {
 
 .data-image:last-child {
     margin-bottom: 0;
+}
+
+/* Timeline Control Styles */
+.timeline-control {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    min-width: 250px;
+    max-width: 450px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    padding: 6px;
+    box-sizing: border-box;
+    display: none; /* Hidden by default */
+    z-index: 1001; /* Above legends but below modals */
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 6px;
+}
+
+.timeline-button {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 28px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+    z-index: 1002;
+    pointer-events: auto;
+    font-weight: 500;
+}
+
+.timeline-button:hover {
+    background: var(--accent);
+    transform: translateY(-1px);
+}
+
+.timeline-button:active {
+    transform: translateY(0);
+}
+
+.timeline-button i {
+    color: white;
+    font-size: 12px;
+}
+
+.timeline-date {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    min-width: 90px;
+    text-align: center;
+    padding: 4px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .timeline-control {
+        width: 70%;
+        min-width: 220px;
+        bottom: 20px;
+        padding: 5px;
+    }
+    
+    .timeline-controls {
+        padding: 0 5px;
+        gap: 6px;
+    }
+    
+    .timeline-button {
+        width: 26px;
+        height: 22px;
+    }
+    
+    .timeline-button i {
+        font-size: 11px;
+    }
+    
+    .timeline-date {
+        font-size: 11px;
+        min-width: 80px;
+        padding: 3px 6px;
+    }
+    
+
+}
+
+@media (max-width: 480px) {
+    .timeline-control {
+        width: 80%;
+        min-width: 200px;
+        bottom: 20px;
+        padding: 4px;
+    }
+    
+    .timeline-controls {
+        padding: 0 4px;
+        gap: 5px;
+    }
+    
+    .timeline-button {
+        width: 24px;
+        height: 20px;
+    }
+    
+    .timeline-button i {
+        font-size: 10px;
+    }
+    
+    .timeline-date {
+        font-size: 10px;
+        min-width: 75px;
+        padding: 2px 5px;
+    }
+    
+
+}
+
+/* Update the data-card containing the map to handle the controls */
+.data-card:has(#map-container) {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+}
+
+/* Combined Control Styles */
+.combined-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 20px;
+    box-sizing: border-box;
+    gap: 10px;
+}
+
+.unit-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unit-selector label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.unit-selector input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .combined-control {
+        gap: 10px;
+    }
+}
+
+#map .timeline-control {
+  z-index: 1002; /* Ensure it appears above other elements */
+}
+
+/* Ensure bathymetry tiles are always on top */
+.leaflet-tile-pane .bathymetryLayer {
+  z-index: 1000 !important;
+}
+
+.leaflet-layer.bathymetryLayer {
+  z-index: 1000 !important;
+}
+
+/* Move Leaflet attribution to top left near zoom buttons */
+.leaflet-control-attribution {
+    position: absolute !important;
+    top: 10px !important;
+    left: auto !important;
+    left: 50px !important; /* Move further to the right */
+    bottom: auto !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    padding: 4px 4px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.0) !important;
+    z-index: 1000 !important;
+    display: block !important;
+    visibility: visible !important;
+    white-space: nowrap !important; /* Keep text on single line */
+    max-width: none !important;
+    width: auto !important;
+}
+
+/* Adjust attribution text styling */
+.leaflet-control-attribution a {
+    color: var(--text-secondary) !important;
+    text-decoration: none !important;
+}
+
+.leaflet-control-attribution a:hover {
+    color: var(--primary) !important;
+    text-decoration: underline !important;
 }

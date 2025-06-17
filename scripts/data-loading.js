@@ -1,10 +1,10 @@
 // Function to load metadata from the CSV and filter profiles by date
 function loadProfilesMetadata(startDate, endDate, dataType = 'CTD') {
-  const dataPath = dataType === 'CTD' 
+  const metadataPath = dataType === 'CTD' 
     ? '../data/CTD_profiles/metadata.csv'
     : '../data/EMOLT/metadata.csv';
 
-  console.log(`Loading ${dataType} profiles from:`, dataPath);
+  console.log(`Loading ${dataType} profiles from:`, metadataPath);
   console.log('Date range:', startDate, 'to', endDate);
 
   // Parse input dates with explicit format
@@ -12,7 +12,7 @@ function loadProfilesMetadata(startDate, endDate, dataType = 'CTD') {
   const parsedEndDate = moment(endDate, 'YYYY-MM-DD');
 
   return new Promise((resolve, reject) => {
-    Papa.parse(dataPath, {
+    Papa.parse(metadataPath, {
       download: true,
       header: true,
       complete: (results) => {
@@ -35,14 +35,14 @@ function loadProfilesMetadata(startDate, endDate, dataType = 'CTD') {
 
 // Function to load measurement data from a CSV for a specific profile ID
 function loadMeasurementData(profileId, dataType = 'CTD') {
-  const filePath = dataType === 'CTD'
+  const measurementsPath = dataType === 'CTD'
     ? `../data/CTD_profiles/${profileId}_measurements.csv`
     : `../data/EMOLT/${profileId}_measurements.csv`;
 
-  console.log(`Loading measurements from: ${filePath}`);  // Add logging to help debug
+  console.log(`Loading measurements from: ${measurementsPath}`);  // Add logging to help debug
 
   return new Promise((resolve, reject) => {
-    Papa.parse(filePath, {
+    Papa.parse(measurementsPath, {
       download: true,
       header: true,
       complete: (results) => {
