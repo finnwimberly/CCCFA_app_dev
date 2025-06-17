@@ -1359,9 +1359,9 @@ function displayToFolderDate(displayDate) {
     // displayDate: MM/DD/YYYY
     const [mm, dd, yyyy] = displayDate.split(/[\/]/);
     const date = new Date(`${yyyy}-${mm}-${dd}`);
-    const start = new Date(date.getFullYear(), 0, 0);
+    const start = new Date(date.getFullYear(), 0, 1); // January 1st of the year
     const diff = date - start;
     const oneDay = 1000 * 60 * 60 * 24;
-    const day = Math.floor(diff / oneDay);
+    const day = Math.floor(diff / oneDay) + 1; // Add 1 because day 1 is January 1st
     return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
