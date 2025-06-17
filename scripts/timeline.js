@@ -43,7 +43,7 @@ function displayToFolderDate(displayDate) {
 // Fetch available dates from the JSON file
 async function fetchAvailableDates() {
     try {
-        const response = await fetch('/data/processed_data/OSTIA_SST/sst_dates.txt');
+        const response = await fetch('../data/OSTIA_SST/sst_dates.txt');
         if (!response.ok) {
             throw new Error('Failed to fetch available dates');
         }
