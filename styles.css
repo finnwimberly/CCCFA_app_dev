@@ -1253,26 +1253,23 @@ footer {
     overflow: hidden;
 }
 
-/* Unit Selector Styles */
-#unit-selector {
-    position: relative;
-    text-align: center;
-    font-size: 16px;
-    margin-top: 1px;
-    margin-bottom: 1px;
-    padding: 4px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
+/* Unit Selector Styles (consolidated and centered) */
+.unit-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
 }
 
 .unit-selector label {
-    font-weight: 600;
-    margin-right: var(--spacing-md);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-right: 0;
 }
 
 .unit-selector input[type="radio"] {
-    margin-right: var(--spacing-xs);
+    margin-right: 5px;
 }
 
 /* Media Queries */
@@ -1469,32 +1466,6 @@ footer {
     margin-top: 20px;
     box-sizing: border-box;
     gap: 10px;
-}
-
-.unit-selector {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.unit-selector label {
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.unit-selector input[type="radio"] {
-    margin-right: 5px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .combined-control {
-        gap: 10px;
-    }
-}
-
-#map .timeline-control {
-  z-index: 1002; /* Ensure it appears above other elements */
 }
 
 /* Ensure bathymetry tiles are always on top */
