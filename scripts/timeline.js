@@ -84,8 +84,26 @@ async function initializeTimeline() {
     const prevButton = document.getElementById('timeline-prev');
     const nextButton = document.getElementById('timeline-next');
     const layerDateInput = document.getElementById('layer-date');
+    const timelineSlider = document.getElementById('timeline-slider');
+    const sliderStartDate = document.querySelector('.slider-start-date');
+    const sliderEndDate = document.querySelector('.slider-end-date');
     
     console.log('Layer date input value on init:', layerDateInput.value);
+    
+    // Initialize slider
+    if (timelineSlider) {
+        timelineSlider.min = 0;
+        timelineSlider.max = availableDates.length - 1;
+        timelineSlider.value = 0;
+        
+        // Set slider labels
+        if (sliderStartDate && sliderEndDate && availableDates.length > 0) {
+            const startDate = folderDateToDisplay(availableDates[0]);
+            const endDate = folderDateToDisplay(availableDates[availableDates.length - 1]);
+            sliderStartDate.textContent = startDate;
+            sliderEndDate.textContent = endDate;
+        }
+    }
     
     // Function to update timeline position based on a date
     function updateTimelinePosition(date) {
@@ -94,6 +112,10 @@ async function initializeTimeline() {
         if (newIndex !== -1) {
             currentDateIndex = newIndex;
             updateTimelineDisplay();
+            // Update slider position
+            if (timelineSlider) {
+                timelineSlider.value = currentDateIndex;
+            }
             return true;
         }
         return false;
@@ -155,6 +177,10 @@ async function initializeTimeline() {
                 layerDateInput.value = folderDateToDisplay(closestDate);
                 console.log('Set closest date to display format:', layerDateInput.value);
                 updateTimelineDisplay();
+                // Update slider position
+                if (timelineSlider) {
+                    timelineSlider.value = currentDateIndex;
+                }
             }
         } else {
             // Date was found, ensure input is in display format
@@ -162,6 +188,28 @@ async function initializeTimeline() {
             console.log('Date found, set input to display format:', layerDateInput.value);
         }
     });
+    
+    // Slider event listener
+    if (timelineSlider) {
+        timelineSlider.addEventListener('input', (e) => {
+            const newIndex = parseInt(e.target.value);
+            if (newIndex !== currentDateIndex) {
+                currentDateIndex = newIndex;
+                updateDate();
+                console.log('Slider moved to index:', currentDateIndex);
+            }
+        });
+        
+        // Prevent map interactions on slider
+        timelineSlider.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
+        timelineSlider.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+    }
     
     // Previous/Next button click handlers with map zoom prevention
     prevButton.addEventListener('click', (e) => {
@@ -290,6 +338,7 @@ function openCalendarPopup(e) {
 function updateDate() {
     const currentDate = availableDates[currentDateIndex];
     const layerDateInput = document.getElementById('layer-date');
+    const timelineSlider = document.getElementById('timeline-slider');
     const newDate = convertDateFormat(currentDate, true);
     // Always set the visible value to MM/DD/YYYY
     layerDateInput.value = folderDateToDisplay(currentDate);
@@ -303,6 +352,11 @@ function updateDate() {
     // Update layer paths (use folder format)
     updateLayerPaths(newDate);
     updateTimelineDisplay();
+    
+    // Update slider position
+    if (timelineSlider) {
+        timelineSlider.value = currentDateIndex;
+    }
 }
 
 // Export functions for use in other modules
