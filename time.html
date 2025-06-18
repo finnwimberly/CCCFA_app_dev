@@ -716,18 +716,19 @@
 
                         const traces = profiles.map(profile => {
                             const date = new Date(profile.Date);
-                            const normalizedDate = (date - minDate) / (maxDate - minDate);
-
-                            // Use a colormap to determine the color
-                            const color = d3.interpolateTurbo(normalizedDate);
+                            const dayOfMonth = date.getDate();
+                            const normalizedDay = (dayOfMonth - 1) / 30;
+                            const color = d3.interpolateTurbo(normalizedDay);
+                            const dateString = date.toLocaleDateString();
 
                             return {
                                 y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
                                 x: profile[info.data].map(v => info.convert(v)),
                                 type: 'scatter',
                                 mode: 'lines',
-                                name: new Date(profile.Date).toLocaleDateString(),
-                                line: { width: 1, color: color }
+                                name: dateString,
+                                line: { width: 1, color: color },
+                                hovertemplate: `Date: ${dateString}<br>X: %{x}<br>Y: %{y}<extra></extra>`
                             };
                         });
 
