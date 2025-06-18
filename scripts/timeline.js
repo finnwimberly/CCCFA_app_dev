@@ -42,7 +42,7 @@ function displayToFolderDate(displayDate) {
     return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
 
-// Fetch available dates from the JSON file
+//  available dates from the JSON file
 async function fetchAvailableDates() {
     try {
         const response = await fetch('../data/OSTIA_SST/sst_dates.txt');
@@ -208,6 +208,12 @@ async function initializeTimeline() {
         timelineSlider.addEventListener('dblclick', (e) => {
             e.stopPropagation();
             e.preventDefault();
+        });
+
+        ['mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'pointermove'].forEach(eventType => {
+            timelineSlider.addEventListener(eventType, e => {
+                e.stopPropagation();
+            });
         });
     }
     
