@@ -165,7 +165,7 @@
         <section id="ctd-profiles" class="data-card">
             <h2>CTD Profiles by Region</h2>
             <p class="caption">Select a region to view monthly CTD profiles for temperature, salinity, and density.
-                The regions referenced here are the same as those used in the anomaly plots above.
+                The regions referenced here are the same as those used in the anomaly plots above. **You can scroll to the right to view more months.**
             </p>
             
             <!-- Region Selector -->
@@ -698,14 +698,27 @@
                         };
                         Plotly.newPlot(plotDiv, [], layout);
                     } else {
-                        const traces = profiles.map(profile => ({
-                            y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
-                            x: profile[info.data].map(v => info.convert(v)),
-                            type: 'scatter',
-                            mode: 'lines',
-                            name: new Date(profile.Date).toLocaleDateString(),
-                            line: { width: 1 }
-                        }));
+                        // Determine the date range for the month
+                        const dates = profiles.map(profile => new Date(profile.Date));
+                        const minDate = Math.min(...dates);
+                        const maxDate = Math.max(...dates);
+
+                        const traces = profiles.map(profile => {
+                            const date = new Date(profile.Date);
+                            const normalizedDate = (date - minDate) / (maxDate - minDate);
+
+                            // Use a colormap to determine the color
+                            const color = Plotly.d3.interpolateViridis(normalizedDate);
+
+                            return {
+                                y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
+                                x: profile[info.data].map(v => info.convert(v)),
+                                type: 'scatter',
+                                mode: 'lines',
+                                name: new Date(profile.Date).toLocaleDateString(),
+                                line: { width: 1, color: color }
+                            };
+                        });
 
                         const layout = {
                             title: `${month} ${year}`,
