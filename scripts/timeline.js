@@ -19,7 +19,6 @@ function convertDateFormat(date, toLayerFormat = true) {
 
 // Helper function to convert folder date (YYYY_DDD or YYYYDDD) to MM/DD/YYYY
 function folderDateToDisplay(date) {
-    console.log('=== FIXED VERSION 3 ACTIVE === folderDateToDisplay called with:', date);
     let y = date.slice(0, 4);
     let d = parseInt(date.slice(-3), 10);
     // Create date by adding days to January 1st of the year
@@ -28,14 +27,11 @@ function folderDateToDisplay(date) {
     let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
     let dd = String(jsDate.getDate()).padStart(2, '0');
     let yyyy = jsDate.getFullYear();
-    const result = `${mm}/${dd}/${yyyy}`;
-    console.log('=== FIXED VERSION 3 === folderDateToDisplay result:', result);
-    return result;
+    return `${mm}/${dd}/${yyyy}`;
 }
 
 // Helper to convert MM/DD/YYYY to YYYY_DDD
 function displayToFolderDate(displayDate) {
-    console.log('=== FIXED VERSION 3 ACTIVE === displayToFolderDate called with:', displayDate);
     // displayDate: MM/DD/YYYY
     const [mm, dd, yyyy] = displayDate.split(/[\/]/);
     const date = new Date(`${yyyy}-${mm}-${dd}`);
@@ -43,9 +39,7 @@ function displayToFolderDate(displayDate) {
     const diff = date - start;
     const oneDay = 1000 * 60 * 60 * 24;
     const day = Math.round(diff / oneDay) + 1; // Add 1 because difference is 0-based
-    const result = `${yyyy}_${String(day).padStart(3, '0')}`;
-    console.log('=== FIXED VERSION 3 === displayToFolderDate result:', result);
-    return result;
+    return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
 
 // Fetch available dates from the JSON file
