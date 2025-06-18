@@ -719,7 +719,7 @@
                             const normalizedDate = (date - minDate) / (maxDate - minDate);
 
                             // Use a colormap to determine the color
-                            const color = d3.Turbo(normalizedDate);
+                            const color = d3.interpolateTurbo(normalizedDate);
 
                             return {
                                 y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
