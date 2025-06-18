@@ -165,7 +165,7 @@
         <section id="ctd-profiles" class="data-card">
             <h2>CTD Profiles by Region</h2>
             <p class="caption">Select a region to view monthly CTD profiles for temperature, salinity, and density.
-                The regions referenced here are the same as those used in the anomaly plots above. **You can scroll to the right to view more months.**
+                The regions referenced here are the same as those used in the anomaly plots above. <b>You can scroll to the right to view more months.</b>
             </p>
             
             <!-- Region Selector -->
@@ -337,6 +337,7 @@
     <script src="https://cdn.plot.ly/plotly-2.27.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3.0.0/dist/d3-scale-chromatic.min.js"></script>
     <script type="module">
         import { loadProfilesMetadata, loadMeasurementData } from './scripts/data-loading.js';
 
@@ -708,7 +709,7 @@
                             const normalizedDate = (date - minDate) / (maxDate - minDate);
 
                             // Use a colormap to determine the color
-                            const color = Plotly.d3.interpolateViridis(normalizedDate);
+                            const color = d3.interpolateViridis(normalizedDate);
 
                             return {
                                 y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
