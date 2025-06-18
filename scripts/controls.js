@@ -167,7 +167,7 @@ const CombinedControl = L.Control.extend({
 });
 
 // Remove the old controls and add the new combined control
-map.addControl(new CombinedControl({ position: 'topright' }));
+map.addControl(new CombinedControl({ position: 'topleft' }));
 
 // Create info modal
 const infoModal = `
@@ -1343,27 +1343,3 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTimeline();
     // ... any other initialization code ...
 });
-
-// Helper function to convert folder date (YYYY_DDD or YYYYDDD) to MM/DD/YYYY
-function folderDateToDisplay(date) {
-    let y = date.slice(0, 4);
-    let d = parseInt(date.slice(-3), 10);
-    // Create date by adding days to January 1st of the year
-    let jsDate = new Date(y, 0, 1); // January 1st
-    jsDate.setDate(jsDate.getDate() + d - 1); // Subtract 1 because day 1 is January 1st
-    let mm = String(jsDate.getMonth() + 1).padStart(2, '0');
-    let dd = String(jsDate.getDate()).padStart(2, '0');
-    let yyyy = jsDate.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
-}
-// Helper to convert MM/DD/YYYY to YYYY_DDD
-function displayToFolderDate(displayDate) {
-    // displayDate: MM/DD/YYYY
-    const [mm, dd, yyyy] = displayDate.split(/[\/]/);
-    const date = new Date(`${yyyy}-${mm}-${dd}`);
-    const start = new Date(date.getFullYear(), 0, 1); // January 1st of the year
-    const diff = date - start;
-    const oneDay = 1000 * 60 * 60 * 24;
-    const day = Math.floor(diff / oneDay) + 1; // Add 1 because difference is 0-based
-    return `${yyyy}_${String(day).padStart(3, '0')}`;
-}

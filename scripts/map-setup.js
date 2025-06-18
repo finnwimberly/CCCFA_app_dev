@@ -6,8 +6,8 @@ const map = L.map('map', {
   zoom: 7,                   // Initial zoom level
   crs: L.CRS.EPSG3857,       // Use standard Web Mercator CRS
   scrollWheelZoom: false,    // Disable zooming with scroll wheel
-  zoomControl: true,         // Add default zoom controls
-  attributionControl: true   // Enable attribution control
+  zoomControl: false,        // Disable default zoom controls (we'll add them manually)
+  attributionControl: false  // Disable default attribution control (we'll add it manually)
 });
 
 // Old base layer
@@ -22,8 +22,29 @@ const oceanBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/
     maxZoom: 13
 }).addTo(map);
 
-// Move attribution control to bottom left
-map.attributionControl.setPosition('topleft');
+// Add zoom control to top right
+L.control.zoom({
+  position: 'topright'
+}).addTo(map);
+
+// Create custom attribution control and add it to the attribution container
+const attributionContainer = document.getElementById('map-attribution-container');
+if (attributionContainer) {
+  const attribution = L.control.attribution({
+    position: 'bottomleft'
+  });
+  
+  // Add attribution content
+  attribution.addAttribution('Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri');
+  attribution.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
+  
+  // Add the attribution control to the container instead of the map
+  attribution.addTo(map);
+  
+  // Move the attribution element to our custom container
+  const attributionElement = attribution.getContainer();
+  attributionContainer.appendChild(attributionElement);
+}
 
 // Initialize resize functionality
 const mapContainer = document.getElementById('map-container');

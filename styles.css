@@ -441,11 +441,14 @@ footer {
     height: 60vh;
   }
   
-  .leaflet-control.custom-control {
+  /* .leaflet-control.custom-control {
     width: 90vw;
     max-width: none;
     min-width: auto;
-  }
+    left: 0 !important;
+    right: auto !important;
+    position: absolute !important;
+  } */
   
   #plots {
     grid-template-columns: 1fr;
@@ -529,6 +532,11 @@ footer {
   .leaflet-control.custom-control {
     width: 45vw;
     min-width: 160px;
+    margin: 10px 8px 10px 8px;
+    max-height: calc(50vh - 60px);
+    left: 0 !important;
+    right: auto !important;
+    position: absolute !important;
   }
 }
 
@@ -611,7 +619,7 @@ footer {
 #fishbot-legend {
   position: absolute;
   bottom: 0px;
-  left: 2px;
+  right: 2px;
   background: var(--surface);
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
@@ -658,7 +666,7 @@ footer {
     max-width: 130px;
     min-height: 300px;
     bottom: 10px;
-    left: 10px;
+    right: 10px;
   }
 }
 
@@ -673,7 +681,7 @@ footer {
     max-width: 120px;
     min-height: 300px;
     bottom: 5px;
-    left: 5px;
+    right: 5px;
   }
 }
 
@@ -725,6 +733,9 @@ footer {
   max-width: 200px;
   display: flex;
   flex-direction: column;
+  left: 0 !important;
+  right: auto !important;
+  position: absolute !important;
 }
 
 .control-container {
@@ -792,6 +803,9 @@ footer {
     min-width: 180px;
     margin: 15px 8px 15px 8px; /* Normal margins for smaller screens */
     max-height: calc(60vh - 60px); /* Use mobile map height (60vh) minus margins (30px each) */
+    left: 0 !important;
+    right: auto !important;
+    position: absolute !important;
   }
   
   .control-container {
@@ -810,6 +824,9 @@ footer {
     min-width: 160px;
     margin: 10px 8px 10px 8px; /* Normal margins for very small screens */
     max-height: calc(50vh - 40px); /* Use small screen map height (50vh) minus margins (20px each) */
+    left: 0 !important;
+    right: auto !important;
+    position: absolute !important;
   }
   
   .control-container {
@@ -1265,7 +1282,7 @@ footer {
 .unit-selector label {
     font-weight: 500;
     color: var(--text-secondary);
-    margin-right: 0;
+    margin: 8px 5px;
 }
 
 .unit-selector input[type="radio"] {
@@ -1311,7 +1328,7 @@ footer {
 /* Timeline Control Styles */
 .timeline-control {
     position: absolute;
-    bottom: 10px;
+    top: 10px;
     left: 50%;
     transform: translateX(-50%);
     width: 50%;
@@ -1459,7 +1476,7 @@ footer {
     .timeline-control {
         width: 70%;
         min-width: 220px;
-        bottom: 20px;
+        top: 20px;
         padding: 5px;
     }
     
@@ -1490,7 +1507,7 @@ footer {
     .timeline-control {
         width: 80%;
         min-width: 200px;
-        bottom: 20px;
+        top: 20px;
         padding: 4px;
     }
     
@@ -1531,8 +1548,8 @@ footer {
     align-items: center;
     background: white;
     border-radius: 8px;
-    padding: 10px 15px;
-    margin-top: 20px;
+    padding: 4px 15px;
+    margin-top: 4px;
     box-sizing: border-box;
     gap: 10px;
 }
@@ -1546,35 +1563,46 @@ footer {
   z-index: 1000 !important;
 }
 
-/* Move Leaflet attribution to top left near zoom buttons */
-.leaflet-control-attribution {
-    position: absolute !important;
-    top: 10px !important;
-    left: auto !important;
-    left: 50px !important; /* Move further to the right */
-    bottom: auto !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    padding: 4px 4px !important;
-    font-size: 11px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.0) !important;
-    z-index: 1000 !important;
-    display: block !important;
-    visibility: visible !important;
-    white-space: nowrap !important; /* Keep text on single line */
-    max-width: none !important;
-    width: auto !important;
+/* Map Attribution Container */
+#map-attribution-container {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: left;
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+  border: none;
 }
 
-/* Adjust attribution text styling */
-.leaflet-control-attribution a {
-    color: var(--text-secondary) !important;
-    text-decoration: none !important;
+#map-attribution-container a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
 }
 
-.leaflet-control-attribution a:hover {
-    color: var(--primary) !important;
-    text-decoration: underline !important;
+#map-attribution-container a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Style the Leaflet attribution control when it's in our custom container */
+#map-attribution-container .leaflet-control-attribution {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  position: static !important;
+  display: block !important;
+  visibility: visible !important;
+  white-space: normal !important;
+  max-width: none !important;
+  width: auto !important;
 }
 
 /* Scoped hyperlink styles for main content area */
