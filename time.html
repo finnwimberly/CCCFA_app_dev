@@ -182,13 +182,12 @@
 
             <!-- Plot Grid Explanation and Colorbar -->
             <p class="caption">
-                <strong>Line color indicates the date within the month (Plotly3 colormap: early = blue, late = pink).</strong>
+                <strong>Line color indicates the day of the month:</strong>
             </p>
-            <div style="margin: 8px 0 16px 0;">
+            <div style="margin: 8px 0 16px 0; text-align: center;">
                 <span style="font-size: 0.9em;">Early</span>
-                <span style="display: inline-block; width: 120px; height: 16px; vertical-align: middle; background: linear-gradient(to right, #3969ac, #e170b2); margin: 0 8px;"></span>
+                <span style="display: inline-block; width: 120px; height: 16px; vertical-align: middle; background: linear-gradient(to right, #30123b, #1e63b5, #29c6b1, #f7e225, #fc6a2c, #b0003a); margin: 0 8px;"></span>
                 <span style="font-size: 0.9em;">Late</span>
-                <span style="font-size: 0.9em; color: #888;">(Plotly3 colormap)</span>
             </div>
             <!-- Plot Grid -->
             <div class="ctd-plot-grid">
@@ -720,7 +719,7 @@
                             const normalizedDate = (date - minDate) / (maxDate - minDate);
 
                             // Use a colormap to determine the color
-                            const color = d3.Plotly3(normalizedDate);
+                            const color = d3.Turbo(normalizedDate);
 
                             return {
                                 y: profile.depth.map(d => convertUnits(d, 'depth', isImperial)),
