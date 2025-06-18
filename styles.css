@@ -1507,3 +1507,24 @@ footer {
     color: var(--primary) !important;
     text-decoration: underline !important;
 }
+
+/* Scoped hyperlink styles for main content area */
+.content-container a {
+  color: #0074d9; /* Blue */
+  text-decoration: none;
+  font-weight: normal;
+  transition: color 0.2s, font-weight 0.2s;
+}
+
+.content-container a:hover,
+.content-container a:focus {
+  color: #0056b3; /* Slightly darker blue on hover */
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.content-container a:visited {
+  color: #0074d9; /* Keep visited links blue */
+  text-decoration: none;
+  font-weight: normal;
+}
