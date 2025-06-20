@@ -1328,7 +1328,7 @@ footer {
 /* Timeline Control Styles */
 .timeline-control {
     position: absolute;
-    top: 16px;
+    top: 10px;
     left: calc(200px + 24px); /* 200px for control panel width, 24px gap */
     right: 64px; /* 64px gap from right edge/zoom buttons */
     min-width: 250px;
