@@ -1328,19 +1328,18 @@ footer {
 /* Timeline Control Styles */
 .timeline-control {
     position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50%;
+    top: 16px;
+    left: calc(200px + 24px); /* 200px for control panel width, 24px gap */
+    right: 64px; /* 64px gap from right edge/zoom buttons */
     min-width: 250px;
-    max-width: 450px;
+    max-width: none;
     background: white;
     border-radius: 4px;
     box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-    padding: 6px;
+    padding: 6px 16px;
     box-sizing: border-box;
-    display: none; /* Hidden by default */
-    z-index: 1001; /* Above legends but below modals */
+    z-index: 1001;
+    display: block;
 }
 
 .timeline-container {
@@ -1472,66 +1471,23 @@ footer {
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .timeline-control {
-        width: 70%;
-        min-width: 220px;
-        top: 20px;
-        padding: 5px;
+        left: 8px;
+        right: 8px;
+        min-width: 120px;
+        padding: 4px 4px;
     }
-    
-    .timeline-controls {
-        padding: 0 5px;
-        gap: 6px;
-    }
-    
-    .timeline-button {
-        width: 26px;
-        height: 22px;
-    }
-    
-    .timeline-button i {
-        font-size: 11px;
-    }
-    
-    .timeline-date {
-        font-size: 11px;
-        min-width: 80px;
-        padding: 3px 6px;
-    }
-    
-
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .timeline-control {
-        width: 80%;
-        min-width: 200px;
-        top: 20px;
-        padding: 4px;
+        left: 2px;
+        right: 2px;
+        min-width: 80px;
+        padding: 2px 2px;
+        top: 8px;
     }
-    
-    .timeline-controls {
-        padding: 0 4px;
-        gap: 5px;
-    }
-    
-    .timeline-button {
-        width: 24px;
-        height: 20px;
-    }
-    
-    .timeline-button i {
-        font-size: 10px;
-    }
-    
-    .timeline-date {
-        font-size: 10px;
-        min-width: 75px;
-        padding: 2px 5px;
-    }
-    
-
 }
 
 /* Update the data-card containing the map to handle the controls */
