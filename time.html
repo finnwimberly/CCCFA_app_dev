@@ -398,12 +398,18 @@
 
                         // Calculate 130-day rolling mean
                         const windowSize = 130;
+                        const halfWindow = Math.floor(windowSize / 2);
                         const rollingMean = [];
                         for (let i = 0; i < values.length; i++) {
-                            const start = Math.max(0, i - Math.floor(windowSize / 2));
-                            const end = Math.min(values.length, i + Math.floor(windowSize / 2) + 1);
-                            const window = values.slice(start, end);
-                            rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                            if (i < halfWindow || i > values.length - halfWindow - 1) {
+                                // Not enough data for a full window, set to null
+                                rollingMean.push(null);
+                            } else {
+                                const start = i - halfWindow;
+                                const end = i + halfWindow + 1;
+                                const window = values.slice(start, end);
+                                rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                            }
                         }
 
                         // Create traces
