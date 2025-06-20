@@ -117,11 +117,6 @@ const CombinedControl = L.Control.extend({
                     <i class="fas fa-chevron-down collapse-icon"></i>
                 </div>
                 <div class="collapsible-content" id="layer-content">
-            <div class="control-item">
-                <label class="control-section-label">Layer date:</label>
-                <input type="text" id="layer-date" name="layer-date" 
-                    class="control-input" />
-            </div>
                     <div class="control-item">
                         <div class="collapsible-header sub-header">
                     <label class="control-section-label">Surface Layers:</label>
