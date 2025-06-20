@@ -1478,25 +1478,14 @@ footer {
     transform: scale(1.1);
 }
 
-.timeline-slider-labels {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    padding: 0 8px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-top: 2px;
-    width: 100%;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-}
-
 .slider-start-date,
 .slider-end-date {
-    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    align-self: center;
+    margin: 0 2px;
 }
 
 /* Responsive adjustments */
