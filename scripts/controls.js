@@ -111,9 +111,7 @@ const CombinedControl = L.Control.extend({
             <!-- Layer Control Section -->
             <div class="control-section">
                 <div class="collapsible-header">
-                    <label class="control-section-label">Layer Control
-                <i id="info-icon" class="fas fa-info-circle" title="Info"></i>
-                    </label>
+                    <label class="control-section-label">Layer Control</label>
                     <i class="fas fa-chevron-down collapse-icon"></i>
                 </div>
                 <div class="collapsible-content" id="layer-content">
