@@ -62,12 +62,8 @@ async function fetchAvailableDates() {
 async function initializeTimeline() {
     console.log('Initializing timeline...');
     
-    // Immediately hide the timeline control at the start of initialization
     const timelineControl = document.querySelector('.timeline-control');
-    if (timelineControl) {
-        timelineControl.style.display = 'none';
-        console.log('Timeline control hidden at initialization');
-    } else {
+    if (!timelineControl) {
         console.log('Timeline control not found during initialization');
     }
     
@@ -128,23 +124,10 @@ async function initializeTimeline() {
         // Always set input to display format
         layerDateInput.value = folderDateToDisplay(availableDates[currentDateIndex]);
         updateTimelineDisplay();
-        timelineControl.style.display = 'block';
         console.log('Timeline control shown because date exists');
     } else {
-        console.log('No date found, keeping timeline hidden');
+        console.log('No date found, timeline still visible');
     }
-    
-    // Show timeline control when a date is explicitly selected
-    layerDateInput.addEventListener('change', () => {
-        console.log('Date change event triggered, new value:', layerDateInput.value);
-        if (layerDateInput.value && layerDateInput.value.trim() !== '') {
-            console.log('Date changed, showing timeline control');
-            timelineControl.style.display = 'block';
-        } else {
-            console.log('No date selected, hiding timeline control');
-            timelineControl.style.display = 'none';
-        }
-    });
     
     // Listen for layer date changes (from calendar or direct input)
     layerDateInput.addEventListener('change', () => {

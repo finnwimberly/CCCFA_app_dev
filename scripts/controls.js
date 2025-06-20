@@ -25,6 +25,40 @@ let polygon = null;
 let points = [];
 let tempLine = null;
 
+// Store available dates for each layer
+const availableLayerDates = {
+  SST: [],
+  SSS: [],
+  CHL: [],
+  OSTIA_SST: [],
+  OSTIA_anomaly: []
+};
+
+// Helper to set the most recent date for a given layer
+function setMostRecentLayerDate(layerType) {
+    const dateList = availableLayerDates[layerType];
+    if (dateList && dateList.length > 0) {
+        const mostRecentDate = dateList[dateList.length - 1]; // 'YYYY-MM-DD'
+        const layerDateInput = document.getElementById('layer-date');
+        // Set input value for display
+        layerDateInput.value = moment(mostRecentDate).format('MM/DD/YYYY');
+        // Set folder date attribute
+        const year = mostRecentDate.slice(0, 4);
+        const dayOfYear = moment(mostRecentDate, "YYYY-MM-DD").dayOfYear().toString().padStart(3, '0');
+        const folderDate = `${year}_${dayOfYear}`;
+        layerDateInput.setAttribute('data-folder-date', folderDate);
+        // Update global tileDate and layer paths
+        updateLayerPaths(folderDate);
+        // Trigger change event for timeline, etc.
+        const event = new Event('change');
+        layerDateInput.dispatchEvent(event);
+        return folderDate;
+    } else {
+        showModal("No available dates for this layer.");
+        return null;
+    }
+}
+
 // Create a single combined control panel
 const CombinedControl = L.Control.extend({
     onAdd: function () {
@@ -193,141 +227,46 @@ const infoModal = `
   </div>
 `;
 
-// Create layer date modal
-const layerDateModal = `
-  <div id="layer-date-overlay"></div>
-  <div id="layer-date-modal">
-    <span id="layer-date-modal-close">&times;</span>
-    <h4>Layer Date Required</h4>
-    <p class="modal-subtitle">
-      Please select a layer date prior to selecting a layer.
-    </p>
-  </div>
-`;
+// // Create layer date modal
+// const layerDateModal = `
+//   <div id="layer-date-overlay"></div>
+//   <div id="layer-date-modal">
+//     <span id="layer-date-modal-close">&times;</span>
+//     <h4>Layer Date Required</h4>
+//     <p class="modal-subtitle">
+//       Please select a layer date prior to selecting a layer.
+//     </p>
+//   </div>
+// `;
 
 document.body.insertAdjacentHTML('beforeend', infoModal);
-document.body.insertAdjacentHTML('beforeend', layerDateModal);
+// document.body.insertAdjacentHTML('beforeend', layerDateModal);
 
 // Info Modal Logic
-document.getElementById('info-icon').addEventListener('click', () => {
-  document.getElementById('info-overlay').style.display = 'block';
-  document.getElementById('info-modal').style.display = 'block';
-});
-
-document.getElementById('info-modal-close').addEventListener('click', () => {
-  document.getElementById('info-overlay').style.display = 'none';
-  document.getElementById('info-modal').style.display = 'none';
-});
-
-document.getElementById('info-overlay').addEventListener('click', () => {
-  document.getElementById('info-overlay').style.display = 'none';
-  document.getElementById('info-modal').style.display = 'none';
-});
-
-// Modify the layer date modal behavior
-function showLayerDateModal() {
-    const overlay = document.getElementById('layer-date-overlay');
-    const modal = document.getElementById('layer-date-modal');
-    if (overlay && modal) {
-        // Prevent any existing event handlers
-        overlay.style.pointerEvents = 'none';
-        modal.style.pointerEvents = 'none';
-        
-        // Show the modal
-        overlay.style.display = 'block';
-        modal.style.display = 'block';
-        
-        // Re-enable pointer events after a small delay
-        setTimeout(() => {
-            overlay.style.pointerEvents = 'auto';
-            modal.style.pointerEvents = 'auto';
-        }, 100);
-    }
-}
-
-function hideLayerDateModal(event) {
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    const overlay = document.getElementById('layer-date-overlay');
-    const modal = document.getElementById('layer-date-modal');
-    if (overlay && modal) {
-        overlay.style.display = 'none';
-        modal.style.display = 'none';
-    }
-}
-
-// Update the layer date modal event listeners
-document.getElementById('layer-date-modal-close').addEventListener('click', (event) => {
-    hideLayerDateModal(event);
-});
-
-document.getElementById('layer-date-overlay').addEventListener('click', (event) => {
-    hideLayerDateModal(event);
-});
-
-// Prevent clicks inside the modal from closing it
-document.getElementById('layer-date-modal').addEventListener('click', (event) => {
-    event.stopPropagation();
-});
-
-// Define showModal function before it's used
-function showModal(message) {
-  // Create overlay if it doesn't exist
-  if (!document.getElementById('error-overlay')) {
-    const overlay = document.createElement('div');
-    overlay.id = 'error-overlay';
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-    `;
-    document.body.appendChild(overlay);
+document.addEventListener('DOMContentLoaded', function() {
+  // Info Modal Logic (now in timeline-control)
+  const infoIcon = document.getElementById('info-icon');
+  const infoOverlay = document.getElementById('info-overlay');
+  const infoModal = document.getElementById('info-modal');
+  const infoModalClose = document.getElementById('info-modal-close');
+  if (infoIcon && infoOverlay && infoModal && infoModalClose) {
+    infoIcon.addEventListener('click', () => {
+      infoOverlay.style.display = 'block';
+      infoModal.style.display = 'block';
+    });
+    infoModalClose.addEventListener('click', () => {
+      infoOverlay.style.display = 'none';
+      infoModal.style.display = 'none';
+    });
+    infoOverlay.addEventListener('click', () => {
+      infoOverlay.style.display = 'none';
+      infoModal.style.display = 'none';
+    });
   }
 
-  // Create modal if it doesn't exist
-  if (!document.getElementById('error-modal')) {
-    const modal = document.createElement('div');
-    modal.id = 'error-modal';
-    modal.style.cssText = `
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--surface);
-      padding: var(--spacing-lg);
-      border-radius: var(--radius-md);
-      box-shadow: 0 4px 6px var(--shadow);
-      z-index: 1001;
-      max-width: 500px;
-      width: 90%;
-      text-align: center;
-    `;
-    document.body.appendChild(modal);
-  }
-
-  // Show overlay and modal
-  document.getElementById('error-overlay').style.display = 'block';
-  const modal = document.getElementById('error-modal');
-  modal.style.display = 'block';
-  modal.innerHTML = `
-    <div style="position: relative;">
-      <span style="position: absolute; top: 0; right: 0; cursor: pointer; font-size: 1.5rem; color: var(--text-secondary);" onclick="document.getElementById('error-overlay').style.display = 'none'; this.parentElement.parentElement.style.display = 'none';">&times;</span>
-      <p style="margin: 0; color: var(--text-primary);">${message}</p>
-    </div>
-  `;
-
-  // Add click event to overlay to close modal
-  document.getElementById('error-overlay').onclick = function() {
-    this.style.display = 'none';
-    document.getElementById('error-modal').style.display = 'none';
-  };
-}
+  // (Other DOMContentLoaded logic, e.g. collapsibles, select/deselect, etc.)
+  // ... existing code ...
+});
 
 async function fetchAvailableDates(filePath) {
   try {
@@ -413,13 +352,13 @@ function toggleLayer(layerType, event, isChecked) {
     if (isChecked) {
         // Check if a layer date is selected
         if (!tileDate) {
-            // Uncheck the toggle
-            document.getElementById(layerTypes[layerType].toggleId).checked = false;
-            
-            // Show the layer date modal
-            showLayerDateModal();
-            
-            return;
+            // Auto-select most recent date for this layer
+            const newDate = setMostRecentLayerDate(layerType);
+            if (!newDate) {
+                document.getElementById(layerTypes[layerType].toggleId).checked = false;
+                return;
+            }
+            // tileDate is now set, continue as normal
         }
 
         // Deactivate fishbot layer if it's active
@@ -592,10 +531,16 @@ setupCheckboxToggle('cfrf-toggle', () => {});
 // Initialize date pickers
 $(function () {
     // Paths for SST, SSS, and Chloro dates
-    const sstDatesPath = '../data/SST/sst_dates.txt';
-    const sssDatesPath = '../data/SSS/sss_dates.txt';
-    const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    // const sstDatesPath = '../data/SST/sst_dates.txt';
+    // const sssDatesPath = '../data/SSS/sss_dates.txt';
+    // const chloroDatesPath = '../data/CHL/chl_dates.txt';
+    // const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    // const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+
+    const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
+    const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
+    const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
+    const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
     const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
 
     // Fetch available dates for highlighting
@@ -613,6 +558,13 @@ $(function () {
         const ostiaSstSet = new Set(ostiaSstDates);
         const ostiaAnomalySet = new Set(ostiaAnomalyDates);
         const allDatesSet = new Set([...sstDates, ...sssDates, ...chloroDates, ...ostiaSstDates, ...ostiaAnomalyDates]);
+
+        // Store available dates for each layer
+        availableLayerDates.SST = sstDates;
+        availableLayerDates.SSS = sssDates;
+        availableLayerDates.CHL = chloroDates;
+        availableLayerDates.OSTIA_SST = ostiaSstDates;
+        availableLayerDates.OSTIA_anomaly = ostiaAnomalyDates;
 
         // Initialize the date range picker for profiles
         $('#daterange').daterangepicker({
