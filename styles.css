@@ -1361,11 +1361,12 @@ footer {
 .timeline-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 0;
     width: 100%;
     position: relative;
+    flex-wrap: nowrap;
 }
 
 .timeline-header #info-icon {
@@ -1390,6 +1391,7 @@ footer {
     box-shadow: 0 1px 2px var(--shadow);
     outline: none;
     margin: 0 2px;
+    flex-shrink: 0;
 }
 
 .timeline-button:hover {
@@ -1417,6 +1419,7 @@ footer {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 4px;
+    flex-shrink: 0;
 }
 
 /* Timeline Slider Styles */
@@ -1426,7 +1429,7 @@ footer {
 }
 
 .timeline-slider {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-width: 120px;
     max-width: none;
     margin: 0 8px;
@@ -1485,6 +1488,9 @@ footer {
     white-space: nowrap;
     align-self: center;
     margin: 0 2px;
+    flex-shrink: 0;
+    min-width: 60px;
+    text-align: center;
 }
 
 /* Responsive adjustments */

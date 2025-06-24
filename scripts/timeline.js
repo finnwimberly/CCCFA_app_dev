@@ -169,6 +169,10 @@ async function initializeTimeline() {
             // Date was found, ensure input is in display format
             layerDateInput.value = folderDateToDisplay(availableDates[currentDateIndex]);
             console.log('Date found, set input to display format:', layerDateInput.value);
+            // Update slider position
+            if (timelineSlider) {
+                timelineSlider.value = currentDateIndex;
+            }
         }
     });
     
