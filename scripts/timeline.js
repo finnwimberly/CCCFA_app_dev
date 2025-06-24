@@ -42,6 +42,18 @@ function displayToFolderDate(displayDate) {
     return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
 
+// Function to open the calendar popup
+function openCalendarPopup(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const layerDateInput = document.getElementById('layer-date');
+    if (layerDateInput) {
+        // Trigger the daterangepicker to open
+        $(layerDateInput).data('daterangepicker').show();
+    }
+}
+
 //  available dates from the JSON file
 async function fetchAvailableDates() {
     try {
@@ -107,7 +119,6 @@ async function initializeTimeline() {
         const newIndex = availableDates.indexOf(dateFormatted);
         if (newIndex !== -1) {
             currentDateIndex = newIndex;
-            updateTimelineDisplay();
             // Update slider position
             if (timelineSlider) {
                 timelineSlider.value = currentDateIndex;
@@ -123,7 +134,6 @@ async function initializeTimeline() {
         updateTimelinePosition(layerDateInput.value);
         // Always set input to display format
         layerDateInput.value = folderDateToDisplay(availableDates[currentDateIndex]);
-        updateTimelineDisplay();
         console.log('Timeline control shown because date exists');
     } else {
         console.log('No date found, timeline still visible');
@@ -159,7 +169,6 @@ async function initializeTimeline() {
                 // Always set input to display format
                 layerDateInput.value = folderDateToDisplay(closestDate);
                 console.log('Set closest date to display format:', layerDateInput.value);
-                updateTimelineDisplay();
                 // Update slider position
                 if (timelineSlider) {
                     timelineSlider.value = currentDateIndex;
@@ -175,6 +184,9 @@ async function initializeTimeline() {
             }
         }
     });
+    
+    // Make layer-date input clickable to open calendar popup
+    layerDateInput.addEventListener('click', openCalendarPopup);
     
     // Slider event listener
     if (timelineSlider) {
@@ -289,52 +301,15 @@ async function initializeTimeline() {
     });
 }
 
-function updateTimelineDisplay() {
-    const timelineDate = document.getElementById('timeline-date');
-    
-    // Update date display
-    const currentDate = availableDates[currentDateIndex];
-    // Convert YYYYDDD to a proper date for display
-    const year = currentDate.slice(0, 4);
-    const dayOfYear = parseInt(currentDate.slice(4));
-    // Create date by adding days to January 1st of the year
-    const date = new Date(year, 0, 1); // January 1st
-    date.setDate(date.getDate() + dayOfYear - 1); // Subtract 1 because day 1 is January 1st
-    timelineDate.textContent = moment(date).format('MMM D, YYYY');
-    
-    // Make the date clickable with hover effects
-    timelineDate.style.cursor = 'pointer';
-    timelineDate.style.transition = 'all 0.2s ease';
-    
-    // Add hover effects via CSS classes
-    timelineDate.classList.add('timeline-date-clickable');
-    
-    // Remove any existing click listeners to avoid duplicates
-    timelineDate.removeEventListener('click', openCalendarPopup);
-    
-    // Add click listener to open calendar
-    timelineDate.addEventListener('click', openCalendarPopup);
-}
-
-// Function to open the calendar popup
-function openCalendarPopup(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const layerDateInput = document.getElementById('layer-date');
-    if (layerDateInput) {
-        // Trigger the daterangepicker to open
-        $(layerDateInput).data('daterangepicker').show();
-    }
-}
-
 function updateDate() {
     const currentDate = availableDates[currentDateIndex];
     const layerDateInput = document.getElementById('layer-date');
     const timelineSlider = document.getElementById('timeline-slider');
     const newDate = convertDateFormat(currentDate, true);
+    
     // Always set the visible value to MM/DD/YYYY
     layerDateInput.value = folderDateToDisplay(currentDate);
+    
     // Update the daterangepicker instance
     const picker = $('#layer-date').data('daterangepicker');
     if (picker) {
@@ -342,9 +317,9 @@ function updateDate() {
         picker.setStartDate(date);
         picker.setEndDate(date);
     }
+    
     // Update layer paths (use folder format)
     updateLayerPaths(newDate);
-    updateTimelineDisplay();
     
     // Update slider position
     if (timelineSlider) {
