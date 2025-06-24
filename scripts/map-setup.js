@@ -37,6 +37,7 @@ if (attributionContainer) {
   // Add attribution content
   attribution.addAttribution('Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri');
   attribution.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
+  attribution.addAttribution(' | <strong>Data Layers:</strong>');
   
   // Add the attribution control to the container instead of the map
   attribution.addTo(map);
