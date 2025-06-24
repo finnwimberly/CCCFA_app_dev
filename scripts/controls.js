@@ -103,7 +103,7 @@ const CombinedControl = L.Control.extend({
                         </div>
                     </div>
                 </div>
-                <button id="apply-filters" class="small-button">Apply Filters</button>
+                <button id="apply-filters" class="control-button">Apply Filters</button>
             </div>
         </div>
             </div>
