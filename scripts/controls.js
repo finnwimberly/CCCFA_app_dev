@@ -108,6 +108,18 @@ const CombinedControl = L.Control.extend({
         </div>
             </div>
 
+            <!-- Profile Selection Section -->
+            <div class="control-section">
+                <div class="collapsible-header">
+                    <label class="control-section-label">Profile Selection</label>
+                    <i class="fas fa-chevron-down collapse-icon"></i>
+                </div>
+                <div class="collapsible-content" id="profile-selection-content">
+                    <button class="control-button select-button">Select Profiles by Area</button>
+                    <button class="control-button">Deselect All Profiles</button>
+                </div>
+            </div>
+
             <!-- Layer Control Section -->
             <div class="control-section">
                 <div class="collapsible-header">
@@ -180,12 +192,6 @@ const CombinedControl = L.Control.extend({
                 </div>
             </div>
       </div>
-            </div>
-
-            <!-- Action Buttons Section -->
-            <div class="control-section">
-                <button class="control-button select-button">Select Profiles by Area</button>
-        <button class="control-button">Deselect All Profiles</button>
             </div>
       </div>
     `;
