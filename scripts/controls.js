@@ -116,7 +116,7 @@ const CombinedControl = L.Control.extend({
                 </div>
                 <div class="collapsible-content" id="profile-selection-content">
                     <button class="control-button select-button">Select Profiles by Area</button>
-                    <button class="control-button">Deselect All Profiles</button>
+                    <button id="deselect-all-profiles" class="control-button">Deselect All Profiles</button>
                 </div>
             </div>
 
@@ -1036,7 +1036,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Add event listener for Deselect All Profiles button
-    const deselectButton = document.querySelector('.control-button:not(.select-button)');
+    const deselectButton = document.getElementById('deselect-all-profiles');
     if (deselectButton) {
         deselectButton.addEventListener('click', function() {
             // Deselect all profiles
