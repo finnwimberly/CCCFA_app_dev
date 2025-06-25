@@ -69,7 +69,7 @@ header {
 
 .title h1 {
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary);
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -79,7 +79,7 @@ header {
 body[class*="data-access-page"] .title h1,
 body[class*="time"] .title h1 {
   font-size: 1.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--primary);
   margin: 0;
   font-family: 'Inter', sans-serif;
