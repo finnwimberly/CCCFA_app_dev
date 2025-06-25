@@ -62,12 +62,12 @@
             </div>
             <div class="nav-section">
                 <div class="nav-header" onclick="toggleNavSection(this)">
-                    <h3>Long Term Temperature Trends</h3>
+                    <h3>Long Term Trends</h3>
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="nav-content">
                     <a href="#temperature-trend">Map of Regions</a>
-                    <a href="#sst-anomaly-plots">SST Anomaly Plots</a>
+                    <a href="#temperature-trend">Temperature & Salinity Anomalies</a>
                 </div>
             </div>
             <div class="nav-section">
@@ -76,7 +76,10 @@
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="nav-content">
-                    <a href="#ctd-profiles">CTD Profiles</a>
+                    <a href="#ctd-profiles">CTD Profiles Overview</a>
+                    <a href="#temperature-profiles">Temperature Profiles</a>
+                    <a href="#salinity-profiles">Salinity Profiles</a>
+                    <a href="#density-profiles">Density Profiles</a>
                 </div>
             </div>
         </nav>
@@ -122,14 +125,15 @@
 
         <!-- Section 2: Long Term Temperature Trend -->
         <section id="temperature-trend" class="data-card">
-            <h2>Long Term Temperature Trends</h2>
+            <h2>Long Term Temperature & Salinity Trends</h2>
             
             <p class="caption">We define five regions of interest, shown in the map below: 
                 the Gulf of Maine (GoM), Outer Cape (OC), Inner Cape (IC), Rhode Island (RI), and New Jersey (NJ). The anomaly 
                 plots further below correspond to these regions. The GoM overlaps with both the OC and IC regions; these overlapping areas 
                 are indicated by the shaded regions on the map. For each region, the daily anomaly is calculated as the difference between
-                the region's spatially averaged daily SST and the long-term mean for that calendar day, based on the 
-                combined spatial and temporal average across 2007–2024. The daily anomaly is then averaged over the region to produce the region-averaged anomaly.
+                the region's spatially averaged daily/monthly observed SST/SSS and the long-term mean for that calendar day/month, based on the 
+                combined spatial and temporal average across 2007–2024/2016 to 2024 for SST and SSS, respectively. The daily or monthly anomaly is then 
+                averaged over the region to produce the region-averaged anomaly.
             </p>
 
             <h3>Regions:</h3>
@@ -142,13 +146,30 @@
             </div>
 
             <h3>Anomaly Plots:</h3>
-            <p class="caption">The plots below show both daily anomaly values (blue) as well as a 130-day rolling mean (red).</p>
+            <p class="caption">Select a region to view temperature and salinity anomaly plots. The plots show both daily anomaly values (blue) as well as a 130-day rolling mean (red).</p>
+            
+            <!-- Region Selector -->
+            <div class="region-selector">
+                <label for="timeseries-region-select">Select Region:</label>
+                <select id="timeseries-region-select">
+                    <option value="GoM">Gulf of Maine</option>
+                    <option value="OC">Outer Cape</option>
+                    <option value="IC">Inner Cape</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="NJ">New Jersey</option>
+                </select>
+            </div>
+
             <!-- Time Series Plots -->
-            <div id="sst-anomaly-plots" class="plot-grid">
-                <div id="sstPlotOC" class="plot-container"></div>
-                <div id="sstPlotGoM" class="plot-container"></div>
-                <div id="sstPlotRI" class="plot-container"></div>
-                <div id="sstPlotNJ" class="plot-container"></div>
+            <div class="timeseries-plots">
+                <div class="plot-section">
+                    <h3>Sea Surface Temperature Anomaly</h3>
+                    <div id="sst-anomaly-plot" class="plot-container"></div>
+                </div>
+                <div class="plot-section">
+                    <h3>Sea Surface Salinity Anomaly</h3>
+                    <div id="sss-anomaly-plot" class="plot-container"></div>
+                </div>
             </div>
 
             <!-- Unit Selector -->
@@ -192,19 +213,19 @@
             <!-- Plot Grid -->
             <div class="ctd-plot-grid">
                 <!-- Temperature Row -->
-                <div class="plot-row">
+                <div class="plot-row" id="temperature-profiles">
                     <h3>Temperature</h3>
                     <div class="monthly-plots" id="temp-plots"></div>
                 </div>
                 
                 <!-- Salinity Row -->
-                <div class="plot-row">
+                <div class="plot-row" id="salinity-profiles">
                     <h3>Salinity</h3>
                     <div class="monthly-plots" id="sal-plots"></div>
                 </div>
                 
                 <!-- Density Row -->
-                <div class="plot-row">
+                <div class="plot-row" id="density-profiles">
                     <h3>Density</h3>
                     <div class="monthly-plots" id="dens-plots"></div>
                 </div>
@@ -260,6 +281,24 @@
             border-radius: 4px;
             background-color: white;
             cursor: pointer;
+        }
+        
+        /* Time Series Plot Styles */
+        .timeseries-plots {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .plot-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plot-section h3 {
+            margin: 0;
+            color: var(--primary);
         }
         
         .ctd-plot-grid {
@@ -360,137 +399,253 @@
             }
         }
 
-        // Function to create the time series plot
-        async function createTimeSeriesPlot() {
+        // Function to load SST data
+        async function loadSSTData() {
+            const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        }
+
+        // Function to load SSS data
+        async function loadSSSData() {
+            const response = await fetch('../data/SSS/time_series/sss_timeseries.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        }
+
+        // Function to create SST plot for selected region
+        function createSSTPlot(sstData, selectedRegion) {
+            if (!sstData[selectedRegion]) {
+                console.error(`No SST data found for region ${selectedRegion}`);
+                return;
+            }
+
+            const isImperial = document.getElementById('imperial').checked;
+            const unit = isImperial ? '°F' : '°C';
+            const sstaData = sstData[selectedRegion].ssta;
+
+            // Convert data to arrays for Plotly
+            const times = Object.keys(sstaData);
+            const values = Object.values(sstaData).map(v => convertTemperatureAnomaly(v, isImperial));
+
+            // Calculate 130-day rolling mean
+            const windowSize = 130;
+            const halfWindow = Math.floor(windowSize / 2);
+            const rollingMean = [];
+            for (let i = 0; i < values.length; i++) {
+                if (i < halfWindow || i > values.length - halfWindow - 1) {
+                    rollingMean.push(null);
+                } else {
+                    const start = i - halfWindow;
+                    const end = i + halfWindow + 1;
+                    const window = values.slice(start, end);
+                    rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                }
+            }
+
+            // Create traces
+            const rawTrace = {
+                x: times,
+                y: values,
+                name: 'Raw Data',
+                type: 'scatter',
+                mode: 'lines',
+                line: { 
+                    color: '#1f77b4',
+                    width: 1
+                }
+            };
+
+            const meanTrace = {
+                x: times,
+                y: rollingMean,
+                name: '130-day Mean',
+                type: 'scatter',
+                mode: 'lines',
+                line: { 
+                    color: '#ff4444',
+                    width: 2
+                }
+            };
+
+            // Create the layout
+            const layout = {
+                height: 400,
+                showlegend: true,
+                title: {
+                    text: `${sstData[selectedRegion].name} - Sea Surface Temperature Anomaly`,
+                    font: { size: 16 },
+                    x: 0.05,
+                    xanchor: 'left',
+                    y: 0.95
+                },
+                xaxis: {
+                    title: 'Time',
+                    showgrid: true,
+                    gridcolor: 'lightgray'
+                },
+                yaxis: {
+                    title: `Temperature Anomaly (${unit})`,
+                    showgrid: true,
+                    gridcolor: 'lightgray'
+                },
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                font: {
+                    family: 'Inter, sans-serif'
+                },
+                margin: { t: 60, b: 50, l: 50, r: 50 }
+            };
+
+            // Create the figure
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+                modeBarButtonsToRemove: ['lasso2d']
+            };
+
+            Plotly.newPlot('sst-anomaly-plot', [rawTrace, meanTrace], layout, config);
+        }
+
+        // Function to create SSS plot for selected region
+        function createSSSPlot(sssData, selectedRegion) {
+            if (!sssData[selectedRegion]) {
+                console.error(`No SSS data found for region ${selectedRegion}`);
+                return;
+            }
+
+            const sssaData = sssData[selectedRegion].sssa;
+
+            // Convert data to arrays for Plotly
+            const times = Object.keys(sssaData);
+            const values = Object.values(sssaData);
+
+            // Calculate 130-day rolling mean
+            const windowSize = 130;
+            const halfWindow = Math.floor(windowSize / 2);
+            const rollingMean = [];
+            for (let i = 0; i < values.length; i++) {
+                if (i < halfWindow || i > values.length - halfWindow - 1) {
+                    rollingMean.push(null);
+                } else {
+                    const start = i - halfWindow;
+                    const end = i + halfWindow + 1;
+                    const window = values.slice(start, end);
+                    rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                }
+            }
+
+            // Create traces
+            const rawTrace = {
+                x: times,
+                y: values,
+                name: 'Raw Data',
+                type: 'scatter',
+                mode: 'lines',
+                line: { 
+                    color: '#1f77b4',
+                    width: 1
+                }
+            };
+
+            const meanTrace = {
+                x: times,
+                y: rollingMean,
+                name: '130-day Mean',
+                type: 'scatter',
+                mode: 'lines',
+                line: { 
+                    color: '#ff4444',
+                    width: 2
+                }
+            };
+
+            // Create the layout
+            const layout = {
+                height: 400,
+                showlegend: true,
+                title: {
+                    text: `${sssData[selectedRegion].name} - Sea Surface Salinity Anomaly`,
+                    font: { size: 16 },
+                    x: 0.05,
+                    xanchor: 'left',
+                    y: 0.95
+                },
+                xaxis: {
+                    title: 'Time',
+                    showgrid: true,
+                    gridcolor: 'lightgray'
+                },
+                yaxis: {
+                    title: 'Salinity Anomaly (PSU)',
+                    showgrid: true,
+                    gridcolor: 'lightgray'
+                },
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                font: {
+                    family: 'Inter, sans-serif'
+                },
+                margin: { t: 60, b: 50, l: 50, r: 50 }
+            };
+
+            // Create the figure
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+                modeBarButtonsToRemove: ['lasso2d']
+            };
+
+            Plotly.newPlot('sss-anomaly-plot', [rawTrace, meanTrace], layout, config);
+        }
+
+        // Function to create unified time series plots
+        async function createTimeSeriesPlots(selectedRegion) {
             try {
-                // Fetch the data
-                const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                console.log('Loaded data:', data); // Debug log
-
-                // Create plots for each region
-                const regions = {
-                    'OC': { name: 'Outer Cape', container: 'sstPlotOC' },
-                    'GoM': { name: 'Gulf of Maine', container: 'sstPlotGoM' },
-                    'RI': { name: 'Rhode Island', container: 'sstPlotRI' },
-                    'NJ': { name: 'New Jersey', container: 'sstPlotNJ' }
-                };
-
-                // Function to update plots with current unit selection
-                function updatePlots() {
-                    const isImperial = document.getElementById('imperial').checked;
-                    const unit = isImperial ? '°F' : '°C';
-
-                    for (const [region, info] of Object.entries(regions)) {
-                        if (!data[region]) {
-                            console.error(`No data found for region ${region}`);
-                            continue;
-                        }
-
-                        const sstaData = data[region].ssta;
-
-                        // Convert data to arrays for Plotly
-                        const times = Object.keys(sstaData);
-                        const values = Object.values(sstaData).map(v => convertTemperatureAnomaly(v, isImperial));
-
-                        // Calculate 130-day rolling mean
-                        const windowSize = 130;
-                        const halfWindow = Math.floor(windowSize / 2);
-                        const rollingMean = [];
-                        for (let i = 0; i < values.length; i++) {
-                            if (i < halfWindow || i > values.length - halfWindow - 1) {
-                                // Not enough data for a full window, set to null
-                                rollingMean.push(null);
-                            } else {
-                                const start = i - halfWindow;
-                                const end = i + halfWindow + 1;
-                                const window = values.slice(start, end);
-                                rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
-                            }
-                        }
-
-                        // Create traces
-                        const rawTrace = {
-                            x: times,
-                            y: values,
-                            name: 'Raw Data',
-                            type: 'scatter',
-                            mode: 'lines',
-                            line: { 
-                                color: '#1f77b4',
-                                width: 1
-                            }
-                        };
-
-                        const meanTrace = {
-                            x: times,
-                            y: rollingMean,
-                            name: '130-day Mean',
-                            type: 'scatter',
-                            mode: 'lines',
-                            line: { 
-                                color: '#ff4444',
-                                width: 2
-                            }
-                        };
-
-                        // Create the layout
-                        const layout = {
-                            height: 400,
-                            showlegend: false,
-                            title: {
-                                text: `${info.name}`,
-                                font: { size: 16 },
-                                x: 0.05,
-                                xanchor: 'left',
-                                y: 0.95
-                            },
-                            xaxis: {
-                                title: 'Time',
-                                showgrid: true,
-                                gridcolor: 'lightgray'
-                            },
-                            yaxis: {
-                                title: `Temperature Anomaly (${unit})`,
-                                showgrid: true,
-                                gridcolor: 'lightgray'
-                            },
-                            plot_bgcolor: 'white',
-                            paper_bgcolor: 'white',
-                            font: {
-                                family: 'Inter, sans-serif'
-                            },
-                            margin: { t: 60, b: 50, l: 50, r: 50 }
-                        };
-
-                        // Create the figure
-                        const config = {
-                            responsive: true,
-                            displayModeBar: true,
-                            modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
-                            modeBarButtonsToRemove: ['lasso2d']
-                        };
-
-                        Plotly.newPlot(info.container, [rawTrace, meanTrace], layout, config);
-                    }
-                }
-
-                // Initial plot creation
-                updatePlots();
-
-                // Add event listeners for unit changes
-                document.getElementById('imperial').addEventListener('change', updatePlots);
-                document.getElementById('metric').addEventListener('change', updatePlots);
+                // Load both SST and SSS data
+                const sstData = await loadSSTData();
+                const sssData = await loadSSSData();
+                
+                // Create SST plot for selected region
+                createSSTPlot(sstData, selectedRegion);
+                
+                // Create SSS plot for selected region
+                createSSSPlot(sssData, selectedRegion);
             } catch (error) {
                 console.error('Error creating time series plots:', error);
             }
         }
 
-        // Create the plots when the page loads
-        document.addEventListener('DOMContentLoaded', createTimeSeriesPlot);
+        // Function to initialize time series plots
+        async function initializeTimeSeriesPlots() {
+            try {
+                const regionSelect = document.getElementById('timeseries-region-select');
+                
+                // Add event listeners for region and unit changes
+                regionSelect.addEventListener('change', (e) => {
+                    createTimeSeriesPlots(e.target.value);
+                });
+                
+                // Add event listeners for unit changes (only affects SST)
+                document.getElementById('imperial').addEventListener('change', () => {
+                    createTimeSeriesPlots(regionSelect.value);
+                });
+                document.getElementById('metric').addEventListener('change', () => {
+                    createTimeSeriesPlots(regionSelect.value);
+                });
+                
+                // Initial plot with first region
+                createTimeSeriesPlots(regionSelect.value);
+            } catch (error) {
+                console.error('Error initializing time series plots:', error);
+            }
+        }
 
         // CTD Profile Plotting
         async function loadCTDProfiles() {
@@ -845,6 +1000,10 @@
             } else {
                 console.error('Failed to load CTD data');
             }
+
+            // Initialize time series plots
+            console.log('Initializing time series plots...');
+            await initializeTimeSeriesPlots();
         });
 
         // Navigation menu functionality
