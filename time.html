@@ -146,7 +146,7 @@
             </div>
 
             <h3>Anomaly Plots:</h3>
-            <p class="caption">Select a region to view temperature and salinity anomaly plots. The plots show both daily anomaly values (blue) as well as a 130-day rolling mean (red).</p>
+            <p class="caption">Select a region to view temperature and salinity anomaly plots. The temperature plot shows both daily anomaly values (blue) as well as a 130-day rolling mean (red). The salinity plot shows monthly anomaly values.</p>
             
             <!-- Region Selector -->
             <div class="region-selector">
@@ -451,7 +451,7 @@
             const rawTrace = {
                 x: times,
                 y: values,
-                name: 'Raw Data',
+                name: 'Daily Temperature Anomaly',
                 type: 'scatter',
                 mode: 'lines',
                 line: { 
@@ -463,7 +463,7 @@
             const meanTrace = {
                 x: times,
                 y: rollingMean,
-                name: '130-day Mean',
+                name: '130-day Rolling Mean',
                 type: 'scatter',
                 mode: 'lines',
                 line: { 
@@ -476,8 +476,17 @@
             const layout = {
                 height: 400,
                 showlegend: true,
+                legend: {
+                    x: 0.98,
+                    y: 0.98,
+                    xanchor: 'right',
+                    yanchor: 'top',
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: 'lightgray',
+                    borderwidth: 1
+                },
                 title: {
-                    text: `${sstData[selectedRegion].name} - Sea Surface Temperature Anomaly`,
+                    text: `${sstData[selectedRegion].name} - SSTA`,
                     font: { size: 16 },
                     x: 0.05,
                     xanchor: 'left',
@@ -525,43 +534,20 @@
             const times = Object.keys(sssaData);
             const values = Object.values(sssaData);
 
-            // Calculate 130-day rolling mean
-            const windowSize = 130;
-            const halfWindow = Math.floor(windowSize / 2);
-            const rollingMean = [];
-            for (let i = 0; i < values.length; i++) {
-                if (i < halfWindow || i > values.length - halfWindow - 1) {
-                    rollingMean.push(null);
-                } else {
-                    const start = i - halfWindow;
-                    const end = i + halfWindow + 1;
-                    const window = values.slice(start, end);
-                    rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
-                }
-            }
-
-            // Create traces
-            const rawTrace = {
+            // Create trace for monthly salinity anomaly
+            const sssaTrace = {
                 x: times,
                 y: values,
-                name: 'Raw Data',
+                name: 'Monthly Salinity Anomaly',
                 type: 'scatter',
-                mode: 'lines',
+                mode: 'lines+markers',
                 line: { 
                     color: '#1f77b4',
-                    width: 1
-                }
-            };
-
-            const meanTrace = {
-                x: times,
-                y: rollingMean,
-                name: '130-day Mean',
-                type: 'scatter',
-                mode: 'lines',
-                line: { 
-                    color: '#ff4444',
                     width: 2
+                },
+                marker: {
+                    size: 4,
+                    color: '#1f77b4'
                 }
             };
 
@@ -569,8 +555,17 @@
             const layout = {
                 height: 400,
                 showlegend: true,
+                legend: {
+                    x: 0.98,
+                    y: 0.98,
+                    xanchor: 'right',
+                    yanchor: 'top',
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: 'lightgray',
+                    borderwidth: 1
+                },
                 title: {
-                    text: `${sssData[selectedRegion].name} - Sea Surface Salinity Anomaly`,
+                    text: `${sssData[selectedRegion].name} - SSSA`,
                     font: { size: 16 },
                     x: 0.05,
                     xanchor: 'left',
@@ -602,7 +597,7 @@
                 modeBarButtonsToRemove: ['lasso2d']
             };
 
-            Plotly.newPlot('sss-anomaly-plot', [rawTrace, meanTrace], layout, config);
+            Plotly.newPlot('sss-anomaly-plot', [sssaTrace], layout, config);
         }
 
         // Function to create unified time series plots
