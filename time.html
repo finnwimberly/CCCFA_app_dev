@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Series</title>
+    <title>Monthly Summaries</title>
     <link rel="stylesheet" href="styles.css">
 
     <!-- Add Inter font -->
@@ -633,22 +633,82 @@
             const tempUnit = isImperial ? '°F' : '°C';
             const depthUnit = isImperial ? 'fathoms' : 'm';
 
+            // Calculate overall temperature bounds across all data
+            let allTemperatures = [];
+            let allSalinities = [];
+            let allDensities = [];
+            
+            regionProfiles.forEach(profile => {
+                if (profile.temperature && profile.temperature.length > 0) {
+                    const convertedTemps = profile.temperature.map(t => convertUnits(t, 'temperature', isImperial));
+                    allTemperatures = allTemperatures.concat(convertedTemps);
+                }
+                if (profile.salinity && profile.salinity.length > 0) {
+                    allSalinities = allSalinities.concat(profile.salinity);
+                }
+                if (profile.density && profile.density.length > 0) {
+                    allDensities = allDensities.concat(profile.density);
+                }
+            });
+
+            // Set temperature bounds with some padding
+            let tempMin, tempMax;
+            if (allTemperatures.length > 0) {
+                const tempRange = Math.max(...allTemperatures) - Math.min(...allTemperatures);
+                const padding = tempRange * 0.03; // 3% padding
+                tempMin = Math.min(...allTemperatures) - padding;
+                tempMax = Math.max(...allTemperatures) + padding;
+            } else {
+                // Default bounds if no temperature data
+                tempMin = isImperial ? 39 : 3; // 39°F or 3°C
+                tempMax = isImperial ? 70 : 21;  // 70°F or 21°C
+            }
+
+            // Set salinity bounds with some padding
+            let salMin, salMax;
+            if (allSalinities.length > 0) {
+                const salRange = Math.max(...allSalinities) - Math.min(...allSalinities);
+                const padding = salRange * 0.05; // 5% padding
+                salMin = Math.min(...allSalinities) - padding;
+                salMax = Math.max(...allSalinities) + padding;
+            } else {
+                // Default bounds if no salinity data
+                salMin = 30; // 30 PSU
+                salMax = 34.5; // 34.5 PSU
+            }
+
+            // Set density bounds with some padding
+            let densMin, densMax;
+            if (allDensities.length > 0) {
+                const densRange = Math.max(...allDensities) - Math.min(...allDensities);
+                const padding = densRange * 0.05; // 5% padding
+                densMin = Math.min(...allDensities) - padding;
+                densMax = Math.max(...allDensities) + padding;
+            } else {
+                // Default bounds if no density data
+                densMin = 1020; // 1020 kg/m³
+                densMax = 1027; // 1027 kg/m³
+            }
+
             // Create plots for each variable
             const variables = {
                 temp: { 
                     data: 'temperature', 
                     title: `Temperature (${tempUnit})`,
-                    convert: (v) => convertUnits(v, 'temperature', isImperial)
+                    convert: (v) => convertUnits(v, 'temperature', isImperial),
+                    xrange: [tempMin, tempMax]
                 },
                 sal: { 
                     data: 'salinity', 
                     title: 'Salinity (PSU)',
-                    convert: (v) => v // No conversion needed for salinity
+                    convert: (v) => v, // No conversion needed for salinity
+                    xrange: [salMin, salMax]
                 },
                 dens: { 
                     data: 'density', 
                     title: 'Density (kg/m³)',
-                    convert: (v) => v // No conversion needed for density
+                    convert: (v) => v, // No conversion needed for density
+                    xrange: [densMin, densMax]
                 }
             };
 
@@ -693,7 +753,7 @@
                             title: `${month} ${year}`,
                             xaxis: { 
                                 title: info.title,
-                                range: [0, 1]  // Set a small range for empty plot
+                                range: info.xrange || [0, 1]  // Use fixed range for temperature, small range for others
                             },
                             yaxis: { 
                                 title: `Depth (${depthUnit})`,
@@ -740,7 +800,10 @@
 
                         const layout = {
                             title: `${month} ${year}`,
-                            xaxis: { title: info.title },
+                            xaxis: { 
+                                title: info.title,
+                                range: info.xrange // Use fixed range for temperature, undefined for others (autorange)
+                            },
                             yaxis: { 
                                 title: `Depth (${depthUnit})`,
                                 autorange: 'reversed'
