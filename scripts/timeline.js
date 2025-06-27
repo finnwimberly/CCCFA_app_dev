@@ -164,19 +164,42 @@ function openCalendarPopup(e) {
 }
 
 //  available dates from the JSON file
-async function fetchAvailableDates() {
+async function fetchLayerDates(filePath) {
     try {
-        const response = await fetch('../data/SST/sst_dates.txt');
+        const response = await fetch(filePath);
         if (!response.ok) {
-            throw new Error('Failed to fetch available dates');
+            console.error(`Failed to fetch ${filePath}`);
+            return [];
         }
         const text = await response.text();
-        const dates = text.trim().split('\n');
-        return dates.sort((a, b) => new Date(a) - new Date(b));
+        // Ensure only valid YYYYDDD formats are returned
+        return text.trim().split('\n').filter(line => line.trim() && /^\d{4}\d{3}$/.test(line.trim()));
     } catch (error) {
-        console.error('Error fetching available dates:', error);
+        console.error(`Error fetching dates from ${filePath}: ${error.message}`);
         return [];
     }
+}
+
+async function fetchAvailableDates() {
+    const sstDatesPath = '../data/SST/sst_dates.txt';
+    const sssDatesPath = '../data/SSS/sss_dates.txt';
+    const chloroDatesPath = '../data/CHL/chl_dates.txt';
+    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+
+    const allDateArrays = await Promise.all([
+        fetchLayerDates(sstDatesPath),
+        fetchLayerDates(sssDatesPath),
+        fetchLayerDates(chloroDatesPath),
+        fetchLayerDates(ostiaSstDatesPath),
+        fetchLayerDates(ostiaAnomalyDatesPath)
+    ]);
+
+    const allDatesSet = new Set(allDateArrays.flat());
+    const uniqueDates = Array.from(allDatesSet);
+    
+    // Dates are in YYYYDDD format, so a simple string sort is correct.
+    return uniqueDates.sort();
 }
 
 // Create info modal for layer selection color scheme
