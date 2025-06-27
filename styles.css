@@ -857,7 +857,7 @@ footer {
   border-radius: var(--radius-md);
   box-shadow: 0 4px 6px var(--shadow);
   z-index: 1001;
-  max-width: 500px;
+  max-width: 1000px;
   width: 90%;
 }
 
@@ -1614,4 +1614,8 @@ footer {
     max-width: 160px;
     outline: none;
     box-shadow: none;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
