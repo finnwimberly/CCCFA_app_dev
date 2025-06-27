@@ -70,9 +70,59 @@ async function fetchAvailableDates() {
     }
 }
 
+// Create info modal for layer selection color scheme
+const infoModal = `
+  <div id="info-overlay"></div>
+  <div id="info-modal">
+    <span id="info-modal-close">&times;</span>
+    <h4>Layer Selection Color Scheme</h4>
+    <p class="modal-subtitle">
+      To view which data availability by day, click on the date box to the left of the timeline. 
+      The color of each date on the calendar drop-down indicates which data layers are available. A diagonal stripe indicates 
+      that high-resolution SST data is available for that date. Date selection can be done via the calendar or slider. The selected date
+      can be changed by &plusmn; 1 using the arrows. 
+    </p>
+    <ul>
+      <li><span class="color-block highlight-all"></span> All layers available (High resolution (HR) SST, gapfilled SST,
+      SST anomaly,SSS, and CHL)</li>
+      <li><span class="color-block highlight-all-no-sst"></span> All layers except HR SST (gapfilled SST, 
+      SST anomaly, SSS and CHL)</li>
+      <li><span class="color-block highlight-all-no-sss"></span> All layers except SSS (HR SST, gapfilled SST, SST anomaly, 
+      and CHL)</li>
+      <li><span class="color-block highlight-all-no-sss-sst"></span> All layers except SSS and HR SST (gapfilled SST, SST anomaly, 
+      and CHL)</li>
+      <li><span class="color-block highlight-all-sst"></span> All SST layers but no SSS or CHL</li>
+      <li><span class="color-block highlight-ostia-only"></span> Only gapfilled and anomaly SST layers available</li>
+    </ul>
+  </div>
+`;
+
+// Add the modal to the DOM
+document.body.insertAdjacentHTML('beforeend', infoModal);
+
 // Initialize timeline control
 async function initializeTimeline() {
     console.log('Initializing timeline...');
+    
+    // Setup info modal event listeners
+    const infoIcon = document.getElementById('info-icon');
+    const infoOverlay = document.getElementById('info-overlay');
+    const infoModal = document.getElementById('info-modal');
+    const infoModalClose = document.getElementById('info-modal-close');
+    if (infoIcon && infoOverlay && infoModal && infoModalClose) {
+        infoIcon.addEventListener('click', () => {
+            infoOverlay.style.display = 'block';
+            infoModal.style.display = 'block';
+        });
+        infoModalClose.addEventListener('click', () => {
+            infoOverlay.style.display = 'none';
+            infoModal.style.display = 'none';
+        });
+        infoOverlay.addEventListener('click', () => {
+            infoOverlay.style.display = 'none';
+            infoModal.style.display = 'none';
+        });
+    }
     
     const timelineControl = document.querySelector('.timeline-control');
     if (!timelineControl) {
