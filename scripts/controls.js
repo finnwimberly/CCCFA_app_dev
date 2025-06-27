@@ -202,47 +202,6 @@ const CombinedControl = L.Control.extend({
 // Remove the old controls and add the new combined control
 map.addControl(new CombinedControl({ position: 'topleft' }));
 
-// Create layer date modal
-// const layerDateModal = `
-//   <div id="layer-date-overlay"></div>
-//   <div id="layer-date-modal">
-//     <span id="layer-date-modal-close">&times;</span>
-//     <h4>Layer Date Required</h4>
-//     <p class="modal-subtitle">
-//       Please select a layer date prior to selecting a layer.
-//     </p>
-//   </div>
-// `;
-
-// document.body.insertAdjacentHTML('beforeend', infoModal);
-// document.body.insertAdjacentHTML('beforeend', layerDateModal);
-
-// Info Modal Logic
-// document.addEventListener('DOMContentLoaded', function() {
-  // Info Modal Logic (now in timeline-control)
-  // const infoIcon = document.getElementById('info-icon');
-  // const infoOverlay = document.getElementById('info-overlay');
-  // const infoModal = document.getElementById('info-modal');
-  // const infoModalClose = document.getElementById('info-modal-close');
-  // if (infoIcon && infoOverlay && infoModal && infoModalClose) {
-  //   infoIcon.addEventListener('click', () => {
-  //     infoOverlay.style.display = 'block';
-  //     infoModal.style.display = 'block';
-  //   });
-  //   infoModalClose.addEventListener('click', () => {
-  //     infoOverlay.style.display = 'none';
-  //     infoModal.style.display = 'none';
-  //   });
-  //   infoOverlay.addEventListener('click', () => {
-  //     infoOverlay.style.display = 'none';
-  //     infoModal.style.displayå = 'none';
-  //   });
-  // }
-
-  // (Other DOMContentLoaded logic, e.g. collapsibles, select/deselect, etc.)
-  // ... existing code ...
-// });
-
 async function fetchAvailableDates(filePath) {
   try {
       console.log(`Fetching dates from: ${filePath}`);
@@ -516,7 +475,7 @@ $(function () {
     // const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
     // const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
     // const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
-    // const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+    // const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
 
     // Fetch available dates for highlighting
     Promise.all([
@@ -1073,7 +1032,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 800);
 });
 
-export { activeLayerType };
+export { activeLayerType, availableLayerDates };
 
 // Update the profile handling functions
 function handleMapClick(e) {

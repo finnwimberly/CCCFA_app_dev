@@ -1,6 +1,6 @@
 import { map } from './map-setup.js';
 import { updateLayerPaths } from './layers.js';
-import { activeLayerType } from './controls.js';
+import { activeLayerType, availableLayerDates } from './controls.js';
 
 // Timeline state
 let availableDates = [];
@@ -42,6 +42,115 @@ function displayToFolderDate(displayDate) {
     return `${yyyy}_${String(day).padStart(3, '0')}`;
 }
 
+// Helper function to convert YYYY-MM-DD to YYYYDDD format
+function isoDateToTimelineFormat(isoDate) {
+    // Using UTC functions to avoid timezone-related errors
+    const date = new Date(isoDate); // 'YYYY-MM-DD' is parsed as UTC midnight
+    const year = date.getUTCFullYear();
+    const start = new Date(Date.UTC(year, 0, 1)); // Jan 1st of that year, UTC
+    
+    // Calculate the difference in milliseconds and convert to days
+    const diff = date.getTime() - start.getTime();
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.round(diff / oneDay) + 1;
+    
+    return `${year}${String(dayOfYear).padStart(3, '0')}`;
+}
+
+// Helper function to wait for availableLayerDates to be populated
+function waitForLayerDates() {
+    return new Promise((resolve) => {
+        const checkDates = () => {
+            console.log('Checking for layer dates...', {
+                hasAvailableLayerDates: !!availableLayerDates,
+                keys: availableLayerDates ? Object.keys(availableLayerDates) : [],
+                sstLength: availableLayerDates?.SST?.length || 0
+            });
+            
+            if (availableLayerDates && Object.keys(availableLayerDates).length > 0 && 
+                availableLayerDates.SST && availableLayerDates.SST.length > 0) {
+                console.log('Layer dates are available:', availableLayerDates);
+                resolve(availableLayerDates);
+            } else {
+                setTimeout(checkDates, 100); // Check again in 100ms
+            }
+        };
+        checkDates();
+    });
+}
+
+// Helper function to find the next available date for the currently selected layer
+async function findNextAvailableDate(currentDate, layerType) {
+    // Wait for layer dates to be available
+    await waitForLayerDates();
+    
+    if (!layerType || !availableLayerDates[layerType]) {
+        // No layer selected or no dates available, use default +1 day
+        const currentIndex = availableDates.indexOf(currentDate);
+        if (currentIndex < availableDates.length - 1) {
+            return availableDates[currentIndex + 1];
+        }
+        return null; // Already at the end
+    }
+    
+    const layerDates = availableLayerDates[layerType];
+    
+    // Normalize current date to UTC midnight for correct comparison
+    const y = parseInt(currentDate.slice(0, 4), 10);
+    const d = parseInt(currentDate.slice(4), 10);
+    const localDate = new Date(y, 0, d);
+    const currentDateObj = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
+    
+    // Find the next available date for this layer
+    for (let i = 0; i < layerDates.length; i++) {
+        const layerDate = layerDates[i]; // Format: YYYY-MM-DD
+        const layerDateObj = new Date(layerDate); // This is already UTC midnight
+        
+        if (layerDateObj > currentDateObj) {
+            // Convert YYYY-MM-DD to YYYYDDD format
+            return isoDateToTimelineFormat(layerDate);
+        }
+    }
+    
+    return null; // No next date available
+}
+
+// Helper function to find the previous available date for the currently selected layer
+async function findPreviousAvailableDate(currentDate, layerType) {
+    // Wait for layer dates to be available
+    await waitForLayerDates();
+    
+    if (!layerType || !availableLayerDates[layerType]) {
+        // No layer selected or no dates available, use default -1 day
+        const currentIndex = availableDates.indexOf(currentDate);
+        if (currentIndex > 0) {
+            return availableDates[currentIndex - 1];
+        }
+        return null; // Already at the beginning
+    }
+    
+    const layerDates = availableLayerDates[layerType];
+
+    // Normalize current date to UTC midnight for correct comparison
+    const y = parseInt(currentDate.slice(0, 4), 10);
+    const d = parseInt(currentDate.slice(4), 10);
+    const localDate = new Date(y, 0, d);
+    const currentDateObj = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
+    
+    // Find the previous available date for this layer
+    for (let i = layerDates.length - 1; i >= 0; i--) {
+        const layerDate = layerDates[i]; // Format: YYYY-MM-DD
+        const layerDateObj = new Date(layerDate); // This is already UTC midnight
+        
+        if (layerDateObj < currentDateObj) {
+            // Convert YYYY-MM-DD to YYYYDDD format
+            return isoDateToTimelineFormat(layerDate);
+        }
+    }
+    
+    return null; // No previous date available
+}
+
 // Function to open the calendar popup
 function openCalendarPopup(e) {
     e.stopPropagation();
@@ -57,7 +166,7 @@ function openCalendarPopup(e) {
 //  available dates from the JSON file
 async function fetchAvailableDates() {
     try {
-        const response = await fetch('../data/OSTIA_SST/sst_dates.txt');
+        const response = await fetch('../data/SST/sst_dates.txt');
         if (!response.ok) {
             throw new Error('Failed to fetch available dates');
         }
@@ -77,10 +186,11 @@ const infoModal = `
     <span id="info-modal-close">&times;</span>
     <h4>Layer Selection Color Scheme</h4>
     <p class="modal-subtitle">
-      To view which data availability by day, click on the date box to the left of the timeline. 
+      To view data availability by day, click on the date box to the left of the timeline. 
       The color of each date on the calendar drop-down indicates which data layers are available. A diagonal stripe indicates 
-      that high-resolution SST data is available for that date. Date selection can be done via the calendar or slider. The selected date
-      can be changed by &plusmn; 1 using the arrows. 
+      that high-resolution SST data is available for that date. Date selection can be done via the calendar or slider. 
+      The selected date can be changed with the arrows. If a surface layer is selected, the arrows jump to the next/previous 
+      available date for that layer. Otherwise, they change the date by one day.
     </p>
     <ul>
       <li><span class="color-block highlight-all"></span> All layers available (High resolution (HR) SST, gapfilled SST,
@@ -113,14 +223,17 @@ async function initializeTimeline() {
         infoIcon.addEventListener('click', () => {
             infoOverlay.style.display = 'block';
             infoModal.style.display = 'block';
+            document.body.classList.add('modal-open');
         });
         infoModalClose.addEventListener('click', () => {
             infoOverlay.style.display = 'none';
             infoModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
         });
         infoOverlay.addEventListener('click', () => {
             infoOverlay.style.display = 'none';
             infoModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
         });
     }
     
@@ -267,26 +380,27 @@ async function initializeTimeline() {
     }
     
     // Previous/Next button click handlers with map zoom prevention
-    prevButton.addEventListener('click', (e) => {
+    prevButton.addEventListener('click', async (e) => {
         e.stopPropagation();
         e.preventDefault();
-        if (activeLayerType === 'SST') {
-            if (currentDateIndex > 2) {
-                currentDateIndex -= 3;
-                updateDate();
-                console.log('Moved to previous SST date, new index:', currentDateIndex);
+        
+        try {
+            const currentDate = availableDates[currentDateIndex];
+            const previousDate = await findPreviousAvailableDate(currentDate, activeLayerType);
+            
+            if (previousDate) {
+                // Find the index of the previous date in the availableDates array
+                const newIndex = availableDates.indexOf(previousDate);
+                if (newIndex !== -1) {
+                    currentDateIndex = newIndex;
+                    updateDate();
+                    console.log('Moved to previous available date for', activeLayerType || 'default', 'new index:', currentDateIndex);
+                }
             } else {
-                // Do nothing if less than 3 days from start
-                console.log('Cannot move back by 3 days from current SST date, staying at current date.');
+                console.log('No previous date available for', activeLayerType || 'default');
             }
-        } else {
-            if (currentDateIndex > 0) {
-                currentDateIndex--;
-                updateDate();
-                console.log('Moved to previous date, new index:', currentDateIndex);
-            } else {
-                console.log('Already at first date');
-            }
+        } catch (error) {
+            console.error('Error finding previous date:', error);
         }
     });
     
@@ -296,26 +410,27 @@ async function initializeTimeline() {
         e.preventDefault();
     });
     
-    nextButton.addEventListener('click', (e) => {
+    nextButton.addEventListener('click', async (e) => {
         e.stopPropagation();
         e.preventDefault();
-        if (activeLayerType === 'SST') {
-            if (currentDateIndex < availableDates.length - 3) {
-                currentDateIndex += 3;
-                updateDate();
-                console.log('Moved to next SST date, new index:', currentDateIndex);
+        
+        try {
+            const currentDate = availableDates[currentDateIndex];
+            const nextDate = await findNextAvailableDate(currentDate, activeLayerType);
+            
+            if (nextDate) {
+                // Find the index of the next date in the availableDates array
+                const newIndex = availableDates.indexOf(nextDate);
+                if (newIndex !== -1) {
+                    currentDateIndex = newIndex;
+                    updateDate();
+                    console.log('Moved to next available date for', activeLayerType || 'default', 'new index:', currentDateIndex);
+                }
             } else {
-                // Do nothing if less than 3 days from end
-                console.log('Cannot move forward by 3 days from current SST date, staying at current date.');
+                console.log('No next date available for', activeLayerType || 'default');
             }
-        } else {
-            if (currentDateIndex < availableDates.length - 1) {
-                currentDateIndex++;
-                updateDate();
-                console.log('Moved to next date, new index:', currentDateIndex);
-            } else {
-                console.log('Already at last date');
-            }
+        } catch (error) {
+            console.error('Error finding next date:', error);
         }
     });
     
@@ -336,16 +451,36 @@ async function initializeTimeline() {
     });
 
     // Add keyboard controls
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', async (e) => {
         if (e.key === 'ArrowLeft') {
-            if (currentDateIndex > 0) {
-                currentDateIndex--;
-                updateDate();
+            try {
+                const currentDate = availableDates[currentDateIndex];
+                const previousDate = await findPreviousAvailableDate(currentDate, activeLayerType);
+                
+                if (previousDate) {
+                    const newIndex = availableDates.indexOf(previousDate);
+                    if (newIndex !== -1) {
+                        currentDateIndex = newIndex;
+                        updateDate();
+                    }
+                }
+            } catch (error) {
+                console.error('Error finding previous date:', error);
             }
         } else if (e.key === 'ArrowRight') {
-            if (currentDateIndex < availableDates.length - 1) {
-                currentDateIndex++;
-                updateDate();
+            try {
+                const currentDate = availableDates[currentDateIndex];
+                const nextDate = await findNextAvailableDate(currentDate, activeLayerType);
+                
+                if (nextDate) {
+                    const newIndex = availableDates.indexOf(nextDate);
+                    if (newIndex !== -1) {
+                        currentDateIndex = newIndex;
+                        updateDate();
+                    }
+                }
+            } catch (error) {
+                console.error('Error finding next date:', error);
             }
         }
     });

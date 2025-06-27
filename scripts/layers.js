@@ -53,6 +53,9 @@ let ostiaAnomalyOverlay = L.tileLayer('', {
 const bathymetryLayers = {
   metric: '../data/bathymetry_tiles_m/{z}/{x}/{y}.png',
   imperial: '../data/bathymetry_tiles/{z}/{x}/{y}.png'
+
+  // metric: '/data/processed_data/bathymetry_tiles_m/{z}/{x}/{y}.png',
+  // imperial: '/data/processed_data/bathymetry_tiles/{z}/{x}/{y}.png'
 };
 
 // Function to determine active unit system
@@ -434,6 +437,7 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 
 function getRangePath(layerType, date, isLocal = true) {
     const basePath = '../data';
+    // const basePath = '/data/processed_data';
     switch (layerType) {
         case 'SST':
             return `${basePath}/SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
@@ -452,6 +456,7 @@ function getRangePath(layerType, date, isLocal = true) {
 
 function getColormapPath(layerType, isLocal = true) {
     const basePath = '../data';
+    // const basePath = '/data/processed_data';
     switch (layerType) {
         case 'SST':
             return isLocal ? `${basePath}/SST/thermal_colormap.txt` : `${basePath}/OSTIA_SST/thermal_map.txt`;
@@ -476,6 +481,12 @@ function updateLayerPaths(date) {
   const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
   const ostiaSstPath = `../data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
   const ostiaAnomalyPath = `../data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
+
+  // const sstPath = `/data/processed_data/SST/tiles/${date}/{z}/{x}/{y}.png`;
+  // const sssPath = `/data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+  // const chlPath = `/data/processed_data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
+  // const ostiaSstPath = `/data/processed_data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
+  // const ostiaAnomalyPath = `/data/processed_data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
 
   console.log('Constructed SST path:', sstPath);
   console.log('Constructed SSS path:', sssPath);
