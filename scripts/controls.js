@@ -16,6 +16,7 @@ import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 import { toggleFishbotLayer, updateFishbotForDate } from './fishbot.js';
 import { initializeTimeline } from './timeline.js';
+import { showModal } from './layers.js';
 
 console.log('Controls.js loaded - layer date modal for safari');
 
@@ -62,7 +63,8 @@ function setMostRecentLayerDate(layerType) {
 
 // Add a helper similar to setMostRecentLayerDate but for Fishbot:
 function setMostRecentFishbotDate() {
-    const dateList = availableLayerDates.FISHBOT;
+    const dateList = availableLayerDates.fishbot;
+    console.log('Available Fishbot dates:', dateList);
     if (dateList && dateList.length > 0) {
         const mostRecentDate = dateList[dateList.length - 1]; // YYYY-MM-DD
         const year = mostRecentDate.slice(0, 4);
