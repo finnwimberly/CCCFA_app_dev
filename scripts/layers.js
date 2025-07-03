@@ -536,4 +536,4 @@ map.on('zoomend', () => {
 });
 
 // Export necessary variables and functions
-export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend, getSelectedUnitSystem };
+export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, showModal, updateLayerPaths, tileDate, createLegend, getSelectedUnitSystem };
