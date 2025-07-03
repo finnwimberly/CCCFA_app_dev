@@ -31,7 +31,8 @@ const availableLayerDates = {
   SSS: [],
   CHL: [],
   OSTIA_SST: [],
-  OSTIA_anomaly: []
+  OSTIA_anomaly: [],
+  fishbot: []
 };
 
 // Helper to set the most recent date for a given layer
@@ -55,6 +56,23 @@ function setMostRecentLayerDate(layerType) {
         return folderDate;
     } else {
         showModal("No available dates for this layer.");
+        return null;
+    }
+}
+
+// Add a helper similar to setMostRecentLayerDate but for Fishbot:
+function setMostRecentFishbotDate() {
+    const dateList = availableLayerDates.FISHBOT;
+    if (dateList && dateList.length > 0) {
+        const mostRecentDate = dateList[dateList.length - 1]; // YYYY-MM-DD
+        const year = mostRecentDate.slice(0, 4);
+        const dayOfYear = moment(mostRecentDate, "YYYY-MM-DD").dayOfYear().toString().padStart(3, '0');
+        const folderDate = `${year}_${dayOfYear}`;
+        tileDate = folderDate;
+        console.log('Auto-selected most recent fishbot date:', folderDate);
+        return folderDate;
+    } else {
+        showModal("No available dates for Fishbot data.");
         return null;
     }
 }
@@ -390,47 +408,89 @@ setupCheckboxToggle('bathymetry-toggle', (event, checked) => {
         map.removeLayer(bathymetryLayer);
     }
 });
+
+// // Setup Fishbot toggles
+// setupCheckboxToggle('fishbot-temperature-toggle', (event, checked) => {
+//     // Deactivate other fishbot variables
+//     if (checked) {
+//         document.getElementById('fishbot-oxygen-toggle').checked = false;
+//         document.getElementById('fishbot-salinity-toggle').checked = false;
+//     }
+    
+//     // Get the current layer date and tolerance
+//     const currentTileDate = tileDate;
+//     const toleranceSlider = document.getElementById('date-tolerance-slider');
+//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'temperature');
+// });
+// setupCheckboxToggle('fishbot-oxygen-toggle', (event, checked) => {
+//     // Deactivate other fishbot variables
+//     if (checked) {
+//         document.getElementById('fishbot-temperature-toggle').checked = false;
+//         document.getElementById('fishbot-salinity-toggle').checked = false;
+//     }
+    
+//     // Get the current layer date and tolerance
+//     const currentTileDate = tileDate;
+//     const toleranceSlider = document.getElementById('date-tolerance-slider');
+//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'oxygen');
+// });
+// setupCheckboxToggle('fishbot-salinity-toggle', (event, checked) => {
+//     // Deactivate other fishbot variables
+//     if (checked) {
+//         document.getElementById('fishbot-temperature-toggle').checked = false;
+//         document.getElementById('fishbot-oxygen-toggle').checked = false;
+//     }
+    
+//     // Get the current layer date and tolerance
+//     const currentTileDate = tileDate;
+//     const toleranceSlider = document.getElementById('date-tolerance-slider');
+//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
+    
+//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'salinity');
+// });
+
+// Modify fishbot toggle callbacks
 setupCheckboxToggle('fishbot-temperature-toggle', (event, checked) => {
-    // Deactivate other fishbot variables
-    if (checked) {
-        document.getElementById('fishbot-oxygen-toggle').checked = false;
-        document.getElementById('fishbot-salinity-toggle').checked = false;
+    if (checked && !tileDate) {
+        tileDate = setMostRecentFishbotDate();
+        if (!tileDate) {
+            document.getElementById('fishbot-temperature-toggle').checked = false;
+            return;
+        }
     }
-    
-    // Get the current layer date and tolerance
-    const currentTileDate = tileDate;
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-    toggleFishbotLayer(checked, currentTileDate, tolerance, 'temperature');
+    toggleFishbotLayer(checked, tileDate, tolerance, 'temperature');
 });
+
 setupCheckboxToggle('fishbot-oxygen-toggle', (event, checked) => {
-    // Deactivate other fishbot variables
-    if (checked) {
-        document.getElementById('fishbot-temperature-toggle').checked = false;
-        document.getElementById('fishbot-salinity-toggle').checked = false;
+    if (checked && !tileDate) {
+        tileDate = setMostRecentFishbotDate();
+        if (!tileDate) {
+            document.getElementById('fishbot-oxygen-toggle').checked = false;
+            return;
+        }
     }
-    
-    // Get the current layer date and tolerance
-    const currentTileDate = tileDate;
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-    toggleFishbotLayer(checked, currentTileDate, tolerance, 'oxygen');
+    toggleFishbotLayer(checked, tileDate, tolerance, 'oxygen');
 });
+
 setupCheckboxToggle('fishbot-salinity-toggle', (event, checked) => {
-    // Deactivate other fishbot variables
-    if (checked) {
-        document.getElementById('fishbot-temperature-toggle').checked = false;
-        document.getElementById('fishbot-oxygen-toggle').checked = false;
+    if (checked && !tileDate) {
+        tileDate = setMostRecentFishbotDate();
+        if (!tileDate) {
+            document.getElementById('fishbot-salinity-toggle').checked = false;
+            return;
+        }
     }
-    
-    // Get the current layer date and tolerance
-    const currentTileDate = tileDate;
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-    toggleFishbotLayer(checked, currentTileDate, tolerance, 'salinity');
+    toggleFishbotLayer(checked, tileDate, tolerance, 'salinity');
 });
 
 // Setup date tolerance slider
@@ -470,12 +530,14 @@ $(function () {
     const chloroDatesPath = '../data/CHL/chl_dates.txt';
     const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
     const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+    const fishbotDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
 
     // const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
     // const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
     // const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
     // const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
     // const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
+    // const fishbotDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
 
     // Fetch available dates for highlighting
     Promise.all([
@@ -483,14 +545,16 @@ $(function () {
         fetchAvailableDates(sssDatesPath),
         fetchAvailableDates(chloroDatesPath),
         fetchAvailableDates(ostiaSstDatesPath),
-        fetchAvailableDates(ostiaAnomalyDatesPath)
+        fetchAvailableDates(ostiaAnomalyDatesPath),
+        fetchAvailableDates(fishbotDatesPath),
     ])
-    .then(([sstDates, sssDates, chloroDates, ostiaSstDates, ostiaAnomalyDates]) => {
+    .then(([sstDates, sssDates, chloroDates, ostiaSstDates, ostiaAnomalyDates, fishbotDates]) => {
         const sstSet = new Set(sstDates);
         const sssSet = new Set(sssDates);
         const chloroSet = new Set(chloroDates);
         const ostiaSstSet = new Set(ostiaSstDates);
         const ostiaAnomalySet = new Set(ostiaAnomalyDates);
+        const fishbotSet = new Set(fishbotDates);
         const allDatesSet = new Set([...sstDates, ...sssDates, ...chloroDates, ...ostiaSstDates, ...ostiaAnomalyDates]);
 
         // Store available dates for each layer
@@ -499,6 +563,7 @@ $(function () {
         availableLayerDates.CHL = chloroDates;
         availableLayerDates.OSTIA_SST = ostiaSstDates;
         availableLayerDates.OSTIA_anomaly = ostiaAnomalyDates;
+        availableLayerDates.fishbot = fishbotDates;
 
         // Initialize the date range picker for profiles
         $('#daterange').daterangepicker({
