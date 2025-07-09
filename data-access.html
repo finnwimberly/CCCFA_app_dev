@@ -41,6 +41,9 @@
             <a href="https://www.cfrfoundation.org" target="_blank">
                 <img src="/logos/CFRF_logo.png" alt="CFRF Logo" class="cfrf-logo">
             </a>
+            <a href="https://www.gomlf.org" target="_blank">
+                <img src="/logos/gomlf_logo.png" alt="GOMLF Logo" class="gomlf-logo">
+            </a>
             <a href="https://seagrant.whoi.edu/" target="_blank">
                 <img src="/logos/seagrant_logo.png" alt="Sea Grant Logo" class="seagrant-logo">
             </a>
@@ -63,27 +66,33 @@
     <main class="content-container" style="max-width: 95%;">
         <section class="data-card">
             <h2>In-Situ Profiles</h2>
-            <p>CTD profiles are collected by CCCFA and CFRF vessels while eMOLT profiles are collected by over 100 different fishing vessels
-                across the Northeast Shelf. CTD profiles are processed by the CFRF team and made available 
-               via their <a href="https://erddap.ondeckdata.com/erddap/tabledap/index.html?page=1&itemsPerPage=1000">ERDDAP 
-               server</a>. Our dashboard uses the <a href="https://erddap.ondeckdata.com/erddap/tabledap/shelf_fleet_profiles_1m_binned.html"> 
-               1-meter binned CTD profiles </a> (distinct salinity, temperature, and density values at 1-meter intervals), but complete, 
-               continuous CTD profiles are also available through ERDDAP. The eMOLT profiles are stewarded by the Gulf of Maine Lobster Foundation
-               and served via their <a href="https://erddap.ondeckdata.com/erddap/tabledap/emolt_data.html">ERDDAP page</a>. 
-           </p>
+            <p>All profiles served on this dashboard are collected through partnership with the commercial fishing industry throughout the 
+                Northeastern United States. CTD profiles are collected by CCCFA and CFRF vessels while eMOLT temperature profiles are collected 
+                by over 150 different fishing vessels across the Northeast Shelf. CTD profiles are processed by the CFRF team and made 
+                available via their <a href="https://erddap.ondeckdata.com/erddap/tabledap/index.html?page=1&itemsPerPage=1000">ERDDAP 
+                server</a>. in real time. This dashboard uses the <a href="https://erddap.ondeckdata.com/erddap/tabledap/shelf_fleet_profiles_1m_binned.html"> 
+                1-meter binned CTD profiles </a> (distinct salinity, temperature, and density values at 1-meter intervals), but complete, continuous CTD 
+                profiles are also available through ERDDAP. The eMOLT profiles are processed and made accessible by the 
+                <a href="https://www.gomlf.org/">Gulf of Maine Lobster Foundation</a> and served via their 
+                <a href="https://erddap.ondeckdata.com/erddap/tabledap/emolt_data.html">ERDDAP page</a>.</p>
         </section>
 
         <section class="data-card">
             <h2>FIShBOT</h2>
-            <p><a href="https://github.com/CommercialFisheriesResearchFoundation/fishbot/blob/main/README.md">FIShBOT</a> (Fishing Industry Shared Bottom Oceanographic Timeseries) 
-                is a python tool developed by Linus Stolz which aggregates the data collection efforts of the Study Fleet, eMOLT, CFRF, and ECOMON into daily, location-specific
-                bottom averages for temperature, salinity, and dissolved oxygen concentration. The data product is accessible via the CFRF ERDDAP page
-                 <a href="https://erddap.ondeckdata.com/erddap/tabledap/fishbot_realtime.html">here</a>.
+            
+            <p> <a href="https://github.com/CommercialFisheriesResearchFoundation/fishbot/blob/main/README.md">FIShBOT</a> (Fishing Industry Shared Bottom Oceanographic Timeseries) 
+                is a real-time dataset co-developed by CFRF and NOAA which aggregates regional 
+                bottom observations into gridded daily averages. Ocean observations from programs including <a href =
+                 https://www.fisheries.noaa.gov/new-england-mid-atlantic/science-data/cooperative-research-northeast#study-fleet>NOAA Study Fleet</a>, <a href =
+                 "https://www.fisheries.noaa.gov/new-england-mid-atlantic/climate/partnering-fishing-industry-monitor-northeast-shelf">eMOLT</a>, <a href = 
+                 "https://www.cfrfoundation.org/">CFRF</a>, and <a href = "https://www.fisheries.noaa.gov/new-england-mid-atlantic/ecosystems/monitoring-ecosystem-northeast">ECOMON</a> are 
+                aggregated into this product which is accessible via the CFRF <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_realtime.html">ERDDAP server</a>. 
+                Historic static versions of FIShBOT are available on the <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_archive.html">archive dataset<a/>.</p>
         </section>
 
         <section class="data-card">
             <h2>Satellite Data </h2>
-            <p>Our dashboard uses multiple satellite datasets for different purposes. New data are downloaded nightly, and imagery is automatically generated for visualization.</p>
+            <p>Our dashboard uses multiple satellite datasets for different purposes. New data are downloaded nightly and imagery is automatically generated for visualization.</p>
             
             <ul class="data-list">
 
@@ -115,7 +124,7 @@
     <footer>
         <div class="footer-container">
             <div class="footer-section left">
-                For data questions: 
+                For dashboard questions: 
                 <a href="mailto:finn.wimberly@whoi.edu">finn.wimberly@whoi.edu</a>
             </div>
             <div class="footer-section center">
