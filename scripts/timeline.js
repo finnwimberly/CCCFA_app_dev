@@ -64,11 +64,13 @@ function waitForLayerDates() {
             console.log('Checking for layer dates...', {
                 hasAvailableLayerDates: !!availableLayerDates,
                 keys: availableLayerDates ? Object.keys(availableLayerDates) : [],
-                sstLength: availableLayerDates?.SST?.length || 0
+                sstLength: availableLayerDates?.SST?.length || 0,
+                fishbotLength: availableLayerDates?.fishbot?.length || 0
             });
             
             if (availableLayerDates && Object.keys(availableLayerDates).length > 0 && 
-                availableLayerDates.SST && availableLayerDates.SST.length > 0) {
+                (availableLayerDates.SST && availableLayerDates.SST.length > 0) ||
+                (availableLayerDates.fishbot && availableLayerDates.fishbot.length > 0)) {
                 console.log('Layer dates are available:', availableLayerDates);
                 resolve(availableLayerDates);
             } else {
@@ -181,11 +183,17 @@ async function fetchLayerDates(filePath) {
 }
 
 async function fetchAvailableDates() {
-    const sstDatesPath = '../data/SST/sst_dates.txt';
-    const sssDatesPath = '../data/SSS/sss_dates.txt';
-    const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
-    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+    // const sstDatesPath = '../data/SST/sst_dates.txt';
+    // const sssDatesPath = '../data/SSS/sss_dates.txt';
+    // const chloroDatesPath = '../data/CHL/chl_dates.txt';
+    // const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    // const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+
+    const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
+    const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
+    const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
+    const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
+    const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
 
     const allDateArrays = await Promise.all([
         fetchLayerDates(sstDatesPath),
