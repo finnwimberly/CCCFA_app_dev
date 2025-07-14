@@ -13,7 +13,6 @@ let colormapCache = {}; // Cache for different colormaps
 const variableConfig = {
   temperature: {
     colormapFile: '../data/FIShBOT/thermal_colormap.txt',
-    // colormapFile: '/data/processed_data/FIShBOT/thermal_colormap.txt',
     csvColumn: 'temperature',
     displayName: 'Temperature',
     units: { metric: '°C', imperial: '°F' },
@@ -22,7 +21,6 @@ const variableConfig = {
   },
   oxygen: {
     colormapFile: '../data/FIShBOT/oxy_colormap.txt',
-    // colormapFile: '/data/processed_data/FIShBOT/oxy_colormap.txt',
     csvColumn: 'dissolved_oxygen',
     displayName: 'Oxygen',
     units: { metric: 'mg/L', imperial: 'mg/L' },
@@ -31,7 +29,6 @@ const variableConfig = {
   },
   salinity: {
     colormapFile: '../data/FIShBOT/haline_colormap.txt',
-    // colormapFile: '/data/processed_data/FIShBOT/haline_colormap.txt',
     csvColumn: 'salinity',
     displayName: 'Salinity',
     units: { metric: 'PSU', imperial: 'PSU' },
@@ -121,76 +118,25 @@ async function loadFishbotData() {
   try {
     console.log('Loading fishbot data...');
     const response = await fetch('../data/FIShBOT/fishbot.csv');
-    // const response = await fetch('/data/processed_data/FIShBOT/fishbot.csv');
     const csvText = await response.text();
     
     // Parse CSV data using Papa Parse
     const parseResult = Papa.parse(csvText, {
       header: true,
       skipEmptyLines: true,
-      dynamicTyping: false // Don't convert to numbers, keep as strings
+      dynamicTyping: true
     });
     
     if (parseResult.errors.length > 0) {
       console.warn('CSV parsing errors:', parseResult.errors);
     }
     
-    console.log(`Parsed ${parseResult.data.length} total rows from CSV`);
-    
-    // Debug: Check the first few rows to see their structure
-    console.log('First 3 rows from CSV:', parseResult.data.slice(0, 3));
-    
     fishbotData = parseResult.data.filter(row => {
-      try {
-        // Debug: Log the row structure
-        console.log('Processing row:', row);
-        console.log('row.time type:', typeof row.time, 'value:', row.time);
-        
-        // Only include rows with valid temperature, coordinates, and time
-        const hasValidCoords = row.latitude && row.latitude.trim() !== '' && 
-                              row.longitude && row.longitude.trim() !== '' &&
-                              !isNaN(parseFloat(row.latitude)) && !isNaN(parseFloat(row.longitude));
-        const hasValidTemp = row.temperature && row.temperature.trim() !== '' && !isNaN(parseFloat(row.temperature));
-        const hasValidTime = row.time && typeof row.time === 'string' && row.time.trim() !== '';
-        
-        if (!hasValidCoords) {
-          console.warn('Invalid coordinates:', row.latitude, row.longitude);
-        }
-        if (!hasValidTemp) {
-          console.warn('Invalid temperature:', row.temperature);
-        }
-        if (!hasValidTime) {
-          console.warn('Invalid time:', row.time);
-        }
-        
-        return hasValidCoords && hasValidTemp && hasValidTime;
-      } catch (error) {
-        console.error('Error processing row:', row, 'Error:', error);
-        return false;
-      }
-    }).map(row => ({
-      // Convert string values to numbers for processing
-      time: row.time,
-      latitude: parseFloat(row.latitude),
-      longitude: parseFloat(row.longitude),
-      temperature: parseFloat(row.temperature),
-      dissolved_oxygen: row.dissolved_oxygen && row.dissolved_oxygen.trim() !== '' ? parseFloat(row.dissolved_oxygen) : null,
-      salinity: row.salinity && row.salinity.trim() !== '' ? parseFloat(row.salinity) : null,
-      depth: row.depth && row.depth.trim() !== '' ? parseFloat(row.depth) : null,
-      data_provider: row.data_provider,
-      grid_id: row.grid_id,
-      stat_area: row.stat_area,
-      fishery_dependent: row.fishery_dependent
-    }));
+      // Only include rows with valid temperature and coordinates
+      return !isNaN(row.latitude) && !isNaN(row.longitude) && !isNaN(row.temperature);
+    });
     
     console.log(`Loaded ${fishbotData.length} fishbot data points`);
-    
-    // Log some sample dates to verify format
-    if (fishbotData.length > 0) {
-      const sampleDates = fishbotData.slice(0, 5).map(p => p.time);
-      console.log('Sample dates from fishbot data:', sampleDates);
-    }
-    
     return fishbotData;
   } catch (error) {
     console.error('Error loading fishbot data:', error);
@@ -208,30 +154,15 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   // Set the target date to midnight UTC
   const targetDate = moment.utc().year(year).dayOfYear(dayOfYear).startOf('day');
   
-  console.log(`Filtering fishbot data for target date: ${targetDate.format('YYYY-MM-DD')} with ±${tolerance} day tolerance`);
-  
   // Filter data for the specific date (with configurable tolerance)
   const matchedPoints = data.filter(point => {
-    if (!point.time) return false;
-    
-    // Parse the ISO date from the CSV (format: 2025-04-26T00:00:00Z)
     const pointDate = moment.utc(point.time);
-    
-    if (!pointDate.isValid()) {
-      console.warn('Invalid date in fishbot data:', point.time);
-      return false;
-    }
-    
     const daysDiff = Math.abs(pointDate.diff(targetDate, 'days', true));
     return Math.floor(daysDiff) <= tolerance;
   });
   
   if (matchedPoints.length === 0) {
     console.log(`No fishbot data points found for date ${layerDate} with ±${tolerance} day tolerance`);
-    console.log(`Target date: ${targetDate.format('YYYY-MM-DD')}`);
-    console.log(`Available dates in data: ${[...new Set(data.map(p => moment.utc(p.time).format('YYYY-MM-DD')))].slice(0, 10).join(', ')}...`);
-  } else {
-    console.log(`Found ${matchedPoints.length} fishbot data points for date ${layerDate}`);
   }
   
   return matchedPoints;
@@ -321,9 +252,7 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
     const tooltipContent = `
       <div style="font-family: Arial, sans-serif; font-size: 12px; padding: 4px;">
         <strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}<br>
-        <strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}<br>
-        <strong>Date:</strong> ${new Date(latest.time).toLocaleDateString()}</p>
-
+        <strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}
       </div>
     `;
     
@@ -536,7 +465,16 @@ async function toggleFishbotLayer(isChecked, layerDate = null, tolerance = 2, va
   if (isChecked) {
     // Check if a layer date is selected
     if (!layerDate) {
-      console.log('No layer date provided for fishbot layer');
+      // Show modal asking for date selection (similar to other layers)
+      const checkboxes = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
+      checkboxes.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) checkbox.checked = false;
+      });
+      
+      // Use the same layer date modal as other layers
+      document.getElementById('layer-date-overlay').style.display = 'block';
+      document.getElementById('layer-date-modal').style.display = 'block';
       return;
     }
     
