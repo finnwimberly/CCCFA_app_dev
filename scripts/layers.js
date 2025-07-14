@@ -523,21 +523,6 @@ function updateLayerPaths(date) {
   if (typeof window !== 'undefined' && window.updateFishbotForDate) {
     window.updateFishbotForDate(date);
   }
-  
-  // Check if any fishbot variable is active and update its legend
-  const fishbotToggles = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
-  for (const toggleId of fishbotToggles) {
-    const toggle = document.getElementById(toggleId);
-    if (toggle && toggle.checked) {
-      // Determine variable type from toggle ID
-      const variableType = toggleId.replace('fishbot-', '').replace('-toggle', '');
-      // Import and call fishbot legend creation
-      import('./fishbot.js').then(({ createFishbotLegend }) => {
-        createFishbotLegend(date, variableType);
-      });
-      break; // Only one should be active at a time
-    }
-  }
 }
 
 map.on('zoomend', () => {
