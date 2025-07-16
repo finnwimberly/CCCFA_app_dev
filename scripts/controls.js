@@ -11,7 +11,7 @@ import {
   ostiaAnomalyOverlay
 } from './layers.js';
 import { initializePlots, removeCTDMeasurements } from './plots.js';
-import { loadProfiles, selectProfileSilently, createEmoltIcon } from './map.js';
+import { loadProfiles, selectProfileSilently, createEmoltIcon, showModal } from './map.js';
 import { loadProfilesMetadata } from './data-loading.js';
 import { state } from './state.js';
 import { toggleFishbotLayer, updateFishbotForDate } from './fishbot.js';
@@ -62,9 +62,13 @@ function setMostRecentLayerDate(layerType) {
 
 // Add a helper similar to setMostRecentLayerDate but for Fishbot:
 function setMostRecentFishbotDate() {
-    const dateList = availableLayerDates.FISHBOT;
+    const dateList = availableLayerDates.fishbot; // Note: lowercase 'fishbot' to match the key
     if (dateList && dateList.length > 0) {
         const mostRecentDate = dateList[dateList.length - 1]; // YYYY-MM-DD
+        const layerDateInput = document.getElementById('layer-date');
+        // Set input value for display
+        layerDateInput.value = moment(mostRecentDate).format('MM/DD/YYYY');
+        // Set folder date attribute
         const year = mostRecentDate.slice(0, 4);
         const dayOfYear = moment(mostRecentDate, "YYYY-MM-DD").dayOfYear().toString().padStart(3, '0');
         const folderDate = `${year}_${dayOfYear}`;
@@ -74,7 +78,7 @@ function setMostRecentFishbotDate() {
         // Trigger change event for timeline, etc.
         const event = new Event('change');
         layerDateInput.dispatchEvent(event);
-        console.log('Auto-selected most recent fishbot date:', folderDate);
+
         return folderDate;
     } else {
         showModal("No available dates for Fishbot data.");
@@ -252,9 +256,8 @@ async function fetchAvailableDates(filePath) {
 // Function to extract fishbot dates from CSV data
 async function fetchFishbotDates() {
     try {
-        console.log('Fetching fishbot dates from CSV...');
+
         const response = await fetch('../data/FIShBOT/fishbot.csv');
-        // const response = await fetch('/data/processed_data/FIShBOT/fishbot.csv');
         const csvText = await response.text();
         
         // Parse CSV data using Papa Parse (now available globally via CDN)
@@ -279,8 +282,13 @@ async function fetchFishbotDates() {
         
         // Convert to array and sort
         const dates = Array.from(uniqueDates).sort();
-        console.log(`Extracted ${dates.length} unique fishbot dates`);
-        return dates;
+        
+        // Remove today's date to align with surface layer data that only goes up to yesterday
+        const today = moment().format('YYYY-MM-DD');
+        const filteredDates = dates.filter(date => date !== today);
+        
+        console.log(`Loaded ${filteredDates.length} fishbot dates (excluding today)`);
+        return filteredDates;
     } catch (error) {
         console.error('Error fetching fishbot dates:', error);
         return [];
@@ -695,10 +703,7 @@ $(function () {
             const dayOfYear = date.dayOfYear().toString().padStart(3, '0');
             const layerDate = `${year}_${dayOfYear}`;
             const layerDateInput = document.getElementById('layer-date');
-            console.log('[DATERANGEPICKER] About to set input value.');
-            console.log('  Selected date (moment):', date.format());
-            console.log('  Folder date:', layerDate);
-            console.log('  Display date:', date.format('MM/DD/YYYY'));
+            
             layerDateInput.value = date.format('MM/DD/YYYY');
             // Store folder date for logic
             layerDateInput.setAttribute('data-folder-date', layerDate);
@@ -708,7 +713,7 @@ $(function () {
             const event = new Event('change');
             layerDateInput.dispatchEvent(event);
             // Log the value after setting
-            console.log('  Input value after set:', layerDateInput.value);
+    
         });
     })
     .catch(error => console.error('Error loading available dates:', error));
@@ -733,7 +738,7 @@ document.getElementById('apply-filters').addEventListener('click', function() {
         selectedSources.push('shelf_research_fleet');
     }
     
-    console.log('Applying filters with dates:', startDate, 'to', endDate);
+
     console.log('Selected sources:', selectedSources);
     
     // Clear all legend items
