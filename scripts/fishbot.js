@@ -121,49 +121,33 @@ async function loadFishbotData() {
     const csvText = await response.text();
     
     // Parse CSV data using Papa Parse
-    const parseResult = Papa.parse(csvText, {
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: true
-    });
+          const parseResult = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false // Keep as strings to handle empty fields
+      });
     
     if (parseResult.errors.length > 0) {
       console.warn('CSV parsing errors:', parseResult.errors);
     }
     
-    console.log(`Parsed ${parseResult.data.length} total rows from CSV`);
-    
-    // Debug: Check the first few rows to see their structure
-    console.log('First 3 rows from CSV:', parseResult.data.slice(0, 3));
-    
-    fishbotData = parseResult.data.filter(row => {
-      try {
-        // Debug: Log the row structure
-        console.log('Processing row:', row);
-        console.log('row.time type:', typeof row.time, 'value:', row.time);
+          console.log(`Parsed ${parseResult.data.length} total rows from CSV`);
+      
+      fishbotData = parseResult.data.filter(row => {
+        try {
         
         // Only include rows with valid temperature, coordinates, and time
         const hasValidCoords = row.latitude && row.latitude.trim() !== '' && 
                               row.longitude && row.longitude.trim() !== '' &&
                               !isNaN(parseFloat(row.latitude)) && !isNaN(parseFloat(row.longitude));
         const hasValidTemp = row.temperature && row.temperature.trim() !== '' && !isNaN(parseFloat(row.temperature));
-        const hasValidTime = row.time && typeof row.time === 'string' && row.time.trim() !== '';
-        
-        if (!hasValidCoords) {
-          console.warn('Invalid coordinates:', row.latitude, row.longitude);
-        }
-        if (!hasValidTemp) {
-          console.warn('Invalid temperature:', row.temperature);
-        }
-        if (!hasValidTime) {
-          console.warn('Invalid time:', row.time);
-        }
+                  const hasValidTime = row.time && typeof row.time === 'string' && row.time.trim() !== '';
         
         return hasValidCoords && hasValidTemp && hasValidTime;
-      } catch (error) {
-        console.error('Error processing row:', row, 'Error:', error);
-        return false;
-      }
+              } catch (error) {
+          console.error('Error processing row:', error.message);
+          return false;
+        }
     }).map(row => ({
       // Convert string values to numbers for processing
       time: row.time,
@@ -179,15 +163,10 @@ async function loadFishbotData() {
       fishery_dependent: row.fishery_dependent
     }));
     
-    console.log(`Loaded ${fishbotData.length} fishbot data points`);
-    
-    // Log some sample dates to verify format
-    if (fishbotData.length > 0) {
-      const sampleDates = fishbotData.slice(0, 5).map(p => p.time);
-      console.log('Sample dates from fishbot data:', sampleDates);
-    }
-    
-    console.log(`Loaded ${fishbotData.length} fishbot data points`);
+          // Log some sample dates to verify format
+      if (fishbotData.length > 0) {
+        console.log(`Loaded ${fishbotData.length} valid fishbot data points`);
+      }
     return fishbotData;
   } catch (error) {
     console.error('Error loading fishbot data:', error);
@@ -205,14 +184,16 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   // Set the target date to midnight UTC
   const targetDate = moment.utc().year(year).dayOfYear(dayOfYear).startOf('day');
   
-  console.log(`Filtering fishbot data for target date: ${targetDate.format('YYYY-MM-DD')} with ±${tolerance} day tolerance`);
+
   
   // Filter data for the specific date (with configurable tolerance)
   const matchedPoints = data.filter(point => {
+    if (!point.time) return false;
+    
+    // Parse the ISO date from the CSV (format: 2025-04-26T00:00:00Z)
     const pointDate = moment.utc(point.time);
     
     if (!pointDate.isValid()) {
-      console.warn('Invalid date in fishbot data:', point.time);
       return false;
     }
     
@@ -222,10 +203,6 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   
   if (matchedPoints.length === 0) {
     console.log(`No fishbot data points found for date ${layerDate} with ±${tolerance} day tolerance`);
-    console.log(`Target date: ${targetDate.format('YYYY-MM-DD')}`);
-    console.log(`Available dates in data: ${[...new Set(data.map(p => moment.utc(p.time).format('YYYY-MM-DD')))].slice(0, 10).join(', ')}...`);
-  } else {
-    console.log(`Found ${matchedPoints.length} fishbot data points for date ${layerDate}`);
   }
   
   return matchedPoints;
@@ -313,10 +290,12 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
     
     // Create tooltip content (simplified for hover)
     const tooltipContent = `
-      <div style="font-family: Arial, sans-serif; font-size: 12px; padding: 4px;">
-        <strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}<br>
-        <strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}
-      </div>
+              <div style="font-family: Arial, sans-serif; font-size: 12px; padding: 4px;">
+          <strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}<br>
+          <strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}<br>
+          <strong>Date:</strong> ${new Date(latest.time).toLocaleDateString()}</p>
+
+        </div>
     `;
     
     // Create popup content (more detailed for click)
@@ -520,7 +499,7 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
       legendContainer.style.display = 'none';
     });
 
-  console.log(`Creating FishBot ${variableConfig[variableType].displayName} legend with date: ${layerDate}`);
+
 }
 
 // Function to toggle fishbot layer
@@ -528,16 +507,7 @@ async function toggleFishbotLayer(isChecked, layerDate = null, tolerance = 2, va
   if (isChecked) {
     // Check if a layer date is selected
     if (!layerDate) {
-      // Show modal asking for date selection (similar to other layers)
-      const checkboxes = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
-      checkboxes.forEach(id => {
-        const checkbox = document.getElementById(id);
-        if (checkbox) checkbox.checked = false;
-      });
-      
-      // Use the same layer date modal as other layers
-      document.getElementById('layer-date-overlay').style.display = 'block';
-      document.getElementById('layer-date-modal').style.display = 'block';
+      console.log('No layer date provided for fishbot layer');
       return;
     }
     
@@ -618,7 +588,7 @@ function updateFishbotForDate(newLayerDate) {
   for (const toggleId of fishbotToggles) {
     const toggle = document.getElementById(toggleId);
     if (toggle && toggle.checked) {
-      console.log('Updating fishbot layer for new date:', newLayerDate);
+      
       currentLayerDate = newLayerDate;
       
       // Get current tolerance value from slider

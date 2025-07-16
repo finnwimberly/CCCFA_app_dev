@@ -533,4 +533,4 @@ function showModal(message) {
   }, 3000);
 }
 
-export { loadProfiles, selectProfileSilently, createEmoltIcon, state };
+export { loadProfiles, selectProfileSilently, createEmoltIcon, state, showModal };
