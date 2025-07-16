@@ -276,8 +276,8 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
     
     // Create a rectangle marker for the variable block
     const bounds = [
-      [latest.latitude - 0.02, latest.longitude - 0.02],
-      [latest.latitude + 0.02, latest.longitude + 0.02]
+      [latest.latitude - 0.025, latest.longitude - 0.025],
+      [latest.latitude + 0.025, latest.longitude + 0.025]
     ];
     
     const rectangle = L.rectangle(bounds, {
