@@ -131,12 +131,6 @@ async function loadFishbotData() {
       console.warn('CSV parsing errors:', parseResult.errors);
     }
     
-<<<<<<< Updated upstream
-    fishbotData = parseResult.data.filter(row => {
-      // Only include rows with valid temperature and coordinates
-      return !isNaN(row.latitude) && !isNaN(row.longitude) && !isNaN(row.temperature);
-    });
-=======
     console.log(`Parsed ${parseResult.data.length} total rows from CSV`);
     
     // Debug: Check the first few rows to see their structure
@@ -192,7 +186,6 @@ async function loadFishbotData() {
       const sampleDates = fishbotData.slice(0, 5).map(p => p.time);
       console.log('Sample dates from fishbot data:', sampleDates);
     }
->>>>>>> Stashed changes
     
     console.log(`Loaded ${fishbotData.length} fishbot data points`);
     return fishbotData;
@@ -212,23 +205,17 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   // Set the target date to midnight UTC
   const targetDate = moment.utc().year(year).dayOfYear(dayOfYear).startOf('day');
   
-<<<<<<< Updated upstream
-=======
   console.log(`Filtering fishbot data for target date: ${targetDate.format('YYYY-MM-DD')} with ±${tolerance} day tolerance`);
   
->>>>>>> Stashed changes
   // Filter data for the specific date (with configurable tolerance)
   const matchedPoints = data.filter(point => {
     const pointDate = moment.utc(point.time);
-<<<<<<< Updated upstream
-=======
     
     if (!pointDate.isValid()) {
       console.warn('Invalid date in fishbot data:', point.time);
       return false;
     }
     
->>>>>>> Stashed changes
     const daysDiff = Math.abs(pointDate.diff(targetDate, 'days', true));
     return Math.floor(daysDiff) <= tolerance;
   });
