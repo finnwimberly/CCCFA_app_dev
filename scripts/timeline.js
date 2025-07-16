@@ -183,17 +183,17 @@ async function fetchLayerDates(filePath) {
 }
 
 async function fetchAvailableDates() {
-    // const sstDatesPath = '../data/SST/sst_dates.txt';
-    // const sssDatesPath = '../data/SSS/sss_dates.txt';
-    // const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    // const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
-    // const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
+    const sstDatesPath = '../data/SST/sst_dates.txt';
+    const sssDatesPath = '../data/SSS/sss_dates.txt';
+    const chloroDatesPath = '../data/CHL/chl_dates.txt';
+    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
+    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
 
-    const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
-    const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
-    const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
-    const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
+    // const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
+    // const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
+    // const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
+    // const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
+    // const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
 
     const allDateArrays = await Promise.all([
         fetchLayerDates(sstDatesPath),
