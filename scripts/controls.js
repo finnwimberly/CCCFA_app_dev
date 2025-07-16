@@ -210,7 +210,7 @@ const CombinedControl = L.Control.extend({
                     </div>
                     <div class="tolerance-control">
                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
-                            <label class="control-section-label">Date Tolerance: ±< span id="tolerance-value">2</span> days</label>
+                            <label class="control-section-label">Date Tolerance: ± <span id="tolerance-value">2</span> days</label>
                             <i id="tolerance-info-icon" class="fas fa-info-circle" style="color: var(--text-secondary); cursor: pointer; font-size: 12px;"></i>
                         </div>
                         <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
