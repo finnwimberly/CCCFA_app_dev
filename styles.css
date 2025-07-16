@@ -835,7 +835,7 @@ footer {
 }
 
 /* Info Modal Styles */
-#info-overlay, #layer-date-overlay {
+#info-overlay, #layer-date-overlay, #tolerance-overlay {
   display: none;
   position: fixed;
   top: 0;
@@ -846,7 +846,7 @@ footer {
   z-index: 1000;
 }
 
-#info-modal, #layer-date-modal {
+#info-modal, #layer-date-modal, #tolerance-modal {
   display: none;
   position: fixed;
   top: 50%;

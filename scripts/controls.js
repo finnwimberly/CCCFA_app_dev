@@ -209,7 +209,10 @@ const CombinedControl = L.Control.extend({
                         </div>
                     </div>
                     <div class="tolerance-control">
-                        <label class="control-section-label">Date Tolerance: ±<span id="tolerance-value">2</span> days</label>
+                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
+                            <label class="control-section-label">Date Tolerance: ±< span id="tolerance-value">2</span> days</label>
+                            <i id="tolerance-info-icon" class="fas fa-info-circle" style="color: var(--text-secondary); cursor: pointer; font-size: 12px;"></i>
+                        </div>
                         <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
                         <div class="slider-labels">
                             <span>0</span>
@@ -222,6 +225,31 @@ const CombinedControl = L.Control.extend({
             </div>
       </div>
     `;
+    
+    // Add modal HTML to the document body
+    const modalHTML = `
+      <div id="tolerance-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;"></div>
+      <div id="tolerance-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1001; max-width: 400px; width: 90%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0; color: var(--primary); font-size: 16px;">Date Tolerance</h3>
+          <button id="tolerance-modal-close" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary);">&times;</button>
+        </div>
+                  <div style="color: var(--text-primary); font-size: 14px; line-height: 1.5;">
+            <p>The Date Tolerance setting controls how many days before and after the selected date the FishBot data is shown for.</p>
+            <p><strong>Example:</strong> With a tolerance of ± 2 days and a layer date of January 15th, FishBot data from January 13th to January 17th will be shown.</p>
+            <p>When spatial coverage is more important than temporal precision, increase the tolerance. When you want to know the bottom conditions on an exact day, 
+            decrease the tolerance.</p>
+            <p>The tolerance only affects FishBot data layers (Temperature, Salinity, Dissolved Oxygen). Satellite layers (SST, SSS, CHL) always use the exact selected date.</p>
+            <p>When FishBot has data available for multiple days within the tolerance at the same location, the values are averaged together to provide a representative measurement.</p>
+          </div>
+      </div>
+    `;
+    
+    // Append modal HTML to document body if it doesn't already exist
+    if (!document.getElementById('tolerance-overlay')) {
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
     return div;
   },
 });
@@ -1052,6 +1080,32 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   setupCollapsibles();
+
+    // Setup tolerance info modal event listeners
+    const toleranceInfoIcon = document.getElementById('tolerance-info-icon');
+    const toleranceOverlay = document.getElementById('tolerance-overlay');
+    const toleranceModal = document.getElementById('tolerance-modal');
+    const toleranceModalClose = document.getElementById('tolerance-modal-close');
+
+    if (toleranceInfoIcon && toleranceOverlay && toleranceModal && toleranceModalClose) {
+        toleranceInfoIcon.addEventListener('click', () => {
+            toleranceOverlay.style.display = 'block';
+            toleranceModal.style.display = 'block';
+            document.body.classList.add('modal-open');
+        });
+        
+        toleranceModalClose.addEventListener('click', () => {
+            toleranceOverlay.style.display = 'none';
+            toleranceModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        });
+        
+        toleranceOverlay.addEventListener('click', () => {
+            toleranceOverlay.style.display = 'none';
+            toleranceModal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        });
+    }
   
     // Add event listener for Select Profiles by Area button
     const selectButton = document.querySelector('.select-button');

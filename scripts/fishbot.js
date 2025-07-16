@@ -298,13 +298,19 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
         </div>
     `;
     
+    // Get unique providers from the group
+    const uniqueProviders = [...new Set(group.map(point => point.data_provider))];
+    const providersText = uniqueProviders.length === 1 
+      ? uniqueProviders[0] 
+      : uniqueProviders.join(', ');
+    
     // Create popup content (more detailed for click)
     const popupContent = `
       <div style="font-family: Arial, sans-serif;">
         <h4 style="margin: 0 0 10px 0; color: #333;">FishBot ${variableConfig[variableType].displayName}</h4>
         <p style="margin: 5px 0;"><strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}</p>
         <p style="margin: 5px 0;"><strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}</p>
-        <p style="margin: 5px 0;"><strong>Data Provider:</strong> ${latest.data_provider}</p>
+        <p style="margin: 5px 0;"><strong>Data Provider${uniqueProviders.length > 1 ? 's' : ''}:</strong> ${providersText}</p>
         <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(latest.time).toLocaleDateString()}</p>
         <p style="margin: 5px 0;"><strong>Readings at location:</strong> ${group.length}</p>
       </div>
