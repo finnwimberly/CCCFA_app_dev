@@ -65,7 +65,8 @@ for filename in os.listdir(raw_data_dir):
         # Format YYYY_DDD
         date_str = f"{year}{day_of_year:03d}"
         
-        if date_str not in existing_tiles:  # Only check if tile doesn't exist
+        # Only process files from 2024214 onwards
+        if date_str >= "2024214" and date_str not in existing_tiles:  # Only check if tile doesn't exist
             raw_files_to_process.append(filename)
 
 # Output filtered file list

@@ -68,7 +68,12 @@ function setMostRecentFishbotDate() {
         const year = mostRecentDate.slice(0, 4);
         const dayOfYear = moment(mostRecentDate, "YYYY-MM-DD").dayOfYear().toString().padStart(3, '0');
         const folderDate = `${year}_${dayOfYear}`;
-        tileDate = folderDate;
+        layerDateInput.setAttribute('data-folder-date', folderDate);
+        // Update global tileDate and layer paths
+        updateLayerPaths(folderDate);
+        // Trigger change event for timeline, etc.
+        const event = new Event('change');
+        layerDateInput.dispatchEvent(event);
         console.log('Auto-selected most recent fishbot date:', folderDate);
         return folderDate;
     } else {
@@ -242,6 +247,44 @@ async function fetchAvailableDates(filePath) {
       console.error(`Error fetching dates from ${filePath}: ${error.message}`);
       return [];
   }
+}
+
+// Function to extract fishbot dates from CSV data
+async function fetchFishbotDates() {
+    try {
+        console.log('Fetching fishbot dates from CSV...');
+        const response = await fetch('../data/FIShBOT/fishbot.csv');
+        // const response = await fetch('/data/processed_data/FIShBOT/fishbot.csv');
+        const csvText = await response.text();
+        
+        // Parse CSV data using Papa Parse (now available globally via CDN)
+        const parseResult = Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: false // Keep as strings to handle empty fields
+        });
+        
+        if (parseResult.errors.length > 0) {
+            console.warn('CSV parsing errors:', parseResult.errors);
+        }
+        
+        // Extract unique dates from the time column
+        const uniqueDates = new Set();
+        parseResult.data.forEach(row => {
+            if (row.time && row.time.trim() !== '') {
+                const date = moment.utc(row.time).format('YYYY-MM-DD');
+                uniqueDates.add(date);
+            }
+        });
+        
+        // Convert to array and sort
+        const dates = Array.from(uniqueDates).sort();
+        console.log(`Extracted ${dates.length} unique fishbot dates`);
+        return dates;
+    } catch (error) {
+        console.error('Error fetching fishbot dates:', error);
+        return [];
+    }
 }
 
 // Unified checkbox handler function

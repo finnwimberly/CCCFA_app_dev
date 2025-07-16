@@ -33,9 +33,9 @@ while [ "$(date -d "$current_date" +%s)" -le "$end_sec" ]; do
            --start-datetime "${current_date}T00:00:00" \
            --end-datetime "${current_date}T23:59:59" \
            --minimum-longitude -85.07 \
-           --maximum-longitude -59.94 \
+           --maximum-longitude -35.00 \
            --minimum-latitude 22.10 \
-           --maximum-latitude 46.06 \
+           --maximum-latitude 48.00 \
            --output-directory "${output_dir}" 2>&1)  # Capture both stdout and stderr
 
         # Check if the command exited successfully
