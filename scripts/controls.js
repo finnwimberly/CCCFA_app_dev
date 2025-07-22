@@ -105,7 +105,7 @@ const CombinedControl = L.Control.extend({
                 <label class="control-section-label">Date range:</label>
                 <div style="position: relative;">
                     <input type="text" id="daterange" name="daterange" 
-                        value="08/01/2024 - ${moment().format("MM/DD/YYYY")}" 
+                        value="${moment().subtract(14, 'days').format("MM/DD/YYYY")} - ${moment().format("MM/DD/YYYY")}" 
                         class="control-input" />
                 </div>
             </div>
@@ -117,7 +117,7 @@ const CombinedControl = L.Control.extend({
                 <div class="collapsible-content" id="projects-content">
                     <div class="source-filters">
                         <div class="checkbox-group">
-                            <input type="checkbox" id="emolt-toggle" name="source" value="EMOLT">
+                            <input type="checkbox" id="emolt-toggle" name="source" value="EMOLT" checked>
                             <label for="emolt-toggle" class="control-label">eMOLT</label>
                         </div>
                         <div class="checkbox-group">
@@ -604,11 +604,12 @@ $(function () {
         $('#daterange').daterangepicker({
             opens: 'right',  // Open aligned to the right side
             maxDate: moment().format("MM/DD/YYYY"),
-            startDate: '08/01/2024',
+            startDate: moment().subtract(14, 'days').format("MM/DD/YYYY"),
             endDate: moment().format("MM/DD/YYYY"),
             showDropdowns: true,  // Allow year/month dropdown selection
             autoApply: true,  // Apply the selection immediately
             ranges: {
+                'Last 2 Weeks': [moment().subtract(14, 'days'), moment()],
                 'Last 30 Days': [moment().subtract(30, 'days'), moment()],
                 'Last 60 Days': [moment().subtract(60, 'days'), moment()],
                 'Last 90 Days': [moment().subtract(90, 'days'), moment()],
@@ -1138,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Apply initial filter with only the checked sources
+    // Apply initial filter with all sources for the past two weeks
   setTimeout(() => {
     const emoltChecked = document.getElementById('emolt-toggle').checked;
     const cccfaChecked = document.getElementById('cccfa-toggle').checked;
@@ -1149,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cfrfChecked) initialSources.push('shelf_research_fleet');
         if (emoltChecked) initialSources.push('EMOLT');
         
-        const defaultStartDate = '2024-08-01';
+        const defaultStartDate = moment().subtract(14, 'days').format('YYYY-MM-DD');
         const defaultEndDate = moment().format('YYYY-MM-DD');
         loadProfiles(defaultStartDate, defaultEndDate, initialSources);
     }, 800);
