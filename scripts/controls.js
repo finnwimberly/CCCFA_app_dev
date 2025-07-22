@@ -182,7 +182,7 @@ const CombinedControl = L.Control.extend({
                             <label for="chl-toggle" class="control-label">CHL</label>
                         </div>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="bathymetry-toggle" checked>
+                            <input type="checkbox" id="bathymetry-toggle">
                             <label for="bathymetry-toggle" class="control-label">Bathymetry</label>
                         </div>
                     </div>

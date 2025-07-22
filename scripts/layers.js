@@ -109,8 +109,8 @@ let bathymetryLayer = L.tileLayer(bathymetryLayers[getSelectedUnitSystem()], {
   zIndex: 1000
 });
 
-// Add the bathymetry layer to the map by default
-map.addLayer(bathymetryLayer);
+// Bathymetry layer is now controlled by checkbox toggle only
+// map.addLayer(bathymetryLayer);
 
 // Add event listener to unit selector to reload bathymetry layer when changed
 document.querySelectorAll('input[name="unit"]').forEach((radio) => {
