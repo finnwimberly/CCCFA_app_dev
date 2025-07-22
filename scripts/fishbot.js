@@ -312,10 +312,6 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
         </div>
     `;
     
-    // Debug: Log the actual dates being displayed
-    const displayDate = moment.utc(latest.time).format('M/D/YYYY');
-    console.log(`Debug display: original time=${latest.time}, display date=${displayDate}`);
-    
     // Get unique providers from the group
     const uniqueProviders = [...new Set(group.map(point => point.data_provider))];
     const providersText = uniqueProviders.length === 1 
