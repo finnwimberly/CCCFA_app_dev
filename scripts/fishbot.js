@@ -198,7 +198,12 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
     }
     
     const daysDiff = Math.abs(pointDate.diff(targetDate, 'days', true));
-    // return Math.floor(daysDiff) <= tolerance;
+    
+    // For tolerance=0, check if dates are on the same day
+    if (tolerance === 0) {
+      return pointDate.isSame(targetDate, 'day');
+    }
+    
     return daysDiff <= tolerance;
   });
   
