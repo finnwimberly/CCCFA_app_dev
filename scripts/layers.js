@@ -127,7 +127,7 @@ const overlayLayers = {
 };
 
 // Initialize a global tileDate variable
-let tileDate = null; // Default value
+let layerState = { tileDate: null }; // Default value
 
 function showModal(message) {
   // Create modal elements
@@ -429,8 +429,8 @@ function createLegend(layerType, date) {
 document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', () => {
     // Recreate the legend for the active layer if one is selected
-    if (activeLayerType && tileDate) {
-      createLegend(activeLayerType, tileDate);
+    if (activeLayerType && layerState.tileDate) {
+      createLegend(activeLayerType, layerState.tileDate);
     }
   });
 });
@@ -474,7 +474,7 @@ function getColormapPath(layerType, isLocal = true) {
 }
 
 function updateLayerPaths(date) {
-  tileDate = date; // Update the global tileDate variable
+  layerState.tileDate = date; // Update the global tileDate variable
 
   const sstPath = `../data/SST/tiles/${date}/{z}/{x}/{y}.png`;
   const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
@@ -527,13 +527,13 @@ function updateLayerPaths(date) {
 
 map.on('zoomend', () => {
   console.log(`Zoomend triggered, activeLayerType: ${activeLayerType}`);
-  if (activeLayerType && tileDate) {
+  if (activeLayerType && layerState.tileDate) {
     console.log(`Zoom level changed to ${map.getZoom()}, refreshing legend for: ${activeLayerType}`);
-    createLegend(activeLayerType, tileDate);
+    createLegend(activeLayerType, layerState.tileDate);
   } else {
     console.log("No valid date or layer selected; skipping legend update.");
   }
 });
 
 // Export necessary variables and functions
-export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, tileDate, createLegend, getSelectedUnitSystem };
+export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, layerState, createLegend, getSelectedUnitSystem };

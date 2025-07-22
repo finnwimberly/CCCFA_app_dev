@@ -5,7 +5,7 @@ import {
   chlOverlay, 
   bathymetryLayer, 
   updateLayerPaths, 
-  tileDate, 
+  layerState, 
   createLegend,
   ostiaSstOverlay,
   ostiaAnomalyOverlay
@@ -382,14 +382,14 @@ function toggleLayer(layerType, event, isChecked) {
   
     if (isChecked) {
         // Check if a layer date is selected
-        if (!tileDate) {
+        if (!layerState.tileDate) {
             // Auto-select most recent date for this layer
             const newDate = setMostRecentLayerDate(layerType);
             if (!newDate) {
                 document.getElementById(layerTypes[layerType].toggleId).checked = false;
                 return;
             }
-            // tileDate is now set, continue as normal
+            // layerState.tileDate is now set, continue as normal
         }
 
         // Deactivate fishbot layer if it's active
@@ -431,7 +431,7 @@ function toggleLayer(layerType, event, isChecked) {
         });
         
         // Update layer paths before activating the layer
-        updateLayerPaths(tileDate);
+        updateLayerPaths(layerState.tileDate);
         
         // Activate selected layer
         map.addLayer(layerTypes[layerType].overlay);
@@ -450,7 +450,7 @@ function toggleLayer(layerType, event, isChecked) {
             }
         }
         activeLayerType = layerType;
-        createLegend(layerType, tileDate);
+        createLegend(layerType, layerState.tileDate);
     } else {
         // Deactivate selected layer
         map.removeLayer(layerTypes[layerType].overlay);
@@ -488,88 +488,44 @@ setupCheckboxToggle('bathymetry-toggle', (event, checked) => {
     }
 });
 
-// // Setup Fishbot toggles
-// setupCheckboxToggle('fishbot-temperature-toggle', (event, checked) => {
-//     // Deactivate other fishbot variables
-//     if (checked) {
-//         document.getElementById('fishbot-oxygen-toggle').checked = false;
-//         document.getElementById('fishbot-salinity-toggle').checked = false;
-//     }
-    
-//     // Get the current layer date and tolerance
-//     const currentTileDate = tileDate;
-//     const toleranceSlider = document.getElementById('date-tolerance-slider');
-//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'temperature');
-// });
-// setupCheckboxToggle('fishbot-oxygen-toggle', (event, checked) => {
-//     // Deactivate other fishbot variables
-//     if (checked) {
-//         document.getElementById('fishbot-temperature-toggle').checked = false;
-//         document.getElementById('fishbot-salinity-toggle').checked = false;
-//     }
-    
-//     // Get the current layer date and tolerance
-//     const currentTileDate = tileDate;
-//     const toleranceSlider = document.getElementById('date-tolerance-slider');
-//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'oxygen');
-// });
-// setupCheckboxToggle('fishbot-salinity-toggle', (event, checked) => {
-//     // Deactivate other fishbot variables
-//     if (checked) {
-//         document.getElementById('fishbot-temperature-toggle').checked = false;
-//         document.getElementById('fishbot-oxygen-toggle').checked = false;
-//     }
-    
-//     // Get the current layer date and tolerance
-//     const currentTileDate = tileDate;
-//     const toleranceSlider = document.getElementById('date-tolerance-slider');
-//     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    
-//     toggleFishbotLayer(checked, currentTileDate, tolerance, 'salinity');
-// });
-
 // Modify fishbot toggle callbacks
 setupCheckboxToggle('fishbot-temperature-toggle', (event, checked) => {
-    if (checked && !tileDate) {
-        tileDate = setMostRecentFishbotDate();
-        if (!tileDate) {
+    if (checked && !layerState.tileDate) {
+        layerState.tileDate = setMostRecentFishbotDate();
+        if (!layerState.tileDate) {
             document.getElementById('fishbot-temperature-toggle').checked = false;
             return;
         }
     }
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    toggleFishbotLayer(checked, tileDate, tolerance, 'temperature');
+    toggleFishbotLayer(checked, layerState.tileDate, tolerance, 'temperature');
 });
 
 setupCheckboxToggle('fishbot-oxygen-toggle', (event, checked) => {
-    if (checked && !tileDate) {
-        tileDate = setMostRecentFishbotDate();
-        if (!tileDate) {
+    if (checked && !layerState.tileDate) {
+        layerState.tileDate = setMostRecentFishbotDate();
+        if (!layerState.tileDate) {
             document.getElementById('fishbot-oxygen-toggle').checked = false;
             return;
         }
     }
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    toggleFishbotLayer(checked, tileDate, tolerance, 'oxygen');
+    toggleFishbotLayer(checked, layerState.tileDate, tolerance, 'oxygen');
 });
 
 setupCheckboxToggle('fishbot-salinity-toggle', (event, checked) => {
-    if (checked && !tileDate) {
-        tileDate = setMostRecentFishbotDate();
-        if (!tileDate) {
+    if (checked && !layerState.tileDate) {
+        layerState.tileDate = setMostRecentFishbotDate();
+        if (!layerState.tileDate) {
             document.getElementById('fishbot-salinity-toggle').checked = false;
             return;
         }
     }
     const toleranceSlider = document.getElementById('date-tolerance-slider');
     const tolerance = toleranceSlider ? parseInt(toleranceSlider.value) : 2;
-    toggleFishbotLayer(checked, tileDate, tolerance, 'salinity');
+    toggleFishbotLayer(checked, layerState.tileDate, tolerance, 'salinity');
 });
 
 // Setup date tolerance slider
@@ -582,10 +538,10 @@ document.getElementById('date-tolerance-slider').addEventListener('input', funct
     
     for (const toggleId of fishbotToggles) {
         const toggle = document.getElementById(toggleId);
-        if (toggle && toggle.checked && tileDate) {
+        if (toggle && toggle.checked && layerState.tileDate) {
             // Determine variable type from toggle ID
             const variableType = toggleId.replace('fishbot-', '').replace('-toggle', '');
-            toggleFishbotLayer(true, tileDate, toleranceValue, variableType);
+            toggleFishbotLayer(true, layerState.tileDate, toleranceValue, variableType);
             break; // Only one should be active at a time
         }
     }
