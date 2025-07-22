@@ -182,7 +182,7 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   const year = parseInt(layerDate.split('_')[0]);
   const dayOfYear = parseInt(layerDate.split('_')[1]);
   // Set the target date to midnight UTC
-  const targetDate = moment.utc().year(year).dayOfYear(dayOfYear).startOf('day');
+  const targetDate = moment.utc().year(year).dayOfYear(dayOfYear + 1).startOf('day');
   
 
   
