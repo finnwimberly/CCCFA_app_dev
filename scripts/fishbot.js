@@ -199,6 +199,11 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
     
     const daysDiff = Math.abs(pointDate.diff(targetDate, 'days', true));
     
+    // Debug logging for tolerance issues
+    if (Math.abs(daysDiff - tolerance) < 0.1) {
+      console.log(`Debug: pointDate=${pointDate.format()}, targetDate=${targetDate.format()}, daysDiff=${daysDiff}, tolerance=${tolerance}`);
+    }
+    
     // For tolerance=0, check if dates are on the same day
     if (tolerance === 0) {
       return pointDate.isSame(targetDate, 'day');
