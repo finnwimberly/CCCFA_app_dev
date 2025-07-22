@@ -182,7 +182,7 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
   const year = parseInt(layerDate.split('_')[0]);
   const dayOfYear = parseInt(layerDate.split('_')[1]);
   // Set the target date to midnight UTC
-  const targetDate = moment.utc().year(year).dayOfYear(dayOfYear + 1).startOf('day');
+  const targetDate = moment.utc().year(year).dayOfYear(dayOfYear).startOf('day');
   
 
   
@@ -247,6 +247,7 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
   // Group data points by location to avoid overlapping markers
   const locationGroups = {};
   let validPointsCount = 0;
+  let totalFilteredPoints = filteredData.length;
   
   filteredData.forEach(point => {
     // Only include points with valid data for the selected variable
@@ -260,6 +261,8 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
       locationGroups[key].push(point);
     }
   });
+  
+  console.log(`FishBot ${variableType}: ${totalFilteredPoints} points after date filtering, ${validPointsCount} points with valid ${variableType} data`);
   
   if (validPointsCount === 0) {
     console.log(`No valid ${variableType} values found in the filtered data`);
@@ -304,7 +307,7 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
               <div style="font-family: Arial, sans-serif; font-size: 12px; padding: 4px;">
           <strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}<br>
           <strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}<br>
-          <strong>Date:</strong> ${new Date(new Date(latest.time).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+          <strong>Date:</strong> ${new Date(new Date(latest.time).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
 
         </div>
     `;
@@ -322,7 +325,7 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
         <p style="margin: 5px 0;"><strong>${variableConfig[variableType].displayName}:</strong> ${displayValue.toFixed(1)}${getVariableUnit(variableType)}</p>
         <p style="margin: 5px 0;"><strong>Depth:</strong> ${isImperialUnits ? (latest.depth * 0.5468).toFixed(1) + ' fathoms' : latest.depth + 'm'}</p>
         <p style="margin: 5px 0;"><strong>Data Provider${uniqueProviders.length > 1 ? 's' : ''}:</strong> ${providersText}</p>
-        <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(new Date(latest.time).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+        <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(new Date(latest.time).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
         <p style="margin: 5px 0;"><strong>Readings at location:</strong> ${group.length}</p>
       </div>
     `;
