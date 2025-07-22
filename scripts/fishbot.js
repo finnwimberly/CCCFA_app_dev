@@ -198,7 +198,8 @@ function filterDataByDate(data, layerDate, tolerance = 2) {
     }
     
     const daysDiff = Math.abs(pointDate.diff(targetDate, 'days', true));
-    return Math.floor(daysDiff) <= tolerance;
+    // return Math.floor(daysDiff) <= tolerance;
+    return daysDiff <= tolerance;
   });
   
   if (matchedPoints.length === 0) {
@@ -276,8 +277,8 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
     
     // Create a rectangle marker for the variable block
     const bounds = [
-      [latest.latitude - 0.025, latest.longitude - 0.025],
-      [latest.latitude + 0.025, latest.longitude + 0.025]
+      [latest.latitude - 0.03, latest.longitude - 0.03],
+      [latest.latitude + 0.03, latest.longitude + 0.03]
     ];
     
     const rectangle = L.rectangle(bounds, {
@@ -511,6 +512,16 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
 // Function to toggle fishbot layer
 async function toggleFishbotLayer(isChecked, layerDate = null, tolerance = 2, variableType = 'temperature') {
   if (isChecked) {
+    // Uncheck other FishBot variable toggles
+    const fishbotToggles = ['fishbot-temperature-toggle', 'fishbot-oxygen-toggle', 'fishbot-salinity-toggle'];
+    fishbotToggles.forEach(toggleId => {
+      if (toggleId !== `fishbot-${variableType}-toggle`) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle && toggle.checked) {
+          toggle.checked = false;
+        }
+      }
+    });
     // Check if a layer date is selected
     if (!layerDate) {
       console.log('No layer date provided for fishbot layer');
