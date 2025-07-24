@@ -139,7 +139,7 @@
             <h2>Long Term Temperature & Salinity Trends</h2>
             
             <p class="caption">We define five regions of interest, shown in the map below: 
-                the Gulf of Maine (GoM), Outer Cape (OC), Inner Cape (IC), Rhode Island (RI), and New Jersey (NJ). The anomaly 
+                the Gulf of Maine (GoM), Outer Cape (OC), Inner Cape (IC), Rhode Island (RI), and New Jersey (NJ). The SST/SSS data or anomaly 
                 plots further below correspond to these regions. The GoM overlaps with both the OC and IC regions; these overlapping areas 
                 are indicated by the shaded regions on the map. For each region, the daily anomaly is calculated as the difference between
                 the region's spatially averaged daily/monthly observed SST/SSS and the long-term mean for that calendar day/month, based on the 
@@ -156,29 +156,38 @@
                 </div>
             </div>
 
-            <h3>Anomaly Plots:</h3>
-            <p class="caption">Select a region to view temperature and salinity anomaly plots. The temperature plot shows both daily anomaly values (blue) as well as a 130-day rolling mean (red). The salinity plot shows monthly anomaly values.</p>
+            <h3>Time Series Plots:</h3>
+            <p class="caption">Select a region and data type to view temperature and salinity plots. The temperature plot shows either daily values or anomalies (blue) with a 130-day rolling mean (red) for anomalies. The salinity plot shows monthly values or anomalies.</p>
             
-            <!-- Region Selector -->
+            <!-- Region and Data Type Selectors -->
             <div class="region-selector">
-                <label for="timeseries-region-select">Select Region:</label>
-                <select id="timeseries-region-select">
-                    <option value="GoM">Gulf of Maine</option>
-                    <option value="OC">Outer Cape</option>
-                    <option value="IC">Inner Cape</option>
-                    <option value="RI">Rhode Island</option>
-                    <option value="NJ">New Jersey</option>
-                </select>
+                <div class="selector-group">
+                    <label for="timeseries-region-select">Select Region:</label>
+                    <select id="timeseries-region-select">
+                        <option value="GoM">Gulf of Maine</option>
+                        <option value="OC">Outer Cape</option>
+                        <option value="IC">Inner Cape</option>
+                        <option value="RI">Rhode Island</option>
+                        <option value="NJ">New Jersey</option>
+                    </select>
+                </div>
+                <div class="selector-group">
+                    <label for="data-type-select">Select Data Type:</label>
+                    <select id="data-type-select">
+                        <option value="values">Observed Values</option>
+                        <option value="anomalies">Calculated Anomalies</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Time Series Plots -->
             <div class="timeseries-plots" id="anomaly-plots">
                 <div class="plot-section">
-                    <h3>Sea Surface Temperature Anomaly</h3>
+                    <h3 id="sst-plot-title">Sea Surface Temperature Anomaly</h3>
                     <div id="sst-anomaly-plot" class="plot-container"></div>
                 </div>
                 <div class="plot-section">
-                    <h3>Sea Surface Salinity Anomaly</h3>
+                    <h3 id="sss-plot-title">Sea Surface Salinity Anomaly</h3>
                     <div id="sss-anomaly-plot" class="plot-container"></div>
                 </div>
             </div>
@@ -283,6 +292,17 @@
         .region-selector {
             margin: 20px 0;
             text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
         
         .region-selector select {
@@ -412,24 +432,43 @@
 
         // Function to load SST data
         async function loadSSTData() {
-            const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
+            // const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
+            const response = await fetch('/data/processed_data/OSTIA_SST/time_series/sst_timeseries.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return await response.json();
+            const data = await response.json();
+            console.log('Loaded SST data:', data);
+            return data;
         }
 
         // Function to load SSS data
         async function loadSSSData() {
-            const response = await fetch('../data/SSS/time_series/sss_timeseries.json');
-            if (!response.ok) {
+            // const response = await fetch('../data/SSS/time_series/sss_timeseries.json');
+            const response = await fetch('/data/processed_data/SSS/time_series/sss_timeseries.json');
+                if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return await response.json();
+            const data = await response.json();
+            console.log('Loaded SSS data:', data);
+            
+            // Debug: Check the structure of each region
+            Object.keys(data).forEach(region => {
+                console.log(`SSS region ${region} keys:`, Object.keys(data[region]));
+                if (data[region].sss) {
+                    console.log(`SSS region ${region} sss keys:`, Object.keys(data[region].sss).slice(0, 5));
+                }
+            });
+            
+            return data;
         }
 
+        // Global flag to prevent infinite loops in synchronized zooming
+        let isUpdatingSST = false;
+        let isUpdatingSSS = false;
+
         // Function to create SST plot for selected region
-        function createSSTPlot(sstData, selectedRegion) {
+        function createSSTPlot(sstData, selectedRegion, dataType) {
             if (!sstData[selectedRegion]) {
                 console.error(`No SST data found for region ${selectedRegion}`);
                 return;
@@ -437,13 +476,34 @@
 
             const isImperial = document.getElementById('imperial').checked;
             const unit = isImperial ? '°F' : '°C';
-            const sstaData = sstData[selectedRegion].ssta;
+            
+            // Choose data based on dataType
+            const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
+            const sstDataValues = sstData[selectedRegion][sstDataKey];
 
-            // Convert data to arrays for Plotly
-            const times = Object.keys(sstaData);
-            const values = Object.values(sstaData).map(v => convertTemperatureAnomaly(v, isImperial));
+            // Check if the data exists
+            if (!sstDataValues) {
+                console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
+                console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
+                return;
+            }
 
-            // Calculate 130-day rolling mean
+            // Convert data to arrays for Plotly, filtering out null values
+            const times = [];
+            const values = [];
+            
+            Object.entries(sstDataValues).forEach(([time, value]) => {
+                if (value !== null && value !== undefined && !isNaN(value)) {
+                    times.push(time);
+                    if (dataType === 'anomalies') {
+                        values.push(convertTemperatureAnomaly(value, isImperial));
+                    } else {
+                        values.push(convertTemperatureAnomaly(value, isImperial)); // Convert temperature values
+                    }
+                }
+            });
+
+            // Calculate 130-day rolling mean for both anomalies and raw data
             const windowSize = 130;
             const halfWindow = Math.floor(windowSize / 2);
             const rollingMean = [];
@@ -462,7 +522,7 @@
             const rawTrace = {
                 x: times,
                 y: values,
-                name: 'Daily Temperature Anomaly',
+                name: dataType === 'anomalies' ? 'Daily Temperature Anomaly' : 'Daily Temperature',
                 type: 'scatter',
                 mode: 'lines',
                 line: { 
@@ -471,6 +531,9 @@
                 }
             };
 
+            const traces = [rawTrace];
+            
+            // Add rolling mean trace for both anomalies and raw data
             const meanTrace = {
                 x: times,
                 y: rollingMean,
@@ -482,6 +545,12 @@
                     width: 2
                 }
             };
+            traces.push(meanTrace);
+
+            // Update plot title
+            const titleElement = document.getElementById('sst-plot-title');
+            titleElement.textContent = dataType === 'anomalies' ? 
+                'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
 
             // Create the layout
             const layout = {
@@ -497,7 +566,7 @@
                     borderwidth: 1
                 },
                 title: {
-                    text: `${sstData[selectedRegion].name} - SSTA`,
+                    text: `${sstData[selectedRegion].name} - ${dataType === 'anomalies' ? 'SSTA' : 'SST'}`,
                     font: { size: 16 },
                     x: 0.05,
                     xanchor: 'left',
@@ -509,7 +578,9 @@
                     gridcolor: 'lightgray'
                 },
                 yaxis: {
-                    title: `Temperature Anomaly (${unit})`,
+                    title: dataType === 'anomalies' ? 
+                        `Temperature Anomaly (${unit})` : 
+                        `Temperature (${unit})`,
                     showgrid: true,
                     gridcolor: 'lightgray'
                 },
@@ -529,27 +600,91 @@
                 modeBarButtonsToRemove: ['lasso2d']
             };
 
-            Plotly.newPlot('sst-anomaly-plot', [rawTrace, meanTrace], layout, config);
+            const sstPlot = Plotly.newPlot('sst-anomaly-plot', traces, layout, config);
+            
+            // Add event listener for synchronized zooming
+            document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
+                if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
+                    isUpdatingSST = true;
+                    // Sync the SSS plot with the same time range
+                    Plotly.relayout('sss-anomaly-plot', {
+                        'xaxis.range[0]': eventData['xaxis.range[0]'],
+                        'xaxis.range[1]': eventData['xaxis.range[1]']
+                    }).then(() => {
+                        isUpdatingSST = false;
+                    });
+                }
+            });
         }
 
         // Function to create SSS plot for selected region
-        function createSSSPlot(sssData, selectedRegion) {
+        function createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange) {
             if (!sssData[selectedRegion]) {
                 console.error(`No SSS data found for region ${selectedRegion}`);
                 return;
             }
 
-            const sssaData = sssData[selectedRegion].sssa;
+            // Choose data based on dataType
+            const sssDataKey = dataType === 'anomalies' ? 'sssa' : 'sss';
+            console.log(`Looking for ${sssDataKey} in region ${selectedRegion}`);
+            console.log(`Region data:`, sssData[selectedRegion]);
+            const sssDataValues = sssData[selectedRegion][sssDataKey];
 
-            // Convert data to arrays for Plotly
-            const times = Object.keys(sssaData);
-            const values = Object.values(sssaData);
+            // Check if the data exists
+            if (!sssDataValues) {
+                console.error(`No ${sssDataKey} data found for region ${selectedRegion}`);
+                console.log('Available keys in region:', Object.keys(sssData[selectedRegion]));
+                
+                // If raw SSS data is not available, show a message in the plot
+                const layout = {
+                    height: 400,
+                    title: {
+                        text: `${sssData[selectedRegion].name} - SSS`,
+                        font: { size: 16 },
+                        x: 0.05,
+                        xanchor: 'left',
+                        y: 0.95
+                    },
+                    annotations: [{
+                        text: 'Raw SSS data not available. Only anomaly data is available for salinity.',
+                        xref: 'paper',
+                        yref: 'paper',
+                        x: 0.5,
+                        y: 0.5,
+                        showarrow: false,
+                        font: {
+                            size: 14,
+                            color: 'gray'
+                        }
+                    }],
+                    plot_bgcolor: 'white',
+                    paper_bgcolor: 'white',
+                    font: {
+                        family: 'Inter, sans-serif'
+                    },
+                    margin: { t: 60, b: 50, l: 50, r: 50 }
+                };
+                
+                Plotly.newPlot('sss-anomaly-plot', [], layout);
+                return;
+            }
 
-            // Create trace for monthly salinity anomaly
-            const sssaTrace = {
+            // Convert data to arrays for Plotly, filtering out null values
+            const times = [];
+            const values = [];
+            
+            Object.entries(sssDataValues).forEach(([time, value]) => {
+                if (value !== null && value !== undefined && !isNaN(value)) {
+                    times.push(time);
+                    values.push(value);
+                }
+            });
+
+            // Create trace for monthly salinity data
+            const sssTrace = {
                 x: times,
                 y: values,
-                name: 'Monthly Salinity Anomaly',
+                name: dataType === 'anomalies' ? 'Monthly Salinity Anomaly' : 'Monthly Salinity',
                 type: 'scatter',
                 mode: 'lines+markers',
                 line: { 
@@ -562,7 +697,12 @@
                 }
             };
 
-            // Create the layout
+            // Update plot title
+            const titleElement = document.getElementById('sss-plot-title');
+            titleElement.textContent = dataType === 'anomalies' ? 
+                'Sea Surface Salinity Anomaly' : 'Sea Surface Salinity';
+
+            // Create the layout with aligned time range if provided
             const layout = {
                 height: 400,
                 showlegend: true,
@@ -576,7 +716,7 @@
                     borderwidth: 1
                 },
                 title: {
-                    text: `${sssData[selectedRegion].name} - SSSA`,
+                    text: `${sssData[selectedRegion].name} - ${dataType === 'anomalies' ? 'SSSA' : 'SSS'}`,
                     font: { size: 16 },
                     x: 0.05,
                     xanchor: 'left',
@@ -585,10 +725,13 @@
                 xaxis: {
                     title: 'Time',
                     showgrid: true,
-                    gridcolor: 'lightgray'
+                    gridcolor: 'lightgray',
+                    range: sstTimeRange // Align with SST time range
                 },
                 yaxis: {
-                    title: 'Salinity Anomaly (PSU)',
+                    title: dataType === 'anomalies' ? 
+                        'Salinity Anomaly (PSU)' : 
+                        'Salinity (PSU)',
                     showgrid: true,
                     gridcolor: 'lightgray'
                 },
@@ -608,21 +751,50 @@
                 modeBarButtonsToRemove: ['lasso2d']
             };
 
-            Plotly.newPlot('sss-anomaly-plot', [sssaTrace], layout, config);
+            const sssPlot = Plotly.newPlot('sss-anomaly-plot', [sssTrace], layout, config);
+            
+            // Add event listener for synchronized zooming (reverse direction)
+            document.getElementById('sss-anomaly-plot').on('plotly_relayout', function(eventData) {
+                if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
+                    isUpdatingSSS = true;
+                    // Sync the SST plot with the same time range
+                    Plotly.relayout('sst-anomaly-plot', {
+                        'xaxis.range[0]': eventData['xaxis.range[0]'],
+                        'xaxis.range[1]': eventData['xaxis.range[1]']
+                    }).then(() => {
+                        isUpdatingSSS = false;
+                    });
+                }
+            });
         }
 
         // Function to create unified time series plots
-        async function createTimeSeriesPlots(selectedRegion) {
+        async function createTimeSeriesPlots(selectedRegion, dataType) {
             try {
                 // Load both SST and SSS data
                 const sstData = await loadSSTData();
                 const sssData = await loadSSSData();
                 
-                // Create SST plot for selected region
-                createSSTPlot(sstData, selectedRegion);
+                // Debug: Log the data structure
+                console.log('SST Data structure:', sstData);
+                console.log('SSS Data structure:', sssData);
                 
-                // Create SSS plot for selected region
-                createSSSPlot(sssData, selectedRegion);
+                // Create SST plot for selected region
+                createSSTPlot(sstData, selectedRegion, dataType);
+                
+                // Get SST time range for alignment
+                const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
+                const sstDataValues = sstData[selectedRegion]?.[sstDataKey];
+                
+                // Check if SST data exists before getting time range
+                let sstTimeRange = null;
+                if (sstDataValues) {
+                    const sstTimes = Object.keys(sstDataValues);
+                    sstTimeRange = sstTimes.length > 0 ? [sstTimes[0], sstTimes[sstTimes.length - 1]] : null;
+                }
+                
+                // Create SSS plot for selected region with aligned time range
+                createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange);
             } catch (error) {
                 console.error('Error creating time series plots:', error);
             }
@@ -632,22 +804,27 @@
         async function initializeTimeSeriesPlots() {
             try {
                 const regionSelect = document.getElementById('timeseries-region-select');
+                const dataTypeSelect = document.getElementById('data-type-select');
                 
-                // Add event listeners for region and unit changes
+                // Add event listeners for region, data type, and unit changes
                 regionSelect.addEventListener('change', (e) => {
-                    createTimeSeriesPlots(e.target.value);
+                    createTimeSeriesPlots(e.target.value, dataTypeSelect.value);
+                });
+                
+                dataTypeSelect.addEventListener('change', (e) => {
+                    createTimeSeriesPlots(regionSelect.value, e.target.value);
                 });
                 
                 // Add event listeners for unit changes (only affects SST)
                 document.getElementById('imperial').addEventListener('change', () => {
-                    createTimeSeriesPlots(regionSelect.value);
+                    createTimeSeriesPlots(regionSelect.value, dataTypeSelect.value);
                 });
                 document.getElementById('metric').addEventListener('change', () => {
-                    createTimeSeriesPlots(regionSelect.value);
+                    createTimeSeriesPlots(regionSelect.value, dataTypeSelect.value);
                 });
                 
-                // Initial plot with first region
-                createTimeSeriesPlots(regionSelect.value);
+                // Initial plot with first region and default data type
+                createTimeSeriesPlots(regionSelect.value, dataTypeSelect.value);
             } catch (error) {
                 console.error('Error initializing time series plots:', error);
             }
