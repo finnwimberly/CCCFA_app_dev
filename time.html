@@ -432,8 +432,8 @@
 
         // Function to load SST data
         async function loadSSTData() {
-            // const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
-            const response = await fetch('/data/processed_data/OSTIA_SST/time_series/sst_timeseries.json');
+            const response = await fetch('../data/OSTIA_SST/time_series/sst_timeseries.json');
+            // const response = await fetch('/data/processed_data/OSTIA_SST/time_series/sst_timeseries.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -444,8 +444,8 @@
 
         // Function to load SSS data
         async function loadSSSData() {
-            // const response = await fetch('../data/SSS/time_series/sss_timeseries.json');
-            const response = await fetch('/data/processed_data/SSS/time_series/sss_timeseries.json');
+            const response = await fetch('../data/SSS/time_series/sss_timeseries.json');
+            // const response = await fetch('/data/processed_data/SSS/time_series/sss_timeseries.json');
                 if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
