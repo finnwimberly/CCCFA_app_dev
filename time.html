@@ -422,13 +422,22 @@
         import { loadProfilesMetadata, loadMeasurementData } from './scripts/data-loading.js';
 
         // Function to convert temperature anomaly
-        function convertTemperatureAnomaly(value, toImperial) {
-            if (toImperial) {
-                return value * 1.8;  // °C to °F (just scaling)
-            } else {
-                return value / 1.8;  // °F to °C (just scaling)
+        // function convertTemperatureAnomaly(value, toImperial) {
+        //     if (toImperial) {
+        //         return value * 1.8;  // °C to °F (just scaling)
+        //     } else {
+        //         return value / 1.8;  // °F to °C (just scaling)
+        //     }
+        // }
+
+        function convertTemperature(value, toImperial, { anomaly = false } = {}) {
+            if (!toImperial) {
+                // Source is °C; if we're staying metric, do nothing
+                return value;
             }
-        }
+            // Convert to °F
+            return anomaly ? value * 1.8 : (value * 9/5) + 32;
+            }
 
         // Function to load SST data
         async function loadSSTData() {
@@ -467,7 +476,157 @@
         let isUpdatingSST = false;
         let isUpdatingSSS = false;
 
-        // Function to create SST plot for selected region
+        // // Function to create SST plot for selected region
+        // function createSSTPlot(sstData, selectedRegion, dataType) {
+        //     if (!sstData[selectedRegion]) {
+        //         console.error(`No SST data found for region ${selectedRegion}`);
+        //         return;
+        //     }
+
+        //     const isImperial = document.getElementById('imperial').checked;
+        //     const unit = isImperial ? '°F' : '°C';
+            
+        //     // Choose data based on dataType
+        //     const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
+        //     const sstDataValues = sstData[selectedRegion][sstDataKey];
+
+        //     // Check if the data exists
+        //     if (!sstDataValues) {
+        //         console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
+        //         console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
+        //         return;
+        //     }
+
+        //     // Convert data to arrays for Plotly, filtering out null values
+        //     const times = [];
+        //     const values = [];
+            
+        //     Object.entries(sstDataValues).forEach(([time, value]) => {
+        //         if (value !== null && value !== undefined && !isNaN(value)) {
+        //             times.push(time);
+        //             if (dataType === 'anomalies') {
+        //                 values.push(convertTemperatureAnomaly(value, isImperial));
+        //             } else {
+        //                 values.push(convertTemperatureAnomaly(value, isImperial)); // Convert temperature values
+        //             }
+        //         }
+        //     });
+
+        //     // Calculate 130-day rolling mean for both anomalies and raw data
+        //     const windowSize = 130;
+        //     const halfWindow = Math.floor(windowSize / 2);
+        //     const rollingMean = [];
+        //     for (let i = 0; i < values.length; i++) {
+        //         if (i < halfWindow || i > values.length - halfWindow - 1) {
+        //             rollingMean.push(null);
+        //         } else {
+        //             const start = i - halfWindow;
+        //             const end = i + halfWindow + 1;
+        //             const window = values.slice(start, end);
+        //             rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+        //         }
+        //     }
+
+        //     // Create traces
+        //     const rawTrace = {
+        //         x: times,
+        //         y: values,
+        //         name: dataType === 'anomalies' ? 'Daily Temperature Anomaly' : 'Daily Temperature',
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { 
+        //             color: '#1f77b4',
+        //             width: 1
+        //         }
+        //     };
+
+        //     const traces = [rawTrace];
+            
+        //     // Add rolling mean trace for both anomalies and raw data
+        //     const meanTrace = {
+        //         x: times,
+        //         y: rollingMean,
+        //         name: '130-day Rolling Mean',
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { 
+        //             color: '#ff4444',
+        //             width: 2
+        //         }
+        //     };
+        //     traces.push(meanTrace);
+
+        //     // Update plot title
+        //     const titleElement = document.getElementById('sst-plot-title');
+        //     titleElement.textContent = dataType === 'anomalies' ? 
+        //         'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
+
+        //     // Create the layout
+        //     const layout = {
+        //         height: 400,
+        //         showlegend: true,
+        //         legend: {
+        //             x: 0.98,
+        //             y: 0.98,
+        //             xanchor: 'right',
+        //             yanchor: 'top',
+        //             bgcolor: 'rgba(255, 255, 255, 0.8)',
+        //             bordercolor: 'lightgray',
+        //             borderwidth: 1
+        //         },
+        //         title: {
+        //             text: `${sstData[selectedRegion].name} - ${dataType === 'anomalies' ? 'SSTA' : 'SST'}`,
+        //             font: { size: 16 },
+        //             x: 0.05,
+        //             xanchor: 'left',
+        //             y: 0.95
+        //         },
+        //         xaxis: {
+        //             title: 'Time',
+        //             showgrid: true,
+        //             gridcolor: 'lightgray'
+        //         },
+        //         yaxis: {
+        //             title: dataType === 'anomalies' ? 
+        //                 `Temperature Anomaly (${unit})` : 
+        //                 `Temperature (${unit})`,
+        //             showgrid: true,
+        //             gridcolor: 'lightgray'
+        //         },
+        //         plot_bgcolor: 'white',
+        //         paper_bgcolor: 'white',
+        //         font: {
+        //             family: 'Inter, sans-serif'
+        //         },
+        //         margin: { t: 60, b: 50, l: 50, r: 50 }
+        //     };
+
+        //     // Create the figure
+        //     const config = {
+        //         responsive: true,
+        //         displayModeBar: true,
+        //         modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+        //         modeBarButtonsToRemove: ['lasso2d']
+        //     };
+
+        //     const sstPlot = Plotly.newPlot('sst-anomaly-plot', traces, layout, config);
+            
+        //     // Add event listener for synchronized zooming
+        //     document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
+        //         if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
+        //             isUpdatingSST = true;
+        //             // Sync the SSS plot with the same time range
+        //             Plotly.relayout('sss-anomaly-plot', {
+        //                 'xaxis.range[0]': eventData['xaxis.range[0]'],
+        //                 'xaxis.range[1]': eventData['xaxis.range[1]']
+        //             }).then(() => {
+        //                 isUpdatingSST = false;
+        //             });
+        //         }
+        //     });
+        // }
+
+
         function createSSTPlot(sstData, selectedRegion, dataType) {
             if (!sstData[selectedRegion]) {
                 console.error(`No SST data found for region ${selectedRegion}`);
@@ -476,123 +635,81 @@
 
             const isImperial = document.getElementById('imperial').checked;
             const unit = isImperial ? '°F' : '°C';
-            
-            // Choose data based on dataType
+
             const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
             const sstDataValues = sstData[selectedRegion][sstDataKey];
-
-            // Check if the data exists
             if (!sstDataValues) {
                 console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
                 console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
                 return;
             }
 
-            // Convert data to arrays for Plotly, filtering out null values
+            const isAnomaly = dataType === 'anomalies';
+
             const times = [];
             const values = [];
-            
             Object.entries(sstDataValues).forEach(([time, value]) => {
                 if (value !== null && value !== undefined && !isNaN(value)) {
-                    times.push(time);
-                    if (dataType === 'anomalies') {
-                        values.push(convertTemperatureAnomaly(value, isImperial));
-                    } else {
-                        values.push(convertTemperatureAnomaly(value, isImperial)); // Convert temperature values
-                    }
+                times.push(time);
+                values.push(convertTemperature(value, isImperial, { anomaly: isAnomaly }));
                 }
             });
 
-            // Calculate 130-day rolling mean for both anomalies and raw data
+            // 130-day rolling mean (unchanged)
             const windowSize = 130;
             const halfWindow = Math.floor(windowSize / 2);
             const rollingMean = [];
             for (let i = 0; i < values.length; i++) {
                 if (i < halfWindow || i > values.length - halfWindow - 1) {
-                    rollingMean.push(null);
+                rollingMean.push(null);
                 } else {
-                    const start = i - halfWindow;
-                    const end = i + halfWindow + 1;
-                    const window = values.slice(start, end);
-                    rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
+                const start = i - halfWindow;
+                const end = i + halfWindow + 1;
+                const window = values.slice(start, end);
+                rollingMean.push(window.reduce((a, b) => a + b, 0) / window.length);
                 }
             }
 
-            // Create traces
             const rawTrace = {
                 x: times,
                 y: values,
-                name: dataType === 'anomalies' ? 'Daily Temperature Anomaly' : 'Daily Temperature',
+                name: isAnomaly ? 'Daily Temperature Anomaly' : 'Daily Temperature',
                 type: 'scatter',
                 mode: 'lines',
-                line: { 
-                    color: '#1f77b4',
-                    width: 1
-                }
+                line: { color: '#1f77b4', width: 1 }
             };
 
-            const traces = [rawTrace];
-            
-            // Add rolling mean trace for both anomalies and raw data
             const meanTrace = {
                 x: times,
                 y: rollingMean,
                 name: '130-day Rolling Mean',
                 type: 'scatter',
                 mode: 'lines',
-                line: { 
-                    color: '#ff4444',
-                    width: 2
-                }
+                line: { color: '#ff4444', width: 2 }
             };
-            traces.push(meanTrace);
 
-            // Update plot title
-            const titleElement = document.getElementById('sst-plot-title');
-            titleElement.textContent = dataType === 'anomalies' ? 
-                'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
-
-            // Create the layout
             const layout = {
                 height: 400,
                 showlegend: true,
                 legend: {
-                    x: 0.98,
-                    y: 0.98,
-                    xanchor: 'right',
-                    yanchor: 'top',
-                    bgcolor: 'rgba(255, 255, 255, 0.8)',
-                    bordercolor: 'lightgray',
-                    borderwidth: 1
+                x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
+                bgcolor: 'rgba(255,255,255,0.8)', bordercolor: 'lightgray', borderwidth: 1
                 },
                 title: {
-                    text: `${sstData[selectedRegion].name} - ${dataType === 'anomalies' ? 'SSTA' : 'SST'}`,
-                    font: { size: 16 },
-                    x: 0.05,
-                    xanchor: 'left',
-                    y: 0.95
+                text: `${sstData[selectedRegion].name} - ${isAnomaly ? 'SSTA' : 'SST'}`,
+                font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
                 },
-                xaxis: {
-                    title: 'Time',
-                    showgrid: true,
-                    gridcolor: 'lightgray'
-                },
+                xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray' },
                 yaxis: {
-                    title: dataType === 'anomalies' ? 
-                        `Temperature Anomaly (${unit})` : 
-                        `Temperature (${unit})`,
-                    showgrid: true,
-                    gridcolor: 'lightgray'
+                title: isAnomaly ? `Temperature Anomaly (${unit})` : `Temperature (${unit})`,
+                showgrid: true, gridcolor: 'lightgray'
                 },
                 plot_bgcolor: 'white',
                 paper_bgcolor: 'white',
-                font: {
-                    family: 'Inter, sans-serif'
-                },
+                font: { family: 'Inter, sans-serif' },
                 margin: { t: 60, b: 50, l: 50, r: 50 }
             };
 
-            // Create the figure
             const config = {
                 responsive: true,
                 displayModeBar: true,
@@ -600,22 +717,20 @@
                 modeBarButtonsToRemove: ['lasso2d']
             };
 
-            const sstPlot = Plotly.newPlot('sst-anomaly-plot', traces, layout, config);
-            
-            // Add event listener for synchronized zooming
+            Plotly.newPlot('sst-anomaly-plot', [rawTrace, meanTrace], layout, config);
+
+            // sync zoom (unchanged)
             document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
                 if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
-                    isUpdatingSST = true;
-                    // Sync the SSS plot with the same time range
-                    Plotly.relayout('sss-anomaly-plot', {
-                        'xaxis.range[0]': eventData['xaxis.range[0]'],
-                        'xaxis.range[1]': eventData['xaxis.range[1]']
-                    }).then(() => {
-                        isUpdatingSST = false;
-                    });
+                isUpdatingSST = true;
+                Plotly.relayout('sss-anomaly-plot', {
+                    'xaxis.range[0]': eventData['xaxis.range[0]'],
+                    'xaxis.range[1]': eventData['xaxis.range[1]']
+                }).then(() => { isUpdatingSST = false; });
                 }
             });
-        }
+            }
+
 
         // Function to create SSS plot for selected region
         function createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange) {
