@@ -12,7 +12,8 @@ except Exception as exc:
     sys.exit(1)
 
 
-DATASET_ID = "c3s_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
+# DATASET_ID = "cmems_obs-oc_glo_bgc-optics_my_l4-multi-4km_P1M"
+DATASET_ID = "cmems_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
 VARIABLES = [
     "CHL"
 ]
@@ -41,7 +42,7 @@ def iter_dates(start_date: datetime, end_date: datetime):
 def format_expected_filename(date_str: str) -> str:
     # Mirror the naming from the shell script exactly
     return (
-        f"{DATASET_ID}_CHL-flags_85.06W-35.02W_22.10N-47.98N_{date_str}.nc"
+        f"{DATASET_ID}_CHL-flags_85.06W-59.98W_22.10N-46.02N_{date_str}.nc"
     )
 
 
@@ -137,9 +138,9 @@ def main(argv=None) -> int:
                 start_datetime=f"{date_str}T00:00:00",
                 end_datetime=f"{date_str}T23:59:59",
                 minimum_longitude= -85.07,
-                maximum_longitude=-35.00,
+                maximum_longitude=-59.98,
                 minimum_latitude=22.10,
-                maximum_latitude=48.00,
+                maximum_latitude=46.02,
                 coordinates_selection_method="strict-inside",
                 file_format="netcdf",
                 output_directory=output_dir,
