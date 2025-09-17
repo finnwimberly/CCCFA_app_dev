@@ -10,7 +10,7 @@ conda activate spyder_salinity
 cd /home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing/
 
 # Run the Python script
-python weekly_avgs_beta.py
+python weekly_avgs.py
 
 #Sync rclone and drive
 /home/finn.wimberly/bin/rclone sync /vast/clidex/data/obs/CCCFA/processed_data/weekly_updates/ GDrive:weekly_update_figs
