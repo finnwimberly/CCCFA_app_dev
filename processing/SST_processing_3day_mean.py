@@ -25,7 +25,9 @@ import json
 # Define directories
 base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/data'
 raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
-tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
+tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles')
+os.makedirs(tiles_dir, exist_ok=True)
+
 
 # Get list of existing tile dates
 existing_tiles = set()
@@ -227,7 +229,7 @@ for filename in os.listdir(temp_files_dir):
     # Input and output file paths
     fixed_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{date_str}_fixed.tif")
     vrt_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_{date_str}.vrt")
-    tiles_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day/')
+    tiles_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles/')
 
     # Open the fixed file and get its bounds
     with rasterio.open(fixed_file) as src:
@@ -299,7 +301,7 @@ for filename in os.listdir(temp_files_dir):
     
     colored_vrt_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_{raw_date_str}.vrt")
 
-    tiles_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', date_str)
+    tiles_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles', date_str)
 
 
     #Generate tiles
@@ -323,7 +325,7 @@ for filename in os.listdir(temp_files_dir):
 
 
 # Define the directory containing the tiles
-range_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
+range_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles')
 
 # Loop through each file in the tiles directory
 for filename in os.listdir(range_dir):
@@ -506,7 +508,7 @@ for year, day, filename in files:
     dict_key = f"{year}{day:03d}" 
     fixed_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"sst_data_{dict_key}_fixed_local.tif")
     vrt_file_local = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_{dict_key}_local.vrt")
-    tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_')
+    tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local')
 
     # Open the fixed file and get its bounds
     with rasterio.open(fixed_file_local) as src:
@@ -603,7 +605,7 @@ for year, day, filename in files:
     }
 
     # Define the output directory for the JSON file
-    json_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', dict_key1)
+    json_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles', dict_key1)
 
     # Create the directory if it doesn't exist
     os.makedirs(json_dir, exist_ok=True)
@@ -625,7 +627,7 @@ for year, day, filename in files:
 
     # Define the source and destination directories
     source_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local', dict_key)
-    destination_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day', dict_key)
+    destination_directory = os.path.join(base_dir, 'processed_data', 'SST', 'tiles', dict_key)
 
     # Ensure the destination directory exists
     os.makedirs(destination_directory, exist_ok=True)
@@ -671,7 +673,7 @@ with open(os.path.join(base_dir, 'processed_data', 'SST', 'sst_dates.txt'), 'w')
 
 
 # Define the tiles_3day directory
-tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day')
+tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles')
 
 # Get all folder names in the tiles_3day directory and sort them
 dates = sorted([folder for folder in os.listdir(tiles_dir) if os.path.isdir(os.path.join(tiles_dir, folder))])

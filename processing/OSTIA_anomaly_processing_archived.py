@@ -190,16 +190,13 @@ for date_int, filename in files:
     if len(ssta_subset_masked[dict_key].shape) > 2:
         ssta_subset_masked[dict_key] = np.squeeze(ssta_subset_masked[dict_key])
     
-    # Compute min and max values after masking and calculate symmetric range
+    # Compute min and max values after masking
     ssta_min = np.ma.min(ssta_subset_masked[dict_key])
     ssta_max = np.ma.max(ssta_subset_masked[dict_key])
-    max_abs = max(abs(float(ssta_min)), abs(float(ssta_max)))
-    min_val = -max_abs
-    max_val = max_abs
     
-    # Store statistics with symmetric range
-    ssta_stats[dict_key] = {'min': min_val, 'max': max_val}
-    print(f"{filename}: symmetric range [{min_val}°C, {max_val}°C]")
+    # Store statistics
+    ssta_stats[dict_key] = {'min': float(ssta_min), 'max': float(ssta_max)}
+    print(f"{filename}: min={ssta_min}°C, max={ssta_max}°C")
 
     # Extract coordinate bounds
     lon_min, lon_max = float(ssta_subset[dict_key]['longitude'].min()), float(ssta_subset[dict_key]['longitude'].max())
@@ -343,20 +340,14 @@ for filename in os.listdir(temp_files_dir):
     # Open the raster to extract its bounds (already in EPSG:3857)
     with rasterio.open(tiff_3857) as src:
         bounds = src.bounds  # (left, bottom, right, top)
-        data = src.read(1)
-        
-        # Calculate symmetric range based on maximum absolute value
-        max_abs = max(abs(np.nanmin(data)), abs(np.nanmax(data)))
-        min_val = -max_abs
-        max_val = max_abs
     
     # Extract corner coordinates (directly in EPSG:3857)
     upper_left_x, lower_right_y, lower_right_x, upper_left_y = bounds
     
-    # Generate VRT with symmetric range centered on 0
+    # Generate VRT with enforced SST range (approximately 0-30°C) and correct bounds
     subprocess.run([
         'gdal_translate', '-of', 'VRT', '-ot', 'Byte', '-scale', 
-        str(min_val), str(max_val), '1', '255',  # Symmetric range centered on 0
+        # '0', '30', '1', '255',  # Enforce SST range in Celsius
         '-a_srs', 'EPSG:3857',
         '-a_ullr',
         str(upper_left_x), str(upper_left_y),
@@ -364,7 +355,7 @@ for filename in os.listdir(temp_files_dir):
         tiff_3857, vrt_file
     ])
     
-    print(f"Created VRT with symmetric range [{min_val}, {max_val}]°C: {vrt_file}")
+    print(f"Created VRT: {vrt_file}")
 
 
 # In[12]:
@@ -457,15 +448,10 @@ for dict_key in ssta_stats.keys():
     # Ensure the directory exists
     os.makedirs(out_dir, exist_ok=True)
     
-    # Calculate symmetric range based on maximum absolute value
-    max_abs = max(abs(ssta_stats[dict_key]['min']), abs(ssta_stats[dict_key]['max']))
-    min_val = -max_abs
-    max_val = max_abs
-    
-    # Set symmetric SST range in Celsius
+    # Set fixed SST range in Celsius
     ssta_range = {
-        "min_SSTA": min_val,
-        "max_SSTA": max_val
+        "min_SSTA": ssta_stats[dict_key]['min'],
+        "max_SSTA": ssta_stats[dict_key]['max']
     }
     
     # Save JSON file in the correct tiles folder
@@ -473,7 +459,7 @@ for dict_key in ssta_stats.keys():
     with open(json_file_path, "w") as f:
         json.dump(ssta_range, f, indent=4)
     
-    print(f"Saved symmetric range stats for {dict_key} ({year}_{doy:03d}) to {json_file_path}")
+    print(f"Saved fixed range stats for {dict_key} ({year}_{doy:03d}) to {json_file_path}")
 
 
 # In[15]:
@@ -613,16 +599,13 @@ for date_int, filename in files:
     if len(ssta_subset_masked[dict_key].shape) > 2:
         ssta_subset_masked[dict_key] = np.squeeze(ssta_subset_masked[dict_key])
     
-    # Compute min and max values after masking and calculate symmetric range
+    # Compute min and max values after masking
     ssta_min = np.ma.min(ssta_subset_masked[dict_key])
     ssta_max = np.ma.max(ssta_subset_masked[dict_key])
-    max_abs = max(abs(float(ssta_min)), abs(float(ssta_max)))
-    min_val = -max_abs
-    max_val = max_abs
     
-    # Store statistics with symmetric range
-    ssta_stats[dict_key] = {'min': min_val, 'max': max_val}
-    print(f"{filename}: symmetric range [{min_val}°C, {max_val}°C]")
+    # Store statistics
+    ssta_stats[dict_key] = {'min': float(ssta_min), 'max': float(ssta_max)}
+    print(f"{filename}: min={ssta_min}°C, max={ssta_max}°C")
 
     # Extract coordinate bounds
     lon_min, lon_max = float(ssta_subset[dict_key]['longitude'].min()), float(ssta_subset[dict_key]['longitude'].max())
@@ -766,20 +749,14 @@ for filename in os.listdir(temp_files_dir):
     # Open the raster to extract its bounds (already in EPSG:3857)
     with rasterio.open(tiff_3857) as src:
         bounds = src.bounds  # (left, bottom, right, top)
-        data = src.read(1)
-        
-        # Calculate symmetric range based on maximum absolute value
-        max_abs = max(abs(np.nanmin(data)), abs(np.nanmax(data)))
-        min_val = -max_abs
-        max_val = max_abs
     
     # Extract corner coordinates (directly in EPSG:3857)
     upper_left_x, lower_right_y, lower_right_x, upper_left_y = bounds
     
-    # Generate VRT with symmetric range centered on 0
+    # Generate VRT with enforced SST range (approximately 0-30°C) and correct bounds
     subprocess.run([
         'gdal_translate', '-of', 'VRT', '-ot', 'Byte', '-scale', 
-        str(min_val), str(max_val), '1', '255',  # Symmetric range centered on 0
+        # '0', '30', '1', '255',  # Enforce SST range in Celsius
         '-a_srs', 'EPSG:3857',
         '-a_ullr',
         str(upper_left_x), str(upper_left_y),
@@ -787,7 +764,7 @@ for filename in os.listdir(temp_files_dir):
         tiff_3857, vrt_file
     ])
     
-    print(f"Created VRT with symmetric range [{min_val}, {max_val}]°C: {vrt_file}")
+    print(f"Created VRT: {vrt_file}")
 
 
 # In[23]:
@@ -880,15 +857,10 @@ for dict_key in ssta_stats.keys():
     # Ensure the directory exists
     os.makedirs(out_dir, exist_ok=True)
     
-    # Calculate symmetric range based on maximum absolute value
-    max_abs = max(abs(ssta_stats[dict_key]['min']), abs(ssta_stats[dict_key]['max']))
-    min_val = -max_abs
-    max_val = max_abs
-    
-    # Set symmetric SST range in Celsius
+    # Set fixed SST range in Celsius
     ssta_range = {
-        "min_SSTA": min_val,
-        "max_SSTA": max_val
+        "min_SSTA": ssta_stats[dict_key]['min'],
+        "max_SSTA": ssta_stats[dict_key]['max']
     }
     
     # Save JSON file in the correct tiles folder
@@ -896,7 +868,7 @@ for dict_key in ssta_stats.keys():
     with open(json_file_path, "w") as f:
         json.dump(ssta_range, f, indent=4)
     
-    print(f"Saved symmetric range stats for {dict_key} ({year}_{doy:03d}) to {json_file_path}")
+    print(f"Saved fixed range stats for {dict_key} ({year}_{doy:03d}) to {json_file_path}")
 
 
 # In[26]:
