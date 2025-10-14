@@ -1,8 +1,9 @@
-import { map } from './map-setup.js';
-import { plotCTDMeasurements, initializePlots, removeCTDMeasurements, handleUnitChange} from './plots.js';
-import { loadProfilesMetadata, loadMeasurementData } from './data-loading.js';
-import { generateColor } from './utils.js';
-import { state } from './state.js';
+// map/profiles.js
+import { map } from './core.js';
+import { plotCTDMeasurements, initializePlots, removeCTDMeasurements, handleUnitChange} from '../profiles_and_plots/plots.js';
+import { loadProfilesMetadata, loadMeasurementData } from '../profiles_and_plots/data-loading.js';
+import { generateColor } from '../profiles_and_plots/helpers.js';
+import { state } from '../state.js';
 
 // Add loading state at the top of the file, after imports
 const loadingProfiles = new Set();
@@ -10,8 +11,12 @@ const loadingProfiles = new Set();
 // Create a marker cluster group for EMOLT profiles
 let emoltClusterGroup;
 
+// Track latest load to avoid stale results painting the map
+let activeLoadToken = 0;
+
 // Function to load profiles based on selected date range
 function loadProfiles(startDate, endDate, selectedSources = []) {
+  const myToken = ++activeLoadToken;
   // If no sources are selected, just clear the map and return
   if (selectedSources.length === 0) {
     console.log('No profile sources selected, clearing map only');
@@ -73,7 +78,9 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
     // Load EMOLT profiles
     loadProfilesMetadata(startDate, endDate, 'EMOLT')
       .then((profiles) => {
+        if (myToken !== activeLoadToken) return; // stale response
         profiles.forEach((profile) => {
+          if (myToken !== activeLoadToken) return; // stale response
           const lat = parseFloat(profile['Latitude']);
           const lon = parseFloat(profile['Longitude']);
           const id = profile['Profile ID'];
@@ -120,6 +127,7 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
     // Load CTD profiles
     loadProfilesMetadata(startDate, endDate, 'CTD')
       .then((profiles) => {
+        if (myToken !== activeLoadToken) return; // stale response
         // Filter profiles based on selected sources
         const filteredProfiles = profiles.filter(profile => {
           const group = profile['Group']; // Get the group value
@@ -127,6 +135,7 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
         });
 
         filteredProfiles.forEach((profile) => {
+          if (myToken !== activeLoadToken) return; // stale response
           const lat = parseFloat(profile['Latitude']);
           const lon = parseFloat(profile['Longitude']);
           const id = profile['Profile ID'];

@@ -1,5 +1,6 @@
-import { map } from './map-setup.js';
-import { activeLayerType } from './controls.js';
+import { map } from '../map/core.js';
+import { controlsState, layerState } from '../state.js';
+import { getTilePath, getRangePath, getColormapPath, BATHYMETRY_TILES } from '../config.js';
 
 // Define the bounds for overlays
 const sstBounds = [
@@ -49,14 +50,21 @@ let ostiaAnomalyOverlay = L.tileLayer('', {
   noWrap: true,
 });
 
-// Define bathymetry tile paths
-const bathymetryLayers = {
-  metric: '../data/bathymetry_tiles_m/{z}/{x}/{y}.png',
-  imperial: '../data/bathymetry_tiles/{z}/{x}/{y}.png'
+const doppioBounds = [
+  [20, -85],
+  [50, -40],
+];
 
-  // metric: '/data/processed_data/bathymetry_tiles_m/{z}/{x}/{y}.png',
-  // imperial: '/data/processed_data/bathymetry_tiles/{z}/{x}/{y}.png'
-};
+let doppioOverlay = L.tileLayer('', {
+  opacity: 0.9,
+  attribution: 'Doppio Forecast',
+  maxZoom: 10,
+  bounds: doppioBounds, 
+  noWrap: true,
+});
+
+// Define bathymetry tile paths (centralized in config)
+const bathymetryLayers = BATHYMETRY_TILES;
 
 // Function to determine active unit system
 function getSelectedUnitSystem() {
@@ -116,18 +124,6 @@ let bathymetryLayer = L.tileLayer(bathymetryLayers[getSelectedUnitSystem()], {
 document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', updateBathymetryLayer);
 });
-
-const overlayLayers = {
-  'SST (Sea Surface Temp)': sstOverlay,
-  'SSS (Sea Surface Salinity)': sssOverlay,
-  'CHL (Chlorophyll-a)': chlOverlay,
-  'OSTIA SST': ostiaSstOverlay,
-  'OSTIA SST Anomaly': ostiaAnomalyOverlay,
-  'Bathymetry Contours': bathymetryLayer,
-};
-
-// Initialize a global tileDate variable
-let layerState = { tileDate: null }; // Default value
 
 function showModal(message) {
   // Create modal elements
@@ -193,6 +189,7 @@ function createLegend(layerType, date) {
                  : layerType === 'CHL' ? chlOverlay
                  : layerType === 'OSTIA_SST' ? ostiaSstOverlay
                  : layerType === 'OSTIA_anomaly' ? ostiaAnomalyOverlay
+                 : layerType === 'DOPPIO' ? doppioOverlay
                  : null;
 
   const zoomLevel = map.getZoom();
@@ -245,14 +242,22 @@ function createLegend(layerType, date) {
     rangeFile = zoomLevel >= 8
       ? getRangePath(layerType, date, true)
       : getRangePath(layerType, date, false);
-  }
+  } 
 
-  const colormapFile = getColormapPath(layerType, true);
+  const colormapFile = getColormapPath(layerType);
 
-  Promise.all([
-    fetch(colormapFile).then((res) => res.text()),
-    fetch(rangeFile).then((res) => res.json()),
-  ])
+  // Handle DOPPIO separately: it uses a static min/max range and does not have a range file
+  const loadLegendData = layerType === 'DOPPIO'
+    ? Promise.all([
+        fetch(colormapFile).then((res) => res.text()),
+        Promise.resolve({ min_SST: 1.0, max_SST: 25.0 })
+      ])
+    : Promise.all([
+        fetch(colormapFile).then((res) => res.text()),
+        fetch(rangeFile).then((res) => res.json())
+      ]);
+
+  loadLegendData
     .then(([colormapText, range]) => {
       
       const rgbValues = colormapText.split('\n')
@@ -277,11 +282,14 @@ function createLegend(layerType, date) {
       } else if (layerType === 'OSTIA_anomaly') {
         minValue = range.min_SSTA;
         maxValue = range.max_SSTA;
+      } else if (layerType === 'DOPPIO') {
+        minValue = range.min_SST;
+        maxValue = range.max_SST;
       }
 
       // Convert to Fahrenheit if the unit system is imperial
       if (unitSystem === 'imperial') {
-        if (layerType === 'SST' || layerType === 'OSTIA_SST') {
+        if (layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO') {
           // For absolute temperatures, convert using the full formula
           minValue = (minValue * 9) / 5 + 32;
           maxValue = (maxValue * 9) / 5 + 32;
@@ -303,7 +311,8 @@ function createLegend(layerType, date) {
       const layout = {
         title: {
           text: layerType === 'CHL' ? 'Chl (mg/m³)' 
-                : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                // : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                : layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : layerType === 'OSTIA_anomaly' ? `SSTA (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : 'SSS (PSU)',
           font: {
@@ -429,76 +438,35 @@ function createLegend(layerType, date) {
 document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', () => {
     // Recreate the legend for the active layer if one is selected
-    if (activeLayerType && layerState.tileDate) {
-      createLegend(activeLayerType, layerState.tileDate);
+    if (controlsState.activeLayerType && layerState.tileDate) {
+      createLegend(controlsState.activeLayerType, layerState.tileDate);
     }
   });
 });
 
-function getRangePath(layerType, date, isLocal = true) {
-    const basePath = '../data';
-    // const basePath = '/data/processed_data';
-    switch (layerType) {
-        case 'SST':
-            return `${basePath}/SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
-        case 'SSS':
-            return `${basePath}/SSS/tiles_mirrored/${date}/sss_range_${isLocal ? 'local' : 'global'}.json`;
-        case 'CHL':
-            return `${basePath}/CHL/tiles/${date}/chl_range_${isLocal ? 'local' : 'global'}.json`;
-        case 'OSTIA_SST':
-            return `${basePath}/OSTIA_SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
-        case 'OSTIA_anomaly':
-            return `${basePath}/OSTIA_anomaly/tiles/${date}/ssta_range_${isLocal ? 'local' : 'global'}.json`;
-        default:
-            return null;
-    }
-}
-
-function getColormapPath(layerType, isLocal = true) {
-    const basePath = '../data';
-    // const basePath = '/data/processed_data';
-    switch (layerType) {
-        case 'SST':
-            return isLocal ? `${basePath}/SST/thermal_colormap.txt` : `${basePath}/OSTIA_SST/thermal_map.txt`;
-        case 'SSS':
-            return `${basePath}/SSS/thermal_colormap.txt`;
-        case 'CHL':
-            return `${basePath}/CHL/thermal_colormap.txt`;
-        case 'OSTIA_SST':
-            return `${basePath}/OSTIA_SST/thermal_colormap.txt`;
-        case 'OSTIA_anomaly':
-            return `${basePath}/OSTIA_anomaly/thermal_colormap.txt`;
-        default:
-            return null;
-    }
-}
-
 function updateLayerPaths(date) {
   layerState.tileDate = date; // Update the global tileDate variable
 
-  const sstPath = `../data/SST/tiles/${date}/{z}/{x}/{y}.png`;
-  const sssPath = `../data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
-  const chlPath = `../data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
-  const ostiaSstPath = `../data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
-  const ostiaAnomalyPath = `../data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
-
-  // const sstPath = `/data/processed_data/SST/tiles/${date}/{z}/{x}/{y}.png`;
-  // const sssPath = `/data/processed_data/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
-  // const chlPath = `/data/processed_data/CHL/tiles/${date}/{z}/{x}/{y}.png`;
-  // const ostiaSstPath = `/data/processed_data/OSTIA_SST/tiles/${date}/{z}/{x}/{y}.png`;
-  // const ostiaAnomalyPath = `/data/processed_data/OSTIA_anomaly/tiles/${date}/{z}/{x}/{y}.png`;
+  const sstPath = getTilePath('SST', date);
+  const sssPath = getTilePath('SSS', date);
+  const chlPath = getTilePath('CHL', date);
+  const ostiaSstPath = getTilePath('OSTIA_SST', date);
+  const ostiaAnomalyPath = getTilePath('OSTIA_anomaly', date);
+  const doppioPath = getTilePath('DOPPIO', date);
 
   console.log('Constructed SST path:', sstPath);
   console.log('Constructed SSS path:', sssPath);
   console.log('Constructed CHL path:', chlPath);
   console.log('Constructed OSTIA SST path:', ostiaSstPath);
   console.log('Constructed OSTIA Anomaly path:', ostiaAnomalyPath);
+  console.log('Constructed Doppio path:', doppioPath);
 
   sstOverlay.setUrl(sstPath);
   sssOverlay.setUrl(sssPath);
   chlOverlay.setUrl(chlPath);
   ostiaSstOverlay.setUrl(ostiaSstPath);
   ostiaAnomalyOverlay.setUrl(ostiaAnomalyPath);
+  doppioOverlay.setUrl(doppioPath);
 
   console.log('Checking active layers...');
   console.log('Is SST overlay active?', map.hasLayer(sstOverlay));
@@ -506,6 +474,7 @@ function updateLayerPaths(date) {
   console.log('Is CHL overlay active?', map.hasLayer(chlOverlay));
   console.log('Is OSTIA SST overlay active?', map.hasLayer(ostiaSstOverlay));
   console.log('Is OSTIA Anomaly overlay active?', map.hasLayer(ostiaAnomalyOverlay));
+  console.log('Is Doppio overlay active?', map.hasLayer(doppioOverlay));
 
   if (map.hasLayer(sstOverlay)) {
     createLegend('SST', date);
@@ -517,6 +486,8 @@ function updateLayerPaths(date) {
     createLegend('OSTIA_SST', date);
   } else if (map.hasLayer(ostiaAnomalyOverlay)) {
     createLegend('OSTIA_anomaly', date);
+  } else if (map.hasLayer(doppioOverlay)) {
+    createLegend('DOPPIO', date);
   }
 
   // Update fishbot layer if it's active (using dynamic import to avoid circular dependency)
@@ -526,14 +497,14 @@ function updateLayerPaths(date) {
 }
 
 map.on('zoomend', () => {
-  console.log(`Zoomend triggered, activeLayerType: ${activeLayerType}`);
-  if (activeLayerType && layerState.tileDate) {
-    console.log(`Zoom level changed to ${map.getZoom()}, refreshing legend for: ${activeLayerType}`);
-    createLegend(activeLayerType, layerState.tileDate);
+  console.log(`Zoomend triggered, activeLayerType: ${controlsState.activeLayerType}`);
+  if (controlsState.activeLayerType && layerState.tileDate) {
+    console.log(`Zoom level changed to ${map.getZoom()}, refreshing legend for: ${controlsState.activeLayerType}`);
+    createLegend(controlsState.activeLayerType, layerState.tileDate);
   } else {
     console.log("No valid date or layer selected; skipping legend update.");
   }
 });
 
 // Export necessary variables and functions
-export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, bathymetryLayer, updateLayerPaths, layerState, createLegend, getSelectedUnitSystem };
+export { sstOverlay, sssOverlay, chlOverlay, ostiaSstOverlay, ostiaAnomalyOverlay, doppioOverlay, bathymetryLayer, updateLayerPaths, createLegend, getSelectedUnitSystem };

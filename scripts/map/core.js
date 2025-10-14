@@ -1,4 +1,4 @@
-import { loadProfiles } from './map.js';
+// map/core.js
 
 // Initialize the Leaflet map
 const map = L.map('map', {
@@ -9,12 +9,6 @@ const map = L.map('map', {
   zoomControl: false,        // Disable default zoom controls (we'll add them manually)
   attributionControl: false  // Disable default attribution control (we'll add it manually)
 });
-
-// Old base layer
-// Add the CartoDB Positron tile layer (base map)
-// L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-//   attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-// }).addTo(map);
 
 // New Esri Ocean basemap as the main basemap
 const oceanBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -33,16 +27,10 @@ if (attributionContainer) {
   const attribution = L.control.attribution({
     position: 'bottomleft'
   });
-  
-  // Add attribution content
   attribution.addAttribution('Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri');
   attribution.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
   attribution.addAttribution(' | <strong>Data Layers:</strong>');
-  
-  // Add the attribution control to the container instead of the map
   attribution.addTo(map);
-  
-  // Move the attribution element to our custom container
   const attributionElement = attribution.getContainer();
   attributionContainer.appendChild(attributionElement);
 }
@@ -76,14 +64,10 @@ function resize(e) {
   const currentY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
   const deltaY = currentY - startY;
   const newHeight = startHeight + deltaY;
-  
-  // Set minimum and maximum heights
-  const minHeight = Math.min(400, window.innerHeight * 0.3); // Responsive minimum height
+  const minHeight = Math.min(400, window.innerHeight * 0.3);
   const maxHeight = window.innerHeight * 0.9;
-  
-  // Use requestAnimationFrame for smoother resizing
   requestAnimationFrame(() => {
-  mapContainer.style.height = `${Math.min(Math.max(newHeight, minHeight), maxHeight)}px`;
+    mapContainer.style.height = `${Math.min(Math.max(newHeight, minHeight), maxHeight)}px`;
     map.invalidateSize();
   });
 }
@@ -94,7 +78,6 @@ function stopResize() {
 
 // Add window resize handler
 window.addEventListener('resize', () => {
-  // Debounce the resize event
   clearTimeout(window.resizeTimeout);
   window.resizeTimeout = setTimeout(() => {
     map.invalidateSize();
@@ -108,10 +91,10 @@ if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chr
     mapContainer.style.height = `${vh}px`;
     map.invalidateSize();
   };
-  
   window.addEventListener('resize', updateMapHeight);
   updateMapHeight();
 }
 
-// Export only the map
 export { map };
+
+

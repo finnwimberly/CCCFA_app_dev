@@ -1,9 +1,7 @@
-// Remove this commented-out import
 // import { selectedProfiles } from './map.js';
-import { generateColor } from './utils.js';
-import { loadMeasurementData } from './data-loading.js';
-
-import { state } from './state.js';
+// import { generateColor } from './helpers.js';
+// import { loadMeasurementData } from './data-loading.js';
+import { state } from '../state.js';
 
 
 let plotData = {

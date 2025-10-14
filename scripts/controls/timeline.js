@@ -1,6 +1,7 @@
-import { map } from './map-setup.js';
-import { updateLayerPaths } from './layers.js';
-import { activeLayerType, availableLayerDates } from './controls.js';
+// import { map } from './map/core.js';
+import { updateLayerPaths } from '../gridded_products/layers.js';
+import { controlsState } from '../state.js';
+import { DATE_FILES } from '../config.js';
 
 // Timeline state
 let availableDates = [];
@@ -62,17 +63,17 @@ function waitForLayerDates() {
     return new Promise((resolve) => {
         const checkDates = () => {
             console.log('Checking for layer dates...', {
-                hasAvailableLayerDates: !!availableLayerDates,
-                keys: availableLayerDates ? Object.keys(availableLayerDates) : [],
-                sstLength: availableLayerDates?.SST?.length || 0,
-                fishbotLength: availableLayerDates?.fishbot?.length || 0
+                hasAvailableLayerDates: !!controlsState.availableLayerDates,
+                keys: controlsState.availableLayerDates ? Object.keys(controlsState.availableLayerDates) : [],
+                sstLength: controlsState.availableLayerDates?.SST?.length || 0,
+                fishbotLength: controlsState.availableLayerDates?.fishbot?.length || 0
             });
             
-            if (availableLayerDates && Object.keys(availableLayerDates).length > 0 && 
-                (availableLayerDates.SST && availableLayerDates.SST.length > 0) ||
-                (availableLayerDates.fishbot && availableLayerDates.fishbot.length > 0)) {
-                console.log('Layer dates are available:', availableLayerDates);
-                resolve(availableLayerDates);
+            if (controlsState.availableLayerDates && Object.keys(controlsState.availableLayerDates).length > 0 && 
+                (controlsState.availableLayerDates.SST && controlsState.availableLayerDates.SST.length > 0) ||
+                (controlsState.availableLayerDates.fishbot && controlsState.availableLayerDates.fishbot.length > 0)) {
+                console.log('Layer dates are available:', controlsState.availableLayerDates);
+                resolve(controlsState.availableLayerDates);
             } else {
                 setTimeout(checkDates, 100); // Check again in 100ms
             }
@@ -86,7 +87,7 @@ async function findNextAvailableDate(currentDate, layerType) {
     // Wait for layer dates to be available
     await waitForLayerDates();
     
-    if (!layerType || !availableLayerDates[layerType]) {
+    if (!layerType || !controlsState.availableLayerDates[layerType]) {
         // No layer selected or no dates available, use default +1 day
         const currentIndex = availableDates.indexOf(currentDate);
         if (currentIndex < availableDates.length - 1) {
@@ -95,7 +96,7 @@ async function findNextAvailableDate(currentDate, layerType) {
         return null; // Already at the end
     }
     
-    const layerDates = availableLayerDates[layerType];
+    const layerDates = controlsState.availableLayerDates[layerType];
     
     // Normalize current date to UTC midnight for correct comparison
     const y = parseInt(currentDate.slice(0, 4), 10);
@@ -122,7 +123,7 @@ async function findPreviousAvailableDate(currentDate, layerType) {
     // Wait for layer dates to be available
     await waitForLayerDates();
     
-    if (!layerType || !availableLayerDates[layerType]) {
+    if (!layerType || !controlsState.availableLayerDates[layerType]) {
         // No layer selected or no dates available, use default -1 day
         const currentIndex = availableDates.indexOf(currentDate);
         if (currentIndex > 0) {
@@ -131,7 +132,7 @@ async function findPreviousAvailableDate(currentDate, layerType) {
         return null; // Already at the beginning
     }
     
-    const layerDates = availableLayerDates[layerType];
+    const layerDates = controlsState.availableLayerDates[layerType];
 
     // Normalize current date to UTC midnight for correct comparison
     const y = parseInt(currentDate.slice(0, 4), 10);
@@ -183,23 +184,19 @@ async function fetchLayerDates(filePath) {
 }
 
 async function fetchAvailableDates() {
-    const sstDatesPath = '../data/SST/sst_dates.txt';
-    const sssDatesPath = '../data/SSS/sss_dates.txt';
-    const chloroDatesPath = '../data/CHL/chl_dates.txt';
-    const ostiaSstDatesPath = '../data/OSTIA_SST/sst_dates.txt';
-    const ostiaAnomalyDatesPath = '../data/OSTIA_anomaly/ssta_dates.txt';
-
-    // const sstDatesPath = '/data/processed_data/SST/sst_dates.txt';
-    // const sssDatesPath = '/data/processed_data/SSS/sss_dates.txt';
-    // const chloroDatesPath = '/data/processed_data/CHL/chl_dates.txt';
-    // const ostiaSstDatesPath = '/data/processed_data/OSTIA_SST/sst_dates.txt';
-    // const ostiaAnomalyDatesPath = '/data/processed_data/OSTIA_anomaly/ssta_dates.txt';
+    const sstDatesPath = DATE_FILES.SST;
+    const sssDatesPath = DATE_FILES.SSS;
+    const chloroDatesPath = DATE_FILES.CHL;
+    const ostiaSstDatesPath = DATE_FILES.OSTIA_SST;
+    const doppioDatesPath = DATE_FILES.DOPPIO;
+    const ostiaAnomalyDatesPath = DATE_FILES.OSTIA_anomaly;
 
     const allDateArrays = await Promise.all([
         fetchLayerDates(sstDatesPath),
         fetchLayerDates(sssDatesPath),
         fetchLayerDates(chloroDatesPath),
         fetchLayerDates(ostiaSstDatesPath),
+        fetchLayerDates(doppioDatesPath),
         fetchLayerDates(ostiaAnomalyDatesPath)
     ]);
 
@@ -234,6 +231,7 @@ const infoModal = `
       and CHL)</li>
       <li><span class="color-block highlight-all-sst"></span> All SST layers but no SSS or CHL</li>
       <li><span class="color-block highlight-ostia-only"></span> Only gapfilled and anomaly SST layers available</li>
+      <li><span class="color-block highlight-doppio-only"></span> DOPPIO forecast. Available for next 3 days and updates daily. </li>
     </ul>
   </div>
 `;
@@ -417,7 +415,7 @@ async function initializeTimeline() {
         
         try {
             const currentDate = availableDates[currentDateIndex];
-            const previousDate = await findPreviousAvailableDate(currentDate, activeLayerType);
+            const previousDate = await findPreviousAvailableDate(currentDate, controlsState.activeLayerType);
             
             if (previousDate) {
                 // Find the index of the previous date in the availableDates array
@@ -425,10 +423,10 @@ async function initializeTimeline() {
                 if (newIndex !== -1) {
                     currentDateIndex = newIndex;
                     updateDate();
-                    console.log('Moved to previous available date for', activeLayerType || 'default', 'new index:', currentDateIndex);
+                    console.log('Moved to previous available date for', controlsState.activeLayerType || 'default', 'new index:', currentDateIndex);
                 }
             } else {
-                console.log('No previous date available for', activeLayerType || 'default');
+                console.log('No previous date available for', controlsState.activeLayerType || 'default');
             }
         } catch (error) {
             console.error('Error finding previous date:', error);
@@ -447,7 +445,7 @@ async function initializeTimeline() {
         
         try {
             const currentDate = availableDates[currentDateIndex];
-            const nextDate = await findNextAvailableDate(currentDate, activeLayerType);
+            const nextDate = await findNextAvailableDate(currentDate, controlsState.activeLayerType);
             
             if (nextDate) {
                 // Find the index of the next date in the availableDates array
@@ -455,10 +453,10 @@ async function initializeTimeline() {
                 if (newIndex !== -1) {
                     currentDateIndex = newIndex;
                     updateDate();
-                    console.log('Moved to next available date for', activeLayerType || 'default', 'new index:', currentDateIndex);
+                    console.log('Moved to next available date for', controlsState.activeLayerType || 'default', 'new index:', currentDateIndex);
                 }
             } else {
-                console.log('No next date available for', activeLayerType || 'default');
+                console.log('No next date available for', controlsState.activeLayerType || 'default');
             }
         } catch (error) {
             console.error('Error finding next date:', error);
@@ -486,7 +484,7 @@ async function initializeTimeline() {
         if (e.key === 'ArrowLeft') {
             try {
                 const currentDate = availableDates[currentDateIndex];
-                const previousDate = await findPreviousAvailableDate(currentDate, activeLayerType);
+                const previousDate = await findPreviousAvailableDate(currentDate, controlsState.activeLayerType);
                 
                 if (previousDate) {
                     const newIndex = availableDates.indexOf(previousDate);
@@ -501,7 +499,7 @@ async function initializeTimeline() {
         } else if (e.key === 'ArrowRight') {
             try {
                 const currentDate = availableDates[currentDateIndex];
-                const nextDate = await findNextAvailableDate(currentDate, activeLayerType);
+                const nextDate = await findNextAvailableDate(currentDate, controlsState.activeLayerType);
                 
                 if (nextDate) {
                     const newIndex = availableDates.indexOf(nextDate);

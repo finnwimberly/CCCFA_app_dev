@@ -1,5 +1,5 @@
-import { map } from './map-setup.js';
-import { getSelectedUnitSystem } from './layers.js';
+import { map } from '../map/core.js';
+import { FISHBOT_DATA } from '../config.js';
 
 // Global variables
 let fishbotData = [];
@@ -12,7 +12,7 @@ let colormapCache = {}; // Cache for different colormaps
 // Variable configuration
 const variableConfig = {
   temperature: {
-    colormapFile: '../data/FIShBOT/thermal_colormap.txt',
+    colormapFile: FISHBOT_DATA.COLORMAPS.temperature,
     csvColumn: 'temperature',
     displayName: 'Temperature',
     units: { metric: '°C', imperial: '°F' },
@@ -20,7 +20,7 @@ const variableConfig = {
     range: { min: 4, max: 26.5 }
   },
   oxygen: {
-    colormapFile: '../data/FIShBOT/oxy_colormap.txt',
+    colormapFile: FISHBOT_DATA.COLORMAPS.oxygen,
     csvColumn: 'dissolved_oxygen',
     displayName: 'Oxygen',
     units: { metric: 'mg/L', imperial: 'mg/L' },
@@ -28,7 +28,7 @@ const variableConfig = {
     range: { min: 2, max: 12 }
   },
   salinity: {
-    colormapFile: '../data/FIShBOT/haline_colormap.txt',
+    colormapFile: FISHBOT_DATA.COLORMAPS.salinity,
     csvColumn: 'salinity',
     displayName: 'Salinity',
     units: { metric: 'PSU', imperial: 'PSU' },
@@ -117,7 +117,7 @@ async function getVariableColor(value, variableType) {
 async function loadFishbotData() {
   try {
     console.log('Loading fishbot data...');
-    const response = await fetch('../data/FIShBOT/fishbot.csv');
+    const response = await fetch(FISHBOT_DATA.CSV);
     const csvText = await response.text();
     
     // Parse CSV data using Papa Parse

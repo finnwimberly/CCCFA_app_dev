@@ -595,19 +595,22 @@ footer {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 10px;
-  background: var(--primary);
+  height: 14px;
+  background: linear-gradient(to bottom, rgba(26,75,110,0.15), rgba(26,75,110,0.15));
+  border-top: 1px solid rgba(0,0,0,0.1);
   cursor: ns-resize;
   opacity: 0;
   transition: opacity var(--transition-fast);
+  z-index: 2000; /* ensure above map and legends */
+  pointer-events: auto;
 }
 
 #map-container:hover .resize-handle {
-  opacity: 0.5;
+  opacity: 0.75;
 }
 
 .resize-handle:hover {
-  opacity: 0.8 !important;
+  opacity: 1 !important;
 }
 
 /* Layer Legend Styles */
@@ -616,6 +619,7 @@ footer {
 #chl-legend,
 #ostia-sst-legend,
 #ostia-anomaly-legend,
+#doppio-legend,
 #fishbot-legend {
   position: absolute;
   bottom: 0px;
@@ -642,6 +646,7 @@ footer {
 #chl-legend .plotly,
 #ostia-sst-legend .plotly,
 #ostia-anomaly-legend .plotly,
+#doppio-legend .plotly,
 #fishbot-legend .plotly {
   width: 100%; /* Ensure it scales with the parent */
   max-width: 120px; /* Constrain to legend width */
@@ -661,27 +666,13 @@ footer {
   #chl-legend,
   #ostia-sst-legend,
   #ostia-anomaly-legend,
+  #doppio-legend,
   #fishbot-legend {
     min-width: 100px;
     max-width: 130px;
     min-height: 300px;
     bottom: 10px;
     right: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  #sst-legend,
-  #sss-legend,
-  #chl-legend,
-  #ostia-sst-legend,
-  #ostia-anomaly-legend,
-  #fishbot-legend {
-    min-width: 90px;
-    max-width: 120px;
-    min-height: 300px;
-    bottom: 5px;
-    right: 5px;
   }
 }
 
@@ -915,6 +906,7 @@ footer {
 .highlight-all-no-sss-sst { background-color: #FFC107; }
 .highlight-all-sst { background-color: #FF9800; }
 .highlight-ostia-only { background-color: #FF9800; }
+.highlight-doppio-only { background-color: #2196F3; }
 
 /* Show stripe for specific classes */
 .highlight-all::after,
@@ -930,9 +922,11 @@ footer {
 .highlight-all-no-sst::after,
 .highlight-all-no-sss-sst::after,
 .highlight-ostia-only::after,
+.highlight-doppio-only::after,
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
 .daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
-.daterangepicker .calendar-table td.highlight-ostia-only::after {
+.daterangepicker .calendar-table td.highlight-ostia-only::after,
+.daterangepicker .calendar-table td.highlight-doppio-only::after {
   display: none;
 }
 
@@ -1026,16 +1020,6 @@ footer {
   font-size: 1.2em;
   margin-right: 5px;
 }
-
-/* .plot-container {
-  width: 100%;
-  aspect-ratio: 4/3;
-  min-height: 250px;
-  position: relative;
-  background: white;
-  border-radius: var(--radius-md);
-  box-shadow: 0 2px 4px var(--shadow);
-} */
 
 .plot-container {
   width: 100%;
