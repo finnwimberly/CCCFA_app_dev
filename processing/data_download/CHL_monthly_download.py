@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime 
+from dateutil.relativedelta import relativedelta
+
 
 try:
     import copernicusmarine
@@ -10,7 +12,7 @@ except Exception as exc:
     sys.exit(1)
 
 
-DATASET_ID = "cmems_obs-oc_glo_bgc-plankton_my_l3-multi-4km_P1D"
+DATASET_ID = "cmems_obs-oc_glo_bgc-plankton_my_l4-multi-4km_P1M"
 VARIABLES = [
     "CHL"
 ]
@@ -26,20 +28,20 @@ DEFAULT_START = "2024-01-01"
 DEFAULT_END = datetime.now().date().isoformat()
 
 # Default output directory: same as shell
-DEFAULT_OUTPUT_DIR = "/vast/clidex/data/obs/GlobColour/daily"
+DEFAULT_OUTPUT_DIR = "/vast/clidex/data/obs/GlobColour/monthly"
 
 
 def iter_dates(start_date: datetime, end_date: datetime):
     current = start_date
     while current <= end_date:
         yield current
-        current = current + timedelta(days=1)
+        current = current + relativedelta(months=1)
 
 
 def format_expected_filename(date_str: str) -> str:
     # Mirror the naming from the shell script exactly
     return (
-        f"{DATASET_ID}_CHL-flags_85.06W-35.02W_22.10N-47.98N_{date_str}.nc"
+        f"{DATASET_ID}_CHL-flags_85.06W-59.98W_22.10N-46.02N_{date_str}.nc"
     )
 
 
@@ -51,21 +53,21 @@ def parse_args(argv):
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Download daily GlobColour CHL files via Copernicus Marine Python API."
+        description="Download monthly GlobColour CHL files via Copernicus Marine Python API."
     )
     parser.add_argument(
         "--start-date",
-        default=os.environ.get("OSTIA_START_DATE", DEFAULT_START),
+        default=os.environ.get("GlobColour_START_DATE", DEFAULT_START),
         help=f"Start date (YYYY-MM-DD). Default: {DEFAULT_START}",
     )
     parser.add_argument(
         "--end-date",
-        default=os.environ.get("OSTIA_END_DATE", DEFAULT_END),
+        default=os.environ.get("GlobColour_END_DATE", DEFAULT_END),
         help="End date (YYYY-MM-DD). Default: today",
     )
     parser.add_argument(
         "--output-dir",
-        default=os.environ.get("OSTIA_OUTPUT_DIR", DEFAULT_OUTPUT_DIR),
+        default=os.environ.get("GlobColour_OUTPUT_DIR", DEFAULT_OUTPUT_DIR),
         help=f"Output directory. Default: {DEFAULT_OUTPUT_DIR}",
     )
     parser.add_argument(
@@ -77,7 +79,7 @@ def parse_args(argv):
     parser.add_argument(
         "--compression-level",
         type=int,
-        default=int(os.environ.get("OSTIA_NC_COMPRESSION", "1")),
+        default=int(os.environ.get("GlobColour_NC_COMPRESSION", "1")),
         help="NetCDF compression level 0-9. Default: 1",
     )
     parser.add_argument(
@@ -110,13 +112,13 @@ def main(argv=None) -> int:
 
     for cur_date in iter_dates(start_dt, end_dt):
         date_str = cur_date.isoformat()
-        print(f"Checking data for {date_str}...")
+        # print(f"Checking data for {date_str}...")
 
         expected_filename = format_expected_filename(date_str)
         expected_path = os.path.join(output_dir, expected_filename)
 
         if os.path.isfile(expected_path):
-            print(f"File for {date_str} already exists. Skipping download.")
+            # print(f"File for {date_str} already exists. Skipping download.")
             continue
 
         print(f"Downloading data for {date_str}...")
@@ -133,11 +135,11 @@ def main(argv=None) -> int:
                 dataset_id=DATASET_ID,
                 variables=VARIABLES,
                 start_datetime=f"{date_str}T00:00:00",
-                end_datetime=f"{date_str}T23:59:59",
+                # end_datetime=f"{date_str}T23:59:59",
                 minimum_longitude= -85.07,
-                maximum_longitude=-35.00,
+                maximum_longitude=-59.98,
                 minimum_latitude=22.10,
-                maximum_latitude=48.00,
+                maximum_latitude=46.02,
                 coordinates_selection_method="strict-inside",
                 file_format="netcdf",
                 output_directory=output_dir,
@@ -148,7 +150,7 @@ def main(argv=None) -> int:
         except Exception as exc:
             print(
                 f"ERROR downloading {date_str}: {exc}\n"
-                "Hint: ensure 'copernicusmarine login' has been run and consider setting --service files"
+                # "Hint: ensure 'copernicusmarine login' has been run and consider setting --service files"
             )
             return 2
 

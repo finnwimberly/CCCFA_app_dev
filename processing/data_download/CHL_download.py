@@ -10,9 +10,9 @@ except Exception as exc:
     sys.exit(1)
 
 
-DATASET_ID = "METOFFICE-GLO-SST-L4-NRT-OBS-SST-V2"
+DATASET_ID = "cmems_obs-oc_glo_bgc-plankton_my_l3-multi-4km_P1D"
 VARIABLES = [
-    "analysed_sst"
+    "CHL"
 ]
 
 # Global bounds matching the shell script
@@ -26,7 +26,7 @@ DEFAULT_START = "2024-01-01"
 DEFAULT_END = datetime.now().date().isoformat()
 
 # Default output directory: same as shell
-DEFAULT_OUTPUT_DIR = "/vast/clidex/data/obs/SST/OSTIA/data/daily"
+DEFAULT_OUTPUT_DIR = "/vast/clidex/data/obs/GlobColour/daily"
 
 
 def iter_dates(start_date: datetime, end_date: datetime):
@@ -39,7 +39,7 @@ def iter_dates(start_date: datetime, end_date: datetime):
 def format_expected_filename(date_str: str) -> str:
     # Mirror the naming from the shell script exactly
     return (
-        f"{DATASET_ID}_multi-vars_179.98W-179.98E_89.97S-89.97N_{date_str}.nc"
+        f"{DATASET_ID}_CHL-flags_85.06W-35.02W_22.10N-47.98N_{date_str}.nc"
     )
 
 
@@ -51,7 +51,7 @@ def parse_args(argv):
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Download daily OSTIA SST files via Copernicus Marine Python API, matching the shell script."
+        description="Download daily GlobColour CHL files via Copernicus Marine Python API."
     )
     parser.add_argument(
         "--start-date",
@@ -110,13 +110,13 @@ def main(argv=None) -> int:
 
     for cur_date in iter_dates(start_dt, end_dt):
         date_str = cur_date.isoformat()
-        print(f"Checking data for {date_str}...")
+        # print(f"Checking data for {date_str}...")
 
         expected_filename = format_expected_filename(date_str)
         expected_path = os.path.join(output_dir, expected_filename)
 
         if os.path.isfile(expected_path):
-            print(f"File for {date_str} already exists. Skipping download.")
+            # print(f"File for {date_str} already exists. Skipping download.")
             continue
 
         print(f"Downloading data for {date_str}...")
@@ -133,11 +133,11 @@ def main(argv=None) -> int:
                 dataset_id=DATASET_ID,
                 variables=VARIABLES,
                 start_datetime=f"{date_str}T00:00:00",
-                end_datetime=f"{date_str}T23:59:59",
-                minimum_longitude=MIN_LON,
-                maximum_longitude=MAX_LON,
-                minimum_latitude=MIN_LAT,
-                maximum_latitude=MAX_LAT,
+                # end_datetime=f"{date_str}T23:59:59",
+                minimum_longitude= -85.07,
+                maximum_longitude=-35.00,
+                minimum_latitude=22.10,
+                maximum_latitude=48.00,
                 coordinates_selection_method="strict-inside",
                 file_format="netcdf",
                 output_directory=output_dir,
@@ -148,7 +148,7 @@ def main(argv=None) -> int:
         except Exception as exc:
             print(
                 f"ERROR downloading {date_str}: {exc}\n"
-                "Hint: ensure 'copernicusmarine login' has been run and consider setting --service files"
+                # "Hint: ensure 'copernicusmarine login' has been run and consider setting --service files"
             )
             return 2
 
@@ -158,5 +158,3 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

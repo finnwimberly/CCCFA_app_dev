@@ -1,17 +1,25 @@
 #!/bin/bash
 
-# Source Conda environment setup directly
-source /home/finn.wimberly/mambaforge/etc/profile.d/conda.sh
+# Source logging utilities
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/../tools/log_utils.sh"
 
-# Activate the spyder_salinity environment using conda
-if [ "$CONDA_DEFAULT_ENV" != "spyder_salinity" ]; then
-    echo "Activating spyder_salinity environment..."
-    conda activate spyder_salinity
-fi
+# Setup logging
+LOGDIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOGDIR"
+exec >> "$LOGDIR/OSTIA_monthly_resampling.log" 2>&1
+
+OUTPUT_DIR="/vast/clidex/data/obs/SST/OSTIA/data/monthly"
+
+# Log start and take snapshot
+log_changes "start" "$OUTPUT_DIR"
+
+# Activate environment
+source ~/mambaforge/etc/profile.d/conda.sh
+conda activate spyder_salinity
 
 # Directory with all daily NetCDF files
 DATA_DIR="/vast/clidex/data/obs/SST/OSTIA/data/daily"
-OUTPUT_DIR="/vast/clidex/data/obs/SST/OSTIA/data/monthly"
 mkdir -p "$OUTPUT_DIR"
 
 # Start date
@@ -62,3 +70,7 @@ done
 
 echo "All monthly averages created!"
 
+conda deactivate
+
+# Log end and show changes
+log_changes "end" "$OUTPUT_DIR"

@@ -1,0 +1,96 @@
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin
+MAILTO=""
+
+# Root of project processing (edit this one line to recreate installs in your own workspace)
+BASE_DIR=/home/finn.wimberly/Documents/CCCFA_app_dev/Project/processing
+
+# ==== DATA DOWNLOADS ====
+
+# Download raw SSS data every night at midnight (wrapper script)
+0 0 * * *  cd "$BASE_DIR" && /bin/bash data_download/SMAP_download.sh
+
+# Download/process new CTD profiles (every night @ 2 AM)
+0 2 * * *  cd "$BASE_DIR" && /bin/bash data_download/CTD_download.sh
+
+# Download/process new eMOLT profiles (every night @ 2:45 AM)
+45 2 * * * cd "$BASE_DIR" && /bin/bash data_download/EMOLT_download.sh
+
+# Download/process fishbot product (every night @ 3:15 AM)
+15 3 * * * cd "$BASE_DIR" && /bin/bash data_download/fishbot_download.sh
+
+# Download raw SST data (VIIRS) every night at 3 AM
+0 3 * * *  cd "$BASE_DIR" && /bin/bash data_download/VIIRS_download.sh
+
+# Download doppio forecast every night (@ ~3:25 AM)
+25 3 * * * cd "$BASE_DIR" && /bin/bash data_download/doppio_download.sh
+
+# Download chlorophyll-a data every night (@ 4:30 AM)
+30 4 * * * cd "$BASE_DIR" && /bin/bash data_download/CHL_download.sh
+
+# Download OSTIA data every night (@ 6 AM)
+0 6 * * *  cd "$BASE_DIR" && /bin/bash data_download/OSTIA_download.sh
+
+# Download monthly SMAP SSS data (@ 11 PM on the 8th DOM)
+0 23 8 * *  cd "$BASE_DIR" && /bin/bash data_download/SMAP_monthly_download.sh
+
+# Download monthly chl data (@ 11 PM on the 11th DOM)
+0 23 11 * * cd "$BASE_DIR" && /bin/bash data_download/CHL_monthly_download.sh
+
+# Update NOAA PSL climate indices (5th day of each month at 2 AM)
+0 2 5 * *  /bin/bash /vast/clidex/data/obs/climate_indices/update_indices_monthly.sh
+
+# Download NOAA OLR data (3rd day of each month at 2:30 AM)
+30 2 3 * * /bin/bash /vast/clidex/data/obs/NOAA_OLR/run_update_NOAA_OLR.sh
+
+
+# ==== RESAMPLE ===================
+
+# Create monthly avgs for OSTIA SST (2nd day of each month at 7 AM)
+0 7 2 * *  cd "$BASE_DIR" && /bin/bash OSTIA_calc_monthly_averages.sh
+
+
+# ==== MAKE TILES ==============
+
+# Generate new SSS tiles from new raw SSS files
+0 4 * * *  cd "$BASE_DIR" && /bin/bash make_tiles/SMAP_processing.sh
+
+# Generate new SST tiles from new SST files
+0 5 * * *  cd "$BASE_DIR" && /bin/bash make_tiles/VIIRS_processing.sh
+
+# Generate new CHL tiles from new CHL data (GlobColour)
+30 5 * * * cd "$BASE_DIR" && /bin/bash make_tiles/GlobColour_processing.sh
+
+# Generate doppio tiles (give download 20 min)
+45 3 * * * cd "$BASE_DIR" && /bin/bash make_tiles/doppio_processing.sh
+
+# Generate OSTIA SST tiles
+15 6 * * * cd "$BASE_DIR" && /bin/bash make_tiles/OSTIA_processing.sh
+
+# Generate OSTIA anomaly tiles
+30 6 * * * cd "$BASE_DIR" && /bin/bash make_tiles/OSTIA_anomaly_processing.sh
+
+
+# ==== TIME SERIES  ====
+
+# Generate SST time series (every Thursday @ 8:35 AM)
+35 8 * * 4 cd "$BASE_DIR" && /bin/bash update_figs/monthly_avg_plots.sh
+
+# Generate SSS time series (every Saturday @ 9:00 PM)
+0 21 * * 6 cd "$BASE_DIR" && /bin/bash update_figs/SMAP_processing.sh
+
+
+# ==== MAKE FIGURES (WEEKLY UPDATE & MONTHLY SUMMARIES) ======== 
+
+# Weekly update plot (every Wednesday @ 8:45 AM)
+45 8 * * 3 cd "$BASE_DIR" && /bin/bash update_figs/weekly_update.sh
+
+# Generate monthly avg PNGs (8:35 AM on 12th DOM)
+35 8 12 * * cd "$BASE_DIR" && /bin/bash make_tiles/run_monthly_pngs.sh
+
+
+# ==== DAILY SUMMARY EMAIL (07:10) ====
+MAILTO="finn.wimberly@whoi.edu"
+10 7 * * * cd "$BASE_DIR" && /bin/bash tools/daily_cron_summary.sh
+MAILTO=""

@@ -1,5 +1,5 @@
 data
 processing/.ipynb_checkpoints/
-processing/logs/
+processing/*/logs/
 processing/archived/
 processing/jupyter/
