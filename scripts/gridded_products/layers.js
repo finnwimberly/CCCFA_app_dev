@@ -311,9 +311,10 @@ function createLegend(layerType, date) {
       const layout = {
         title: {
           text: layerType === 'CHL' ? 'Chl (mg/m³)' 
-                // : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                : layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                // : layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : layerType === 'OSTIA_anomaly' ? `SSTA (${unitSystem === 'imperial' ? '°F' : '°C'})`
+                : layerType === 'DOPPIO' ? `Bottom Temp. (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : 'SSS (PSU)',
           font: {
             size: 14,
