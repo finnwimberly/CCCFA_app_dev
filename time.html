@@ -419,16 +419,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3.0.0/dist/d3-scale-chromatic.min.js"></script>
     <script type="module">
-        import { loadProfilesMetadata, loadMeasurementData } from './scripts/data-loading.js';
-
-        // Function to convert temperature anomaly
-        // function convertTemperatureAnomaly(value, toImperial) {
-        //     if (toImperial) {
-        //         return value * 1.8;  // °C to °F (just scaling)
-        //     } else {
-        //         return value / 1.8;  // °F to °C (just scaling)
-        //     }
-        // }
+        import { loadProfilesMetadata, loadMeasurementData } from './scripts/profiles_and_plots/data-loading.js';
 
         function convertTemperature(value, toImperial, { anomaly = false } = {}) {
             if (!toImperial) {
