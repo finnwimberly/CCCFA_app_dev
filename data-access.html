@@ -76,19 +76,6 @@
         </section>
 
         <section class="data-card">
-            <h2>FIShBOT</h2>
-            
-            <p> <a href="https://github.com/CommercialFisheriesResearchFoundation/fishbot/blob/main/README.md">FIShBOT</a> (Fishing Industry Shared Bottom Oceanographic Timeseries) 
-                is a real-time dataset co-developed by CFRF and NOAA which aggregates regional 
-                bottom observations into gridded daily averages. Ocean observations from programs including <a href =
-                 https://www.fisheries.noaa.gov/new-england-mid-atlantic/science-data/cooperative-research-northeast#study-fleet>NOAA Study Fleet</a>, <a href =
-                 "https://www.fisheries.noaa.gov/new-england-mid-atlantic/climate/partnering-fishing-industry-monitor-northeast-shelf">eMOLT</a>, <a href = 
-                 "https://www.cfrfoundation.org/">CFRF</a>, and <a href = "https://www.fisheries.noaa.gov/new-england-mid-atlantic/ecosystems/monitoring-ecosystem-northeast">ECOMON</a> are 
-                aggregated into this product which is accessible via the CFRF <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_realtime.html">ERDDAP server</a>. 
-                Historic static versions of FIShBOT are available on the <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_archive.html">archive dataset</a>.</p>
-        </section>
-
-        <section class="data-card">
             <h2>Satellite Data </h2>
             <p>Our dashboard uses multiple satellite datasets for different purposes. New data are downloaded nightly and imagery is automatically generated for visualization.</p>
             
@@ -115,6 +102,30 @@
                     <a href="https://data.marine.copernicus.eu/product/OCEANCOLOUR_GLO_BGC_L3_MY_009_103/description">here</a>.
                     This is a daily product rather than a multi-day mean, so it is often impacted by cloud cover.</li>
             </ul>
+        </section>
+
+        <section class="data-card">
+            <h2>Doppio</h2>
+          
+            <p><a href="https://doi.org/10.5194/gmd-13-3709-2020">Doppio</a> is a Regional Ocean Modeling System (ROMS v3.6) circulation model for the Mid-Atlantic Bight and Gulf of Maine. 
+            The model provides dynamically consistent fields for studies of biogeochemical cycling, ecosystems, estuarine downscaling, and near-real-time forecasting. 
+            Doppio’s performance has been validated against observations from the U.S. Integrated Ocean Observing System (IOOS) network and is described in 
+            <em>Geoscientific Model Development</em> 13, 3709–3729 (2020). On the dashboard, we just show forecasted ocean bottom temperatures. We access the forecast from the Rutgers Marine THREDDS Data Server using the OPeNDAP protocol. 
+            To replicate our data access workflow visit the <a href = "https://github.com/finnwimberly/CCCFA_app_dev/tree/main/processing/data_download">download directory</a>  of our GitHub Repo.</p>
+        </section>
+          
+
+        <section class="data-card">
+            <h2>FIShBOT</h2>
+            
+            <p> <a href="https://github.com/CommercialFisheriesResearchFoundation/fishbot/blob/main/README.md">FIShBOT</a> (Fishing Industry Shared Bottom Oceanographic Timeseries) 
+                is a real-time dataset co-developed by CFRF and NOAA which aggregates regional 
+                bottom observations into gridded daily averages. Ocean observations from programs including <a href =
+                 https://www.fisheries.noaa.gov/new-england-mid-atlantic/science-data/cooperative-research-northeast#study-fleet>NOAA Study Fleet</a>, <a href =
+                 "https://www.fisheries.noaa.gov/new-england-mid-atlantic/climate/partnering-fishing-industry-monitor-northeast-shelf">eMOLT</a>, <a href = 
+                 "https://www.cfrfoundation.org/">CFRF</a>, and <a href = "https://www.fisheries.noaa.gov/new-england-mid-atlantic/ecosystems/monitoring-ecosystem-northeast">ECOMON</a> are 
+                aggregated into this product which is accessible via the CFRF <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_realtime.html">ERDDAP server</a>. 
+                Historic static versions of FIShBOT are available on the <a href = "https://erddap.ondeckdata.com/erddap/tabledap/fishbot_archive.html">archive dataset</a>.</p>
         </section>
 
     </main>
