@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Change to the directory where this script itself is located
 cd "$(dirname "$0")"
 BASE="$(pwd)"
-DL_LOGS="$BASE/data_download/logs"
-MT_LOGS="$BASE/make_tiles/logs"
-RS_LOGS="$BASE/resample/logs"
-TS_LOGS="$BASE/time_series/logs"
-UF_LOGS="$BASE/update_figs/logs"
+DL_LOGS="$BASE/../data_download/logs"
+MT_LOGS="$BASE/../make_tiles/logs"
+RS_LOGS="$BASE/../resample/logs"
+TS_LOGS="$BASE/../time_series/logs"
+UF_LOGS="$BASE/../update_figs/logs"
 SINCE_HOURS=24
 
 now_iso=$(date -Iseconds)
@@ -16,60 +15,119 @@ since_epoch=$(date -d "-${SINCE_HOURS} hours" +%s)
 
 print_section () { echo -e "\n=== $1 ==="; }
 
-summarize_dir () {
-  local dir="$1" label="$2"
-  print_section "$label ($dir)"
+# ----- helpers ---------------------------------------------------------------
 
-  # Skip silently if the directory doesn't exist
+# Return 0/1 based on whether file was modified within window
+touched_recently () {
+  local f="$1"
+  local mtime
+  mtime=$(stat -c %Y "$f")
+  (( mtime >= since_epoch ))
+}
+
+# Extract last created items block -> echo items (one per line)
+get_new_items () {
+  awk '
+    BEGIN{collect=0}
+    /^NEW_ITEMS:/ {collect=1; next}
+    collect==1 && $0 ~ /^[[:space:]]+- / {
+      gsub(/^[[:space:]]+-[[:space:]]*/,"",$0); gsub(/[[:space:]]+$/,"",$0);
+      print $0;
+      next
+    }
+    collect==1 && $0 !~ /^[[:space:]]/ {collect=0}
+  ' "$1"
+}
+
+# Pull WATCH_DIR
+get_watch_dir () {
+  grep -E '^WATCH_DIR:' -m1 "$1" | sed 's/^WATCH_DIR:[[:space:]]*//'
+}
+
+# Try to infer last downloaded filename from a download log
+# Looks for common verbs and path-ish tokens with known data extensions
+get_last_downloaded_from_log () {
+  grep -E -i \
+    -e 'download(ed|ing)\b' \
+    -e '\bsaved\b|\bwritten\b|\bwrote\b|\boutput\b' \
+    -e '\bto\b.*\.(nc|nc4|h5|csv|tif|tiff|grib2?|zip|gz)\b' \
+    "$1" 2>/dev/null \
+  | grep -E -o "(/[A-Za-z0-9._+~/-]+)?[A-Za-z0-9._+-]+\.(nc|nc4|h5|csv|tif|tiff|grib2?|zip|gz)" \
+  | tail -n1 || true
+}
+
+summarize_downloads () {
+  local dir="$1"
+  print_section "DOWNLOADS ($dir)"
   if [[ ! -d "$dir" ]]; then
-    echo "(directory missing)"
+    echo "(no log directory)"
     return
   fi
-
   shopt -s nullglob
-  local printed_any=0
+  for f in "$dir"/*download*.log; do
+    local name; name=$(basename "$f" .log)
+    if ! touched_recently "$f"; then
+      echo "$name: script not ran within the past ${SINCE_HOURS}h"
+      continue
+    fi
+    # If updated recently, try to extract the last downloaded file mentioned
+    local last_dl=""
+    last_dl=$(get_last_downloaded_from_log "$f")
+    if [[ -n "$last_dl" ]]; then
+      echo "$name: latest file: $last_dl"
+    else
+      echo "$name: no files downloaded within the last ${SINCE_HOURS}h"
+    fi
+  done
+
+  # If there were zero matching logs:
+  ls -1 "$dir"/*download*.log >/dev/null 2>&1 || echo "(no download logs found)"
+}
+
+summarize_generic_processes () {
+  local dir="$1" label="$2"
+  print_section "$label ($dir)"
+  if [[ ! -d "$dir" ]]; then
+    echo "(no log directory)"
+    return
+  fi
+  shopt -s nullglob
+  local any=0
   for f in "$dir"/*.log; do
-    mtime=$(stat -c %Y "$f")
-    if (( mtime < since_epoch )); then
+    any=1
+    local name; name=$(basename "$f" .log)
+    if ! touched_recently "$f"; then
+      echo "$name: script not ran within the past ${SINCE_HOURS}h"
       continue
     fi
 
-    last_start=$(grep -E '^(START:|Starting)' "$f" | tail -n1 || true)
-    last_ok=$(grep -E '^STATUS: OK' "$f" | tail -n1 || true)
-    last_fail=$(grep -E '^STATUS: FAIL' "$f" | tail -n1 || true)
-    last_err=$(grep -Ei 'error|traceback|exception|failed' "$f" | tail -n3 || true)
+    # Parse NEW_ITEMS (take the last one) and WATCH_DIR
+    mapfile -t items < <(get_new_items "$f" || true)
+    local watch_dir; watch_dir=$(get_watch_dir "$f" || true)
 
-    status="UNKNOWN"
-    if [[ -n "$last_ok" ]]; then status="OK"
-    elif [[ -n "$last_fail" ]]; then status="FAIL"
-    elif [[ -n "$last_err" ]]; then status="WARN"
+    if ((${#items[@]} > 0)); then
+      # last item in NEW_ITEMS
+      local latest="${items[-1]}"
+      latest="${latest%/}"
+      if [[ -n "$watch_dir" ]]; then
+        echo "$name: latest created: ${watch_dir}/${latest}"
+      else
+        echo "$name: latest created: ${latest}"
+      fi
+    else
+      echo "$name: no dir/file created"
     fi
-
-    echo "-- $(basename "$f")"
-    [[ -n "$last_start" ]] && echo "   last start: $last_start"
-    echo "   status: $status"
-    [[ -n "$last_fail" ]] && echo "   $last_fail"
-    if [[ "$status" != "OK" && -n "$last_err" ]]; then
-      echo "   last errors:"
-      echo "   $last_err" | sed 's/^/   /'
-    fi
-
-    printed_any=1
   done
-
-  if [[ $printed_any -eq 0 ]]; then
-    echo "(no logs updated in the last ${SINCE_HOURS}h)"
-  fi
+  (( any == 1 )) || echo "(no logs found)"
 }
 
-echo "ccocean nightly download & processing summary"
-echo "Generated: $now_iso (last ${SINCE_HOURS}h)"
+# ----- run -------------------------------------------------------------------
 
-summarize_dir "$DL_LOGS" "DATA DOWNLOADS"
-summarize_dir "$MT_LOGS" "TILE GENERATION"
-summarize_dir "$RS_LOGS" "RESAMPLE"
-summarize_dir "$TS_LOGS" "TIME SERIES"
-summarize_dir "$UF_LOGS" "FIGURE UPDATES"
+echo "ccocean nightly summary"
+echo "Generated: $now_iso (window: last ${SINCE_HOURS}h)"
 
-echo
-echo "Logs older than ${SINCE_HOURS}h are hidden from this summary."
+summarize_downloads "$DL_LOGS"
+summarize_generic_processes "$MT_LOGS" "TILE GENERATION"
+summarize_generic_processes "$RS_LOGS" "RESAMPLE"
+summarize_generic_processes "$TS_LOGS" "TIME SERIES"
+summarize_generic_processes "$UF_LOGS" "FIGURE UPDATES"
