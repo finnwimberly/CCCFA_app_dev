@@ -47,12 +47,13 @@ get_watch_dir () {
 # Try to infer last downloaded filename from a download log
 # Looks for common verbs and path-ish tokens with known data extensions
 get_last_downloaded_from_log () {
-  grep -E -i \
+  grep -E -i -A 5 \
     -e 'download(ed|ing)\b' \
     -e '\bsaved\b|\bwritten\b|\bwrote\b|\boutput\b' \
     -e '\bto\b.*\.(nc|nc4|h5|csv|tif|tiff|grib2?|zip|gz)\b' \
+    -e 'NEW_ITEMS' \
     "$1" 2>/dev/null \
-  | grep -E -o "(/[A-Za-z0-9._+~/-]+)?[A-Za-z0-9._+-]+\.(nc|nc4|h5|csv|tif|tiff|grib2?|zip|gz)" \
+  | grep -E -o "[A-Za-z0-9._+~/-]+\.(nc|nc4|h5|csv|tif|tiff|grib2?|zip|gz)" \
   | tail -n1 || true
 }
 
@@ -74,6 +75,14 @@ summarize_downloads () {
     local last_dl=""
     last_dl=$(get_last_downloaded_from_log "$f")
     if [[ -n "$last_dl" ]]; then
+      # If it's not already a full path, prepend WATCH_DIR
+      if [[ "$last_dl" != /* ]]; then
+        local watch_dir
+        watch_dir=$(get_watch_dir "$f" || true)
+        if [[ -n "$watch_dir" ]]; then
+          last_dl="${watch_dir}/${last_dl}"
+        fi
+      fi
       echo "$name: latest file: $last_dl"
     else
       echo "$name: no files downloaded within the last ${SINCE_HOURS}h"
