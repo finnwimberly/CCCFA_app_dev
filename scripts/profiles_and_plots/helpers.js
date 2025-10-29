@@ -1,6 +1,6 @@
 // Generate unique colors for profiles using HSL
 function generateColor(index) {
-    const hue = (index * 137.5) % 360; // Use golden ratio to spread colors evenly
+    const hue = (index * 137.5) % 360; // spread colors evenly
     return `hsl(${hue}, 70%, 50%)`;
   }
   
