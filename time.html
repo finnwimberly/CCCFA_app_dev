@@ -729,51 +729,44 @@
                 console.error(`No SST data found for region ${selectedRegion}`);
                 return;
             }
-
             const isImperial = document.getElementById('imperial').checked;
             const unit = isImperial ? '°F' : '°C';
-
             const isAnomaly = dataType === 'anomalies';
             const sstDataKey = isAnomaly ? 'ssta' : 'sst';
             const sstDataValues = sstData[selectedRegion][sstDataKey];
             const climDict = sstData[selectedRegion]['clim']; 
-
+            
             if (!sstDataValues) {
                 console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
                 console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
                 return;
             }
-            if (!climDict) {
-                console.warn(`No climatology ('clim') found for region ${selectedRegion}`);
-            }
-
-            // helpers
+            
+            // Build data arrays
             const times = [];
             const values = [];
             Object.entries(sstDataValues).forEach(([time, value]) => {
                 if (value !== null && value !== undefined && !isNaN(value)) {
-                times.push(time);
-                values.push(convertTemperature(value, isImperial, { anomaly: isAnomaly }));
+                    times.push(time);
+                    values.push(convertTemperature(value, isImperial, { anomaly: isAnomaly }));
                 }
             });
-
-            // build aligned date-mapped climatology using the same time keys (NEW)
+            
+            // Build climatology only when NOT showing anomalies
             const climTimes = [];
             const climValues = [];
-            if (climDict) {
+            if (climDict && !isAnomaly) {
                 times.forEach((t) => {
-                const v = climDict[t];
-                if (v !== null && v !== undefined && !isNaN(v)) {
+                    const v = climDict[t];
                     climTimes.push(t);
-                    // climatology is absolute temperature
-                    climValues.push(convertTemperature(v, isImperial, { anomaly: false }));
-                } else {
-                    climTimes.push(t);
-                    climValues.push(null);
-                }
+                    if (v !== null && v !== undefined && !isNaN(v)) {
+                        climValues.push(convertTemperature(v, isImperial, { anomaly: false }));
+                    } else {
+                        climValues.push(null);
+                    }
                 });
             }
-
+            
             const rawTrace = {
                 x: times,
                 y: values,
@@ -783,86 +776,78 @@
                 line: { color: '#1f77b4', width: 1 },
                 yaxis: 'y'
             };
-
-            // NEW: climatology trace (replaces rolling mean)
-            const climTrace = climDict ? {
+            
+            // Only create climatology trace when NOT showing anomalies
+            const climTrace = (climDict && !isAnomaly) ? {
                 x: climTimes,
                 y: climValues,
                 name: 'Climatology',
                 type: 'scatter',
                 mode: 'lines',
                 line: { color: '#ff4444', width: 2 },
-                yaxis: isAnomaly ? 'y2' : 'y' // secondary axis only for anomalies
+                yaxis: 'y'
             } : null;
-
+            
+            const titleElement = document.getElementById('sst-plot-title');
+            titleElement.textContent = isAnomaly ? 'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
+            
             const layout = {
                 height: 400,
                 showlegend: true,
                 legend: {
-                x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
-                bgcolor: 'rgba(255,255,255,0.8)', bordercolor: 'lightgray', borderwidth: 1
+                    x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
+                    bgcolor: 'rgba(255,255,255,0.8)', bordercolor: 'lightgray', borderwidth: 1
                 },
                 title: {
-                text: `${sstData[selectedRegion].name} - ${isAnomaly ? 'SSTA' : 'SST'}`,
-                font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
+                    text: `${sstData[selectedRegion].name} - ${isAnomaly ? 'SSTA' : 'SST'}`,
+                    font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
                 },
                 xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray' },
                 yaxis: {
-                title: isAnomaly ? `Temperature Anomaly (${unit})` : `Temperature (${unit})`,
-                showgrid: true, gridcolor: 'lightgray'
+                    title: isAnomaly ? `Temperature Anomaly (${unit})` : `Temperature (${unit})`,
+                    showgrid: true, gridcolor: 'lightgray'
                 },
-                // secondary axis only when plotting anomalies (absolute climatology on right)
-                ...(isAnomaly ? {
-                yaxis2: {
-                    title: `Climatology (${unit})`,
-                    overlaying: 'y',
-                    side: 'right',
-                    showgrid: false
-                }
-                } : {}),
                 plot_bgcolor: 'white',
                 paper_bgcolor: 'white',
                 font: { family: 'Inter, sans-serif' },
-                margin: { t: 60, b: 50, l: 50, r: isAnomaly ? 70 : 50 }
+                margin: { t: 60, b: 50, l: 50, r: 50 }
             };
-
+            
             const config = {
                 responsive: true,
                 displayModeBar: true,
                 modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
                 modeBarButtonsToRemove: ['lasso2d']
             };
-
+            
             const traces = climTrace ? [rawTrace, climTrace] : [rawTrace];
             Plotly.newPlot('sst-anomaly-plot', traces, layout, config);
-
-            // sync zoom (unchanged)
+            
             document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
                 if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
-                isUpdatingSST = true;
-                Plotly.relayout('sss-anomaly-plot', {
-                    'xaxis.range[0]': eventData['xaxis.range[0]'],
-                    'xaxis.range[1]': eventData['xaxis.range[1]']
-                }).then(() => { isUpdatingSST = false; });
+                    isUpdatingSST = true;
+                    Plotly.relayout('sss-anomaly-plot', {
+                        'xaxis.range[0]': eventData['xaxis.range[0]'],
+                        'xaxis.range[1]': eventData['xaxis.range[1]']
+                    }).then(() => { isUpdatingSST = false; });
                 }
             });
+        }
+
+        function createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange) {
+            if (!sssData[selectedRegion]) {
+                console.error(`No SSS data found for region ${selectedRegion}`);
+                return;
             }
-
-            function createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange) {
-                if (!sssData[selectedRegion]) {
-                    console.error(`No SSS data found for region ${selectedRegion}`);
-                    return;
-                }
-
-                const isAnomaly = dataType === 'anomalies';
-                const sssDataKey = isAnomaly ? 'sssa' : 'sss';
-                const sssDataValues = sssData[selectedRegion][sssDataKey];
-                const climDict = sssData[selectedRegion]['clim']; 
-
-                if (!sssDataValues) {
-                    console.error(`No ${sssDataKey} data found for region ${selectedRegion}`);
-                    console.log('Available keys in region:', Object.keys(sssData[selectedRegion]));
-                    const layout = {
+            const isAnomaly = dataType === 'anomalies';
+            const sssDataKey = isAnomaly ? 'sssa' : 'sss';
+            const sssDataValues = sssData[selectedRegion][sssDataKey];
+            const climDict = sssData[selectedRegion]['clim']; 
+            
+            if (!sssDataValues) {
+                console.error(`No ${sssDataKey} data found for region ${selectedRegion}`);
+                console.log('Available keys in region:', Object.keys(sssData[selectedRegion]));
+                const layout = {
                     height: 400,
                     title: {
                         text: `${sssData[selectedRegion].name} - SSS`,
@@ -874,106 +859,98 @@
                     }],
                     plot_bgcolor: 'white', paper_bgcolor: 'white', font: { family: 'Inter, sans-serif' },
                     margin: { t: 60, b: 50, l: 50, r: 50 }
-                    };
-                    Plotly.newPlot('sss-anomaly-plot', [], layout);
-                    return;
-                }
-
-                const times = [];
-                const values = [];
-                Object.entries(sssDataValues).forEach(([time, value]) => {
-                    if (value !== null && value !== undefined && !isNaN(value)) {
+                };
+                Plotly.newPlot('sss-anomaly-plot', [], layout);
+                return;
+            }
+            
+            const times = [];
+            const values = [];
+            Object.entries(sssDataValues).forEach(([time, value]) => {
+                if (value !== null && value !== undefined && !isNaN(value)) {
                     times.push(time);
                     values.push(value);
-                    }
-                });
-
-                // NEW: build climatology aligned to the same dates
-                const climTimes = [];
-                const climValues = [];
-                if (climDict) {
-                    times.forEach((t) => {
+                }
+            });
+            
+            // Build climatology only when NOT showing anomalies
+            const climTimes = [];
+            const climValues = [];
+            if (climDict && !isAnomaly) {
+                times.forEach((t) => {
                     const v = climDict[t];
                     climTimes.push(t);
                     climValues.push((v !== null && v !== undefined && !isNaN(v)) ? v : null);
-                    });
-                }
-
-                const sssTrace = {
-                    x: times,
-                    y: values,
-                    name: isAnomaly ? 'Monthly Salinity Anomaly' : 'Monthly Salinity',
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    line: { color: '#1f77b4', width: 2 },
-                    marker: { size: 4, color: '#1f77b4' },
-                    yaxis: 'y'
-                };
-
-                const climTrace = climDict ? {
-                    x: climTimes,
-                    y: climValues,
-                    name: 'Climatology',
-                    type: 'scatter',
-                    mode: 'lines',
-                    line: { color: '#ff4444', width: 2 },
-                    yaxis: isAnomaly ? 'y2' : 'y'
-                } : null;
-
-                const titleElement = document.getElementById('sss-plot-title');
-                titleElement.textContent = isAnomaly ? 'Sea Surface Salinity Anomaly' : 'Sea Surface Salinity';
-
-                const layout = {
-                    height: 400,
-                    showlegend: true,
-                    legend: {
+                });
+            }
+            
+            const sssTrace = {
+                x: times,
+                y: values,
+                name: isAnomaly ? 'Monthly Salinity Anomaly' : 'Monthly Salinity',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#1f77b4', width: 2 },
+                marker: { size: 4, color: '#1f77b4' },
+                yaxis: 'y'
+            };
+            
+            // Only create climatology trace when NOT showing anomalies
+            const climTrace = (climDict && !isAnomaly) ? {
+                x: climTimes,
+                y: climValues,
+                name: 'Climatology',
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#ff4444', width: 2 },
+                yaxis: 'y'
+            } : null;
+            
+            const titleElement = document.getElementById('sss-plot-title');
+            titleElement.textContent = isAnomaly ? 'Sea Surface Salinity Anomaly' : 'Sea Surface Salinity';
+            
+            const layout = {
+                height: 400,
+                showlegend: true,
+                legend: {
                     x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
                     bgcolor: 'rgba(255, 255, 255, 0.8)', bordercolor: 'lightgray', borderwidth: 1
-                    },
-                    title: {
+                },
+                title: {
                     text: `${sssData[selectedRegion].name} - ${isAnomaly ? 'SSSA' : 'SSS'}`,
                     font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
-                    },
-                    xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray', range: sstTimeRange },
-                    yaxis: {
+                },
+                xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray', range: sstTimeRange },
+                yaxis: {
                     title: isAnomaly ? 'Salinity Anomaly (PSU)' : 'Salinity (PSU)',
                     showgrid: true, gridcolor: 'lightgray'
-                    },
-                    ...(isAnomaly ? {
-                    yaxis2: {
-                        title: 'Climatology (PSU)',
-                        overlaying: 'y',
-                        side: 'right',
-                        showgrid: false
-                    }
-                    } : {}),
-                    plot_bgcolor: 'white',
-                    paper_bgcolor: 'white',
-                    font: { family: 'Inter, sans-serif' },
-                    margin: { t: 60, b: 50, l: 50, r: isAnomaly ? 70 : 50 }
-                };
-
-                const config = {
-                    responsive: true,
-                    displayModeBar: true,
-                    modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
-                    modeBarButtonsToRemove: ['lasso2d']
-                };
-
-                const traces = climTrace ? [sssTrace, climTrace] : [sssTrace];
-                Plotly.newPlot('sss-anomaly-plot', traces, layout, config);
-
-                // sync zoom (unchanged)
-                document.getElementById('sss-anomaly-plot').on('plotly_relayout', function(eventData) {
-                    if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
+                },
+                plot_bgcolor: 'white',
+                paper_bgcolor: 'white',
+                font: { family: 'Inter, sans-serif' },
+                margin: { t: 60, b: 50, l: 50, r: 50 }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+                modeBarButtonsToRemove: ['lasso2d']
+            };
+            
+            const traces = climTrace ? [sssTrace, climTrace] : [sssTrace];
+            Plotly.newPlot('sss-anomaly-plot', traces, layout, config);
+            
+            document.getElementById('sss-anomaly-plot').on('plotly_relayout', function(eventData) {
+                if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
                     isUpdatingSSS = true;
                     Plotly.relayout('sst-anomaly-plot', {
                         'xaxis.range[0]': eventData['xaxis.range[0]'],
                         'xaxis.range[1]': eventData['xaxis.range[1]']
                     }).then(() => { isUpdatingSSS = false; });
-                    }
-                });
                 }
+            });
+        }
 
 
 
