@@ -724,6 +724,289 @@
         //     });
         // }
 
+        // function createSSTPlot(sstData, selectedRegion, dataType) {
+        //     if (!sstData[selectedRegion]) {
+        //         console.error(`No SST data found for region ${selectedRegion}`);
+        //         return;
+        //     }
+        //     const isImperial = document.getElementById('imperial').checked;
+        //     const unit = isImperial ? '°F' : '°C';
+        //     const isAnomaly = dataType === 'anomalies';
+        //     const sstDataKey = isAnomaly ? 'ssta' : 'sst';
+        //     const sstDataValues = sstData[selectedRegion][sstDataKey];
+        //     const climDict = sstData[selectedRegion]['clim']; 
+            
+        //     if (!sstDataValues) {
+        //         console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
+        //         console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
+        //         return;
+        //     }
+            
+        //     // Build data arrays
+        //     const times = [];
+        //     const values = [];
+        //     Object.entries(sstDataValues).forEach(([time, value]) => {
+        //         if (value !== null && value !== undefined && !isNaN(value)) {
+        //             times.push(time);
+        //             values.push(convertTemperature(value, isImperial, { anomaly: isAnomaly }));
+        //         }
+        //     });
+
+        //     const rollingWindow = 30; // days
+        //     const rollingValues = [];
+        //     for (let i = 0; i < values.length; i++) {
+        //         const start = Math.max(0, i - rollingWindow + 1);
+        //         const window = values.slice(start, i + 1);
+        //         const mean = window.reduce((a, b) => a + b, 0) / window.length;
+        //         rollingValues.push(mean);
+        //     }
+
+        //     // Create rolling mean trace (only for anomalies)
+        //     const rollingTrace = isAnomaly ? {
+        //         x: times,
+        //         y: rollingValues,
+        //         name: `${rollingWindow}-day Rolling Mean`,
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { color: 'red', width: 2 },
+        //         yaxis: 'y'
+        //     } : null;
+            
+        //     // Build climatology only when NOT showing anomalies
+        //     const climTimes = [];
+        //     const climValues = [];
+        //     if (climDict && !isAnomaly) {
+        //         times.forEach((t) => {
+        //             const v = climDict[t];
+        //             climTimes.push(t);
+        //             if (v !== null && v !== undefined && !isNaN(v)) {
+        //                 climValues.push(convertTemperature(v, isImperial, { anomaly: false }));
+        //             } else {
+        //                 climValues.push(null);
+        //             }
+        //         });
+        //     }
+            
+        //     const rawTrace = {
+        //         x: times,
+        //         y: values,
+        //         name: isAnomaly ? 'Daily Temperature Anomaly' : 'Daily Temperature',
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { color: '#1f77b4', width: 1 },
+        //         yaxis: 'y'
+        //     };
+            
+        //     // Only create climatology trace when NOT showing anomalies
+        //     const climTrace = (climDict && !isAnomaly) ? {
+        //         x: climTimes,
+        //         y: climValues,
+        //         name: 'Climatology',
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { color: '#ff4444', width: 2 },
+        //         yaxis: 'y'
+        //     } : null;
+            
+        //     const titleElement = document.getElementById('sst-plot-title');
+        //     titleElement.textContent = isAnomaly ? 'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
+            
+        //     const layout = {
+        //         height: 400,
+        //         showlegend: true,
+        //         legend: {
+        //             x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
+        //             bgcolor: 'rgba(255,255,255,0.8)', bordercolor: 'lightgray', borderwidth: 1
+        //         },
+        //         title: {
+        //             text: `${sstData[selectedRegion].name} - ${isAnomaly ? 'SSTA' : 'SST'}`,
+        //             font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
+        //         },
+        //         xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray' },
+        //         yaxis: {
+        //             title: isAnomaly ? `Temperature Anomaly (${unit})` : `Temperature (${unit})`,
+        //             showgrid: true, gridcolor: 'lightgray'
+        //         },
+        //         plot_bgcolor: 'white',
+        //         paper_bgcolor: 'white',
+        //         font: { family: 'Inter, sans-serif' },
+        //         margin: { t: 60, b: 50, l: 50, r: 50 }
+        //     };
+            
+        //     const config = {
+        //         responsive: true,
+        //         displayModeBar: true,
+        //         modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+        //         modeBarButtonsToRemove: ['lasso2d']
+        //     };
+            
+        //     const traces = [rawTrace];
+        //     if (isAnomaly && rollingTrace) traces.push(rollingTrace);
+        //     if (climTrace) traces.push(climTrace);
+            
+        //     document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
+        //         if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
+        //             isUpdatingSST = true;
+        //             Plotly.relayout('sss-anomaly-plot', {
+        //                 'xaxis.range[0]': eventData['xaxis.range[0]'],
+        //                 'xaxis.range[1]': eventData['xaxis.range[1]']
+        //             }).then(() => { isUpdatingSST = false; });
+        //         }
+        //     });
+        // }
+
+        // function createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange) {
+        //     if (!sssData[selectedRegion]) {
+        //         console.error(`No SSS data found for region ${selectedRegion}`);
+        //         return;
+        //     }
+        //     const isAnomaly = dataType === 'anomalies';
+        //     const sssDataKey = isAnomaly ? 'sssa' : 'sss';
+        //     const sssDataValues = sssData[selectedRegion][sssDataKey];
+        //     const climDict = sssData[selectedRegion]['clim']; 
+            
+        //     if (!sssDataValues) {
+        //         console.error(`No ${sssDataKey} data found for region ${selectedRegion}`);
+        //         console.log('Available keys in region:', Object.keys(sssData[selectedRegion]));
+        //         const layout = {
+        //             height: 400,
+        //             title: {
+        //                 text: `${sssData[selectedRegion].name} - SSS`,
+        //                 font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
+        //             },
+        //             annotations: [{
+        //                 text: 'Raw SSS data not available. Only anomaly data is available for salinity.',
+        //                 xref: 'paper', yref: 'paper', x: 0.5, y: 0.5, showarrow: false, font: { size: 14, color: 'gray' }
+        //             }],
+        //             plot_bgcolor: 'white', paper_bgcolor: 'white', font: { family: 'Inter, sans-serif' },
+        //             margin: { t: 60, b: 50, l: 50, r: 50 }
+        //         };
+        //         Plotly.newPlot('sss-anomaly-plot', [], layout);
+        //         return;
+        //     }
+            
+        //     const times = [];
+        //     const values = [];
+        //     Object.entries(sssDataValues).forEach(([time, value]) => {
+        //         if (value !== null && value !== undefined && !isNaN(value)) {
+        //             times.push(time);
+        //             values.push(value);
+        //         }
+        //     });
+            
+        //     // Build climatology only when NOT showing anomalies
+        //     const climTimes = [];
+        //     const climValues = [];
+        //     if (climDict && !isAnomaly) {
+        //         times.forEach((t) => {
+        //             const v = climDict[t];
+        //             climTimes.push(t);
+        //             climValues.push((v !== null && v !== undefined && !isNaN(v)) ? v : null);
+        //         });
+        //     }
+            
+        //     const sssTrace = {
+        //         x: times,
+        //         y: values,
+        //         name: isAnomaly ? 'Monthly Salinity Anomaly' : 'Monthly Salinity',
+        //         type: 'scatter',
+        //         mode: 'lines+markers',
+        //         line: { color: '#1f77b4', width: 2 },
+        //         marker: { size: 4, color: '#1f77b4' },
+        //         yaxis: 'y'
+        //     };
+            
+        //     // Only create climatology trace when NOT showing anomalies
+        //     const climTrace = (climDict && !isAnomaly) ? {
+        //         x: climTimes,
+        //         y: climValues,
+        //         name: 'Climatology',
+        //         type: 'scatter',
+        //         mode: 'lines',
+        //         line: { color: '#ff4444', width: 2 },
+        //         yaxis: 'y'
+        //     } : null;
+            
+        //     const titleElement = document.getElementById('sss-plot-title');
+        //     titleElement.textContent = isAnomaly ? 'Sea Surface Salinity Anomaly' : 'Sea Surface Salinity';
+            
+        //     const layout = {
+        //         height: 400,
+        //         showlegend: true,
+        //         legend: {
+        //             x: 0.98, y: 0.98, xanchor: 'right', yanchor: 'top',
+        //             bgcolor: 'rgba(255, 255, 255, 0.8)', bordercolor: 'lightgray', borderwidth: 1
+        //         },
+        //         title: {
+        //             text: `${sssData[selectedRegion].name} - ${isAnomaly ? 'SSSA' : 'SSS'}`,
+        //             font: { size: 16 }, x: 0.05, xanchor: 'left', y: 0.95
+        //         },
+        //         xaxis: { title: 'Time', showgrid: true, gridcolor: 'lightgray', range: sstTimeRange },
+        //         yaxis: {
+        //             title: isAnomaly ? 'Salinity Anomaly (PSU)' : 'Salinity (PSU)',
+        //             showgrid: true, gridcolor: 'lightgray'
+        //         },
+        //         plot_bgcolor: 'white',
+        //         paper_bgcolor: 'white',
+        //         font: { family: 'Inter, sans-serif' },
+        //         margin: { t: 60, b: 50, l: 50, r: 50 }
+        //     };
+            
+        //     const config = {
+        //         responsive: true,
+        //         displayModeBar: true,
+        //         modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
+        //         modeBarButtonsToRemove: ['lasso2d']
+        //     };
+            
+        //     const traces = climTrace ? [sssTrace, climTrace] : [sssTrace];
+        //     Plotly.newPlot('sss-anomaly-plot', traces, layout, config);
+            
+        //     document.getElementById('sss-anomaly-plot').on('plotly_relayout', function(eventData) {
+        //         if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
+        //             isUpdatingSSS = true;
+        //             Plotly.relayout('sst-anomaly-plot', {
+        //                 'xaxis.range[0]': eventData['xaxis.range[0]'],
+        //                 'xaxis.range[1]': eventData['xaxis.range[1]']
+        //             }).then(() => { isUpdatingSSS = false; });
+        //         }
+        //     });
+        // }
+
+
+
+        // // Function to create unified time series plots
+        // async function createTimeSeriesPlots(selectedRegion, dataType) {
+        //     try {
+        //         // Load both SST and SSS data
+        //         const sstData = await loadSSTData();
+        //         const sssData = await loadSSSData();
+                
+        //         // Debug: Log the data structure
+        //         console.log('SST Data structure:', sstData);
+        //         console.log('SSS Data structure:', sssData);
+                
+        //         // Create SST plot for selected region
+        //         createSSTPlot(sstData, selectedRegion, dataType);
+                
+        //         // Get SST time range for alignment
+        //         const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
+        //         const sstDataValues = sstData[selectedRegion]?.[sstDataKey];
+                
+        //         // Check if SST data exists before getting time range
+        //         let sstTimeRange = null;
+        //         if (sstDataValues) {
+        //             const sstTimes = Object.keys(sstDataValues);
+        //             sstTimeRange = sstTimes.length > 0 ? [sstTimes[0], sstTimes[sstTimes.length - 1]] : null;
+        //         }
+                
+        //         // Create SSS plot for selected region with aligned time range
+        //         createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange);
+        //     } catch (error) {
+        //         console.error('Error creating time series plots:', error);
+        //     }
+        // }
+
         function createSSTPlot(sstData, selectedRegion, dataType) {
             if (!sstData[selectedRegion]) {
                 console.error(`No SST data found for region ${selectedRegion}`);
@@ -735,23 +1018,21 @@
             const sstDataKey = isAnomaly ? 'ssta' : 'sst';
             const sstDataValues = sstData[selectedRegion][sstDataKey];
             const climDict = sstData[selectedRegion]['clim']; 
-            
+
             if (!sstDataValues) {
                 console.error(`No ${sstDataKey} data found for region ${selectedRegion}`);
                 console.log('Available keys in region:', Object.keys(sstData[selectedRegion]));
                 return;
             }
-            
-            // Build data arrays
-            const times = [];
-            const values = [];
-            Object.entries(sstDataValues).forEach(([time, value]) => {
-                if (value !== null && value !== undefined && !isNaN(value)) {
-                    times.push(time);
-                    values.push(convertTemperature(value, isImperial, { anomaly: isAnomaly }));
-                }
-            });
 
+            // Build sorted data arrays
+            const pairs = Object.entries(sstDataValues)
+                .filter(([t, v]) => v !== null && v !== undefined && !isNaN(v))
+                .sort((a, b) => a[0].localeCompare(b[0]));
+            const times = pairs.map(([t]) => t);
+            const values = pairs.map(([, v]) => convertTemperature(v, isImperial, { anomaly: isAnomaly }));
+
+            // Rolling mean (SST anomaly only)
             const rollingWindow = 30; // days
             const rollingValues = [];
             for (let i = 0; i < values.length; i++) {
@@ -761,17 +1042,6 @@
                 rollingValues.push(mean);
             }
 
-            // Create rolling mean trace (only for anomalies)
-            const rollingTrace = isAnomaly ? {
-                x: times,
-                y: rollingValues,
-                name: `${rollingWindow}-day Rolling Mean`,
-                type: 'scatter',
-                mode: 'lines',
-                line: { color: 'red', width: 2 },
-                yaxis: 'y'
-            } : null;
-            
             // Build climatology only when NOT showing anomalies
             const climTimes = [];
             const climValues = [];
@@ -786,7 +1056,7 @@
                     }
                 });
             }
-            
+
             const rawTrace = {
                 x: times,
                 y: values,
@@ -796,7 +1066,18 @@
                 line: { color: '#1f77b4', width: 1 },
                 yaxis: 'y'
             };
-            
+
+            // Only for anomalies
+            const rollingTrace = isAnomaly ? {
+                x: times,
+                y: rollingValues,
+                name: `${rollingWindow}-day Rolling Mean`,
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: 'red', width: 2 },
+                yaxis: 'y'
+            } : null;
+
             // Only create climatology trace when NOT showing anomalies
             const climTrace = (climDict && !isAnomaly) ? {
                 x: climTimes,
@@ -807,10 +1088,10 @@
                 line: { color: '#ff4444', width: 2 },
                 yaxis: 'y'
             } : null;
-            
+
             const titleElement = document.getElementById('sst-plot-title');
             titleElement.textContent = isAnomaly ? 'Sea Surface Temperature Anomaly' : 'Sea Surface Temperature';
-            
+
             const layout = {
                 height: 400,
                 showlegend: true,
@@ -832,26 +1113,31 @@
                 font: { family: 'Inter, sans-serif' },
                 margin: { t: 60, b: 50, l: 50, r: 50 }
             };
-            
+
             const config = {
                 responsive: true,
                 displayModeBar: true,
                 modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
                 modeBarButtonsToRemove: ['lasso2d']
             };
-            
+
             const traces = [rawTrace];
             if (isAnomaly && rollingTrace) traces.push(rollingTrace);
             if (climTrace) traces.push(climTrace);
-            
-            document.getElementById('sst-anomaly-plot').on('plotly_relayout', function(eventData) {
-                if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
-                    isUpdatingSST = true;
-                    Plotly.relayout('sss-anomaly-plot', {
-                        'xaxis.range[0]': eventData['xaxis.range[0]'],
-                        'xaxis.range[1]': eventData['xaxis.range[1]']
-                    }).then(() => { isUpdatingSST = false; });
-                }
+
+            const sstEl = document.getElementById('sst-anomaly-plot');
+
+            // Create/update the plot, then attach the listener
+            Plotly.react(sstEl, traces, layout, config).then(() => {
+                sstEl.on('plotly_relayout', function(eventData) {
+                    if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSSS) {
+                        isUpdatingSST = true;
+                        Plotly.relayout('sss-anomaly-plot', {
+                            'xaxis.range[0]': eventData['xaxis.range[0]'],
+                            'xaxis.range[1]': eventData['xaxis.range[1]']
+                        }).then(() => { isUpdatingSST = false; });
+                    }
+                });
             });
         }
 
@@ -864,7 +1150,7 @@
             const sssDataKey = isAnomaly ? 'sssa' : 'sss';
             const sssDataValues = sssData[selectedRegion][sssDataKey];
             const climDict = sssData[selectedRegion]['clim']; 
-            
+
             if (!sssDataValues) {
                 console.error(`No ${sssDataKey} data found for region ${selectedRegion}`);
                 console.log('Available keys in region:', Object.keys(sssData[selectedRegion]));
@@ -884,16 +1170,14 @@
                 Plotly.newPlot('sss-anomaly-plot', [], layout);
                 return;
             }
-            
-            const times = [];
-            const values = [];
-            Object.entries(sssDataValues).forEach(([time, value]) => {
-                if (value !== null && value !== undefined && !isNaN(value)) {
-                    times.push(time);
-                    values.push(value);
-                }
-            });
-            
+
+            // Sorted times/values
+            const pairs = Object.entries(sssDataValues)
+                .filter(([t, v]) => v !== null && v !== undefined && !isNaN(v))
+                .sort((a, b) => a[0].localeCompare(b[0]));
+            const times = pairs.map(([t]) => t);
+            const values = pairs.map(([, v]) => v);
+
             // Build climatology only when NOT showing anomalies
             const climTimes = [];
             const climValues = [];
@@ -904,7 +1188,7 @@
                     climValues.push((v !== null && v !== undefined && !isNaN(v)) ? v : null);
                 });
             }
-            
+
             const sssTrace = {
                 x: times,
                 y: values,
@@ -915,7 +1199,7 @@
                 marker: { size: 4, color: '#1f77b4' },
                 yaxis: 'y'
             };
-            
+
             // Only create climatology trace when NOT showing anomalies
             const climTrace = (climDict && !isAnomaly) ? {
                 x: climTimes,
@@ -926,10 +1210,10 @@
                 line: { color: '#ff4444', width: 2 },
                 yaxis: 'y'
             } : null;
-            
+
             const titleElement = document.getElementById('sss-plot-title');
             titleElement.textContent = isAnomaly ? 'Sea Surface Salinity Anomaly' : 'Sea Surface Salinity';
-            
+
             const layout = {
                 height: 400,
                 showlegend: true,
@@ -951,56 +1235,50 @@
                 font: { family: 'Inter, sans-serif' },
                 margin: { t: 60, b: 50, l: 50, r: 50 }
             };
-            
+
             const config = {
                 responsive: true,
                 displayModeBar: true,
                 modeBarButtonsToAdd: ['drawline', 'drawopenpath', 'eraseshape'],
                 modeBarButtonsToRemove: ['lasso2d']
             };
-            
+
             const traces = climTrace ? [sssTrace, climTrace] : [sssTrace];
-            Plotly.newPlot('sss-anomaly-plot', traces, layout, config);
-            
-            document.getElementById('sss-anomaly-plot').on('plotly_relayout', function(eventData) {
-                if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
-                    isUpdatingSSS = true;
-                    Plotly.relayout('sst-anomaly-plot', {
-                        'xaxis.range[0]': eventData['xaxis.range[0]'],
-                        'xaxis.range[1]': eventData['xaxis.range[1]']
-                    }).then(() => { isUpdatingSSS = false; });
-                }
+            const sssEl = document.getElementById('sss-anomaly-plot');
+
+            Plotly.react(sssEl, traces, layout, config).then(() => {
+                sssEl.on('plotly_relayout', function(eventData) {
+                    if (eventData['xaxis.range[0]'] && eventData['xaxis.range[1]'] && !isUpdatingSST) {
+                        isUpdatingSSS = true;
+                        Plotly.relayout('sst-anomaly-plot', {
+                            'xaxis.range[0]': eventData['xaxis.range[0]'],
+                            'xaxis.range[1]': eventData['xaxis.range[1]']
+                        }).then(() => { isUpdatingSSS = false; });
+                    }
+                });
             });
         }
 
-
-
-        // Function to create unified time series plots
+        // Unified time series creator
         async function createTimeSeriesPlots(selectedRegion, dataType) {
             try {
-                // Load both SST and SSS data
                 const sstData = await loadSSTData();
                 const sssData = await loadSSSData();
-                
-                // Debug: Log the data structure
+
                 console.log('SST Data structure:', sstData);
                 console.log('SSS Data structure:', sssData);
-                
-                // Create SST plot for selected region
+
+                // Create SST first so we can grab its x-range for SSS
                 createSSTPlot(sstData, selectedRegion, dataType);
-                
-                // Get SST time range for alignment
+
                 const sstDataKey = dataType === 'anomalies' ? 'ssta' : 'sst';
                 const sstDataValues = sstData[selectedRegion]?.[sstDataKey];
-                
-                // Check if SST data exists before getting time range
                 let sstTimeRange = null;
                 if (sstDataValues) {
-                    const sstTimes = Object.keys(sstDataValues);
+                    const sstTimes = Object.keys(sstDataValues).sort((a,b) => a.localeCompare(b));
                     sstTimeRange = sstTimes.length > 0 ? [sstTimes[0], sstTimes[sstTimes.length - 1]] : null;
                 }
-                
-                // Create SSS plot for selected region with aligned time range
+
                 createSSSPlot(sssData, selectedRegion, dataType, sstTimeRange);
             } catch (error) {
                 console.error('Error creating time series plots:', error);
