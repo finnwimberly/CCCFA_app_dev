@@ -1034,12 +1034,14 @@
 
             // Rolling mean (SST anomaly only)
             const rollingWindow = 30; // days
+            const halfWindow = Math.floor(rollingWindow / 2);
             const rollingValues = [];
             for (let i = 0; i < values.length; i++) {
-                const start = Math.max(0, i - rollingWindow + 1);
-                const window = values.slice(start, i + 1);
-                const mean = window.reduce((a, b) => a + b, 0) / window.length;
-                rollingValues.push(mean);
+            const start = Math.max(0, i - halfWindow);
+            const end = Math.min(values.length, i + halfWindow + 1);
+            const window = values.slice(start, end);
+            const mean = window.reduce((a, b) => a + b, 0) / window.length;
+            rollingValues.push(mean);
             }
 
             // Build climatology only when NOT showing anomalies
