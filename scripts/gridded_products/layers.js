@@ -250,7 +250,7 @@ function createLegend(layerType, date) {
   const loadLegendData = layerType === 'DOPPIO'
     ? Promise.all([
         fetch(colormapFile).then((res) => res.text()),
-        Promise.resolve({ min_SST: 1.0, max_SST: 25.0 })
+        Promise.resolve({ min_SST: 1.0, max_SST: 20.0 })
       ])
     : Promise.all([
         fetch(colormapFile).then((res) => res.text()),
