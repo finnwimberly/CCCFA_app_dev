@@ -289,7 +289,7 @@ function createLegend(layerType, date) {
   //       fetch(rangeFile).then((res) => res.json())
   //     ]);
   // Handle DOPPIO separately: use season_limits.json to pick min/max for the given date
-  
+
   const loadLegendData = layerType === 'DOPPIO'
   ? Promise.all([
       fetch(colormapFile).then((res) => {
@@ -297,7 +297,7 @@ function createLegend(layerType, date) {
         return res.text();
       }),
       // fetch season limits and pick the season for the provided `date` param
-      fetch('/processed_data/doppio/season_limits.json')
+      fetch('/..data/doppio/season_limits.json')
         .then((res) => {
           if (!res.ok) throw new Error('Failed to fetch season_limits.json');
           return res.json();
