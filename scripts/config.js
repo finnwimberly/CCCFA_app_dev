@@ -134,7 +134,7 @@ export function getColormapPath(layerType) {
     case 'OSTIA_anomaly':
       return `${base}/OSTIA_anomaly/thermal_colormap.txt`;
     case 'DOPPIO':
-      return `${base}/doppio/doppio_colormap.txt`;
+      return `${base}/doppio/doppio_colormap_winter.txt`;
     default:
       return null;
   }
