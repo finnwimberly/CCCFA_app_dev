@@ -151,6 +151,38 @@ function showModal(message) {
   });
 }
 
+// Helpers to create legends with different seasonal limits:
+// Accepts "YYYYMMDD" or a Date object; falls back to today's date if falsy
+function seasonFromYYYYMMDD(yyyymmdd) {
+  if (!yyyymmdd) {
+    const d = new Date();
+    return seasonFromMonth(d.getMonth() + 1);
+  }
+
+  // If caller passed a Date object accidentally
+  if (yyyymmdd instanceof Date) {
+    return seasonFromMonth(yyyymmdd.getMonth() + 1);
+  }
+
+  // Validate 8-digit YYYYMMDD
+  if (!/^\d{8}$/.test(yyyymmdd)) {
+    console.warn('seasonFromYYYYMMDD: unexpected date format, falling back to today:', yyyymmdd);
+    const d = new Date();
+    return seasonFromMonth(d.getMonth() + 1);
+  }
+
+  const month = parseInt(yyyymmdd.slice(4, 6), 10);
+  return seasonFromMonth(month);
+}
+
+function seasonFromMonth(month) {
+  // month is 1-12
+  if ([12, 1, 2].includes(month)) return "winter";
+  if ([3, 4, 5].includes(month)) return "spring";
+  if ([6, 7, 8].includes(month)) return "summer";
+  return "fall";
+}
+
 // Helper function to generate legend
 function createLegend(layerType, date) {
   // Get the legend container element
@@ -247,15 +279,47 @@ function createLegend(layerType, date) {
   const colormapFile = getColormapPath(layerType);
 
   // Handle DOPPIO separately: it uses a static min/max range and does not have a range file
+  // const loadLegendData = layerType === 'DOPPIO'
+  //   ? Promise.all([
+  //       fetch(colormapFile).then((res) => res.text()),
+  //       Promise.resolve({ min_SST: 1.0, max_SST: 20.0 })
+  //     ])
+  //   : Promise.all([
+  //       fetch(colormapFile).then((res) => res.text()),
+  //       fetch(rangeFile).then((res) => res.json())
+  //     ]);
+  // Handle DOPPIO separately: use season_limits.json to pick min/max for the given date
+  
   const loadLegendData = layerType === 'DOPPIO'
-    ? Promise.all([
-        fetch(colormapFile).then((res) => res.text()),
-        Promise.resolve({ min_SST: 1.0, max_SST: 20.0 })
-      ])
-    : Promise.all([
-        fetch(colormapFile).then((res) => res.text()),
-        fetch(rangeFile).then((res) => res.json())
-      ]);
+  ? Promise.all([
+      fetch(colormapFile).then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch colormap');
+        return res.text();
+      }),
+      // fetch season limits and pick the season for the provided `date` param
+      fetch('/processed_data/doppio/season_limits.json')
+        .then((res) => {
+          if (!res.ok) throw new Error('Failed to fetch season_limits.json');
+          return res.json();
+        })
+        .then((limitsJson) => {
+          const season = seasonFromYYYYMMDD(date);
+          const seasonRange = limitsJson[season];
+          if (!seasonRange) {
+            console.warn(`season_limits.json missing season '${season}', falling back`);
+            return { min_SST: 1.0, max_SST: 20.0 };
+          }
+          return seasonRange;
+        })
+        .catch((err) => {
+          console.warn('Error loading season limits; using fallback range. Error:', err);
+          return { min_SST: 1.0, max_SST: 20.0 };
+        })
+    ])
+  : Promise.all([
+      fetch(colormapFile).then((res) => res.text()),
+      fetch(rangeFile).then((res) => res.json())
+    ]);
 
   loadLegendData
     .then(([colormapText, range]) => {
