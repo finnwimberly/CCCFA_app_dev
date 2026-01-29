@@ -297,7 +297,7 @@ function createLegend(layerType, date) {
         return res.text();
       }),
       // fetch season limits and pick the season for the provided `date` param
-      fetch('/..data/doppio/season_limits.json')
+      fetch('../../data/doppio/season_limits.json')
         .then((res) => {
           if (!res.ok) throw new Error('Failed to fetch season_limits.json');
           return res.json();
