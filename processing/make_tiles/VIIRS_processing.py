@@ -24,7 +24,7 @@ import json
 
 # Define directories
 base_dir = '/home/finn.wimberly/Documents/CCCFA_app_dev/data'
-raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
+raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS/3day'
 tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles')
 os.makedirs(tiles_dir, exist_ok=True)
 
@@ -63,7 +63,6 @@ os.makedirs(temp_files_dir, exist_ok=True)
 # Load all SST data files in the directory and store in a dictionary
 sst_data = {}
 sst = {}
-raw_data_dir = '/vast/clidex/data/obs/SST/NOAAVIIRS'
 
 # # Load the data for filtered files
 # files = []
@@ -279,6 +278,7 @@ for filename in os.listdir(temp_files_dir):
 
     # Create a colored VRT file
     colored_vrt_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"colored_{date_str}.vrt")
+    vrt_file = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day', f"temp_{date_str}.vrt")
     gdaldem_command = [
         'gdaldem', 'color-relief', vrt_file, color_filename, colored_vrt_file, '-of', 'VRT', '-alpha'
     ]
@@ -365,7 +365,8 @@ for filename in os.listdir(range_dir):
 
 # In[14]:
 
-
+tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local')
+os.makedirs(tiles_directory_local, exist_ok=True)
 # Load all SST data files in the directory and store in a dictionary
 sst_data = {}
 sst = {}
@@ -653,8 +654,8 @@ for year, day, filename in files:
 
 
 #Tidying up folders and removing unnecessary files
-local_tiles_dir = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local')
-shutil.rmtree(local_tiles_dir)
+tiles_directory_local = os.path.join(base_dir, 'processed_data', 'SST', 'tiles_3day_local')
+shutil.rmtree(tiles_directory_local)
 
 temp_directory = os.path.join(base_dir, 'processed_data', 'SST', 'temp_files_3day')
 shutil.rmtree(temp_directory)

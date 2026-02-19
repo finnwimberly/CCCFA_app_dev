@@ -22,7 +22,7 @@ MIN_LAT = -89.9749984741211
 MAX_LAT = 89.9749984741211
 
 # Default dates: replicate shell behavior (start fixed, end = today)
-DEFAULT_START = "2024-01-01"
+DEFAULT_START = "2024-08-01"
 DEFAULT_END = datetime.now().date().isoformat()
 
 # Default output directory: same as shell

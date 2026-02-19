@@ -28,5 +28,12 @@ conda deactivate
 log_changes "end" "$TILES_DIR"
 
 # Filter out verbose lines and write to actual log
-grep -v -E "(Input file size|Generating Base Tiles:|Generating Overview Tiles:|^[0-9]+\.\.\.|^100|Saved GeoTIFF:|Flipping latitude|Creating VRT for|Creating colorized VRT for|Created colorized VRT:|Creating tiles in:)" "$TEMP_LOG" >> "$LOGDIR/VIIRS_tiles.log"
+# Filter: only keep the NEW_ITEMS block (or a NO_NEW_ITEMS line)
+if grep -q '^NEW_ITEMS:' "$TEMP_LOG"; then
+  # Append only the header and bullet lines
+  grep -E '^(NEW_ITEMS:|  - )' "$TEMP_LOG" >> "$LOGDIR/VIIRS_tiles.log"
+else
+  echo "NO_NEW_ITEMS" >> "$LOGDIR/VIIRS_tiles.log"
+fi
+
 rm -f "$TEMP_LOG"

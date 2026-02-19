@@ -23,6 +23,7 @@ from matplotlib import cm
 from scipy.interpolate import griddata
 from rasterio.features import rasterize
 import cartopy.io.shapereader as shpreader
+import datetime as dt
 
 
 # In[36]:
@@ -40,10 +41,6 @@ os.makedirs(tiles_dir, exist_ok=True)
 # Path for the temp_files directory
 temp_files_dir = os.path.join(base_dir, 'processed_data', 'doppio', 'temp_files')
 os.makedirs(temp_files_dir, exist_ok=True)
-
-
-# In[37]:
-
 
 # which file are we processing
 date_pattern = re.compile(r"doppio_bottom_temps_(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.nc")
@@ -214,14 +211,6 @@ for t in daily["time"].values:
 
 ds.close()
 
-# if not np.isfinite(global_min) or not np.isfinite(global_max):
-#     raise RuntimeError("Could not determine global min/max for color table.")
-
-# print(f"\nGlobal range across days: [{global_min:.3f}, {global_max:.3f}] °C")
-
-
-# In[41]:
-
 
 # #Check out tif 
 # from rasterio.plot import show
@@ -233,47 +222,133 @@ ds.close()
 #     plt.show()
 
 
-# In[42]:
+# # build value-based color file
+# VMIN, VMAX = 1.0, 20.0  # hard limits in °C
+
+# n = 255
+# values = np.linspace(VMIN, VMAX, n)
+# colors = cmocean.cm.thermal(np.linspace(0, 1, n))
+
+# color_filename = os.path.join(temp_files_dir, "doppio_colormap.txt")
+# with open(color_filename, "w") as f:
+#     f.write("nv 0 0 0 0\n") 
+#     for v, c in zip(values, colors):
+#         r, g, b = (int(c[0]*255), int(c[1]*255), int(c[2]*255))
+#         f.write(f"{v:.6f} {r} {g} {b} 255\n")
+
+# seasonal temp bounds
+SEASON_LIMITS = {
+    "winter": (0.0, 12.0),
+    "spring": (2.0, 14.0),
+    "summer": (6.0, 20.0),
+    "fall":   (3.0, 16.0),
+}
+
+def season_from_date(d: dt.date) -> str:
+    m = d.month
+    if m in (12, 1, 2): return "winter"
+    if m in (3, 4, 5):  return "spring"
+    if m in (6, 7, 8):  return "summer"
+    return "fall"
+
+# create a small json mapping seasons -> vmin/vmax for the frontend to fetch
+season_limits_file = os.path.join(
+    base_dir, 'processed_data', 'doppio', 'season_limits.json'
+)
+os.makedirs(os.path.dirname(season_limits_file), exist_ok=True)
+
+needs_write = (
+    not os.path.exists(season_limits_file)
+    or os.path.getsize(season_limits_file) == 0
+)
+
+if needs_write:
+    print(f"Writing season limits: {season_limits_file}")
+    with open(season_limits_file, "w") as sf:
+        json.dump(
+            {s: {"min_SST": v[0], "max_SST": v[1]} for s, v in SEASON_LIMITS.items()},
+            sf,
+            indent=2
+        )
+else:
+    print(f"Using existing season limits: {season_limits_file}")
+
+def write_colormap_txt(path: str, vmin: float, vmax: float, n: int = 255):
+    values = np.linspace(vmin, vmax, n)
+    colors = cmocean.cm.thermal(np.linspace(0, 1, n))
+
+    with open(path, "w") as f:
+        f.write("nv 0 0 0 0\n")
+        for v, c in zip(values, colors):
+            r, g, b = (int(c[0]*255), int(c[1]*255), int(c[2]*255))
+            f.write(f"{v:.6f} {r} {g} {b} 255\n")
+
+# generate one colormap file per season (cached)
+colormap_by_season = {}
+for season, (vmin, vmax) in SEASON_LIMITS.items():
+    cmap_path = os.path.join(base_dir, 'processed_data', 'doppio', f"doppio_colormap_{season}.txt")
+    # write only if not exists
+    if not os.path.exists(cmap_path):
+        write_colormap_txt(cmap_path, vmin, vmax)
+    colormap_by_season[season] = cmap_path
 
 
-# build value-based color file
-VMIN, VMAX = 1.0, 25.0  # hard limits in °C
+### -------- PRE SEASONAL BOUNDS ---------------------
+# for filename in os.listdir(temp_files_dir):
+#     # if not filename.endswith('.vrt'):
+#     if not filename.startswith('doppio_bottom_temp_daily_') or not filename.endswith('.vrt'):
+#         continue
+        
+#     # Get the date from filename
+#     date_str = filename.replace('doppio_bottom_temp_daily_', '').replace('.vrt', '')
 
-n = 255
-values = np.linspace(VMIN, VMAX, n)
-colors = cmocean.cm.thermal(np.linspace(0, 1, n))
+#     # Create a colored VRT file
+#     in_vrt = os.path.join(temp_files_dir, filename)
+#     colored_vrt_file = os.path.join(base_dir, 'processed_data', 'doppio', 'temp_files', f"colored_{date_str}.vrt")
+#     # gdaldem_command = [
+#     #     'gdaldem', 'color-relief', in_vrt, color_filename, colored_vrt_file, '-of', 'VRT', '-alpha'
+#     # ]
+#     # subprocess.run(gdaldem_command)
 
-color_filename = os.path.join(temp_files_dir, "doppio_colormap.txt")
-with open(color_filename, "w") as f:
-    f.write("nv 0 0 0 0\n") 
-    for v, c in zip(values, colors):
-        r, g, b = (int(c[0]*255), int(c[1]*255), int(c[2]*255))
-        f.write(f"{v:.6f} {r} {g} {b} 255\n")
+#     subprocess.run([
+#     'gdaldem','color-relief',
+#     in_vrt, color_filename, colored_vrt_file,
+#     '-of','VRT','-alpha'
+#     ], check=True)
 
+#     print(f"Created colored VRT: {colored_vrt_file}")
 
+# iterate files (YYYYMMDD) and create colored VRT with season-specific colormap
+
+#CREATE FILES WITH SEASONAL BOUNDS
 for filename in os.listdir(temp_files_dir):
-    # if not filename.endswith('.vrt'):
     if not filename.startswith('doppio_bottom_temp_daily_') or not filename.endswith('.vrt'):
         continue
-        
-    # Get the date from filename
+
     date_str = filename.replace('doppio_bottom_temp_daily_', '').replace('.vrt', '')
 
-    # Create a colored VRT file
+    # parse YYYYMMDD
+    try:
+        parsed_date = dt.datetime.strptime(date_str, "%Y%m%d").date()
+    except ValueError:
+        print(f"Skipping {filename}: date parse failed for '{date_str}' (expected YYYYMMDD)")
+        continue
+
+    season = season_from_date(parsed_date)
+    cmap_for_season = colormap_by_season[season]
+
     in_vrt = os.path.join(temp_files_dir, filename)
-    colored_vrt_file = os.path.join(base_dir, 'processed_data', 'doppio', 'temp_files', f"colored_{date_str}.vrt")
-    # gdaldem_command = [
-    #     'gdaldem', 'color-relief', in_vrt, color_filename, colored_vrt_file, '-of', 'VRT', '-alpha'
-    # ]
-    # subprocess.run(gdaldem_command)
+    out_dir = os.path.join(base_dir, 'processed_data', 'doppio', 'temp_files')
+    colored_vrt_file = os.path.join(out_dir, f"colored_{date_str}.vrt")
 
     subprocess.run([
-    'gdaldem','color-relief',
-    in_vrt, color_filename, colored_vrt_file,
-    '-of','VRT','-alpha'
+        'gdaldem', 'color-relief',
+        in_vrt, cmap_for_season, colored_vrt_file,
+        '-of', 'VRT', '-alpha'
     ], check=True)
 
-    print(f"Created colored VRT: {colored_vrt_file}")
+    print(f"{date_str}: season={season}, vmin={SEASON_LIMITS[season][0]}, vmax={SEASON_LIMITS[season][1]}")
+    print(f"  -> Created colored VRT: {colored_vrt_file}")
 
 
 # In[43]:

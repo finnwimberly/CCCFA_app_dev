@@ -133,7 +133,9 @@ for date_int, filename in files:
 
     # Open dataset
     chl_data[dict_key] = xr.open_dataset(file_path)
-    chl[dict_key] = chl_data[dict_key]['CHL'].squeeze()
+    #chl[dict_key] = chl_data[dict_key]['CHL'].squeeze()
+    chl[dict_key] = chl_data[dict_key]['CHL'].isel(time=0).squeeze()
+
 
     # Mask NaN values before applying log scaling
     chl_masked = np.ma.masked_invalid(chl[dict_key])
@@ -499,7 +501,9 @@ for date_int, filename in files:  # Process only the first 3 files for testing
     chl_data[dict_key] = xr.open_dataset(file_path)
 
     # Extract CHL variable
-    chl_var = chl_data[dict_key]['CHL'].squeeze()
+    #chl_var = chl_data[dict_key]['CHL'].squeeze()
+    chl_var = chl_data[dict_key]['CHL'].isel(time=0).squeeze()
+
 
     # Mask values outside the Cape Cod region
     chl_var_masked = chl_var.where(

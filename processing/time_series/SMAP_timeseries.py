@@ -67,35 +67,39 @@ for region, coords in regions.items():
     clim_monthly = clim_region.assign_coords(month=clim_region['time'].dt.month)
     clim_monthly = clim_monthly.swap_dims({'time': 'month'}).drop_vars('time')
 
-    # compute anomaly
+    # compute anomaly (broadcasts monthly clim to each timestamp by month)
     sssa = sss_region.groupby('time.month') - clim_monthly
 
-    # Format raw SSS for JSON (safe string keys and float values)
+    # aligned per-date baseline climatology (same time axis as sss_region)
+    clim_aligned = sss_region - sssa
+
+    # Format raw SSS for JSON
     sss_dict = {
         str(np.datetime_as_string(t, unit='D')): float(v) if np.isfinite(v) else None
         for t, v in zip(sss_region.time.values, sss_region.values)
     }
-
-    # Format SSS anomalies for JSON (safe string keys and float values)
+    # Format anomalies
     sssa_dict = {
         str(np.datetime_as_string(t, unit='D')): float(v) if np.isfinite(v) else None
         for t, v in zip(sssa.time.values, sssa.values)
     }
+    # per-date baseline climatology (month-of-year mean mapped to each date)
+    clim_dict = {
+        str(np.datetime_as_string(t, unit='D')): float(v) if np.isfinite(v) else None
+        for t, v in zip(clim_aligned.time.values, clim_aligned.values)
+    }
 
-    # Store in dictionary
     time_series[region] = {
-        'sss': sss_dict,
-        'sssa': sssa_dict,
-        'name': coords['name']
+        'name': coords['name'],
+        'sss': sss_dict,     # absolute SSS [psu]
+        'sssa': sssa_dict,   # anomaly [psu]
+        'clim': clim_dict    # per-date baseline used [psu]
     }
 
 # Write to JSON
 output_path = '/vast/clidex/data/obs/CCCFA/processed_data/SSS/time_series/sss_timeseries.json'
 with open(output_path, 'w') as f:
     json.dump(time_series, f)
-
-
-# In[ ]:
 
 
 
