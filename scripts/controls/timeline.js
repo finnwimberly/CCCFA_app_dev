@@ -1,4 +1,4 @@
-// import { map } from './map/core.js';
+import { map } from '../map/core.js';
 import { updateLayerPaths } from '../gridded_products/layers.js';
 import { controlsState } from '../state.js';
 import { DATE_FILES } from '../config.js';
@@ -391,21 +391,27 @@ async function initializeTimeline() {
             }
         });
         
-        // Prevent map interactions on slider
-        timelineSlider.addEventListener('click', (e) => {
+        // Disable map dragging while the slider is being used.
+        // stopPropagation() alone is not enough — Leaflet's drag handler
+        // attaches at the map container level and intercepts events even
+        // on child elements. Explicitly disabling/enabling is the only
+        // reliable approach.
+        const disableMapDrag = (e) => {
             e.stopPropagation();
-        });
-        
-        timelineSlider.addEventListener('dblclick', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-        });
+            map.dragging.disable();
+        };
+        const enableMapDrag = () => map.dragging.enable();
 
-        ['mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup', 'pointermove'].forEach(eventType => {
-            timelineSlider.addEventListener(eventType, e => {
-                e.stopPropagation();
-            });
-        });
+        timelineSlider.addEventListener('mousedown',  disableMapDrag);
+        timelineSlider.addEventListener('pointerdown', disableMapDrag);
+        timelineSlider.addEventListener('touchstart',  disableMapDrag, { passive: false });
+
+        document.addEventListener('mouseup',  enableMapDrag);
+        document.addEventListener('pointerup', enableMapDrag);
+        document.addEventListener('touchend',  enableMapDrag);
+
+        timelineSlider.addEventListener('click',   (e) => e.stopPropagation());
+        timelineSlider.addEventListener('dblclick', (e) => { e.stopPropagation(); e.preventDefault(); });
     }
     
     // Previous/Next button click handlers with map zoom prevention
@@ -469,15 +475,20 @@ async function initializeTimeline() {
         e.preventDefault();
     });
     
-    // Prevent map interactions on entire timeline control
-    timelineControl.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-    
-    timelineControl.addEventListener('dblclick', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-    });
+    // Prevent clicks/double-clicks on the timeline control from
+    // reaching the map (zoom on double-click, etc.)
+    L.DomEvent.disableClickPropagation(timelineControl);
+
+    // Leaflet 1.7.1's disableClickPropagation stops mousedown & touchstart
+    // but NOT pointerdown. Leaflet's pointer-event normalisation layer
+    // registers a pointerdown listener directly on the map container, so
+    // pointer events bubbling up from the timeline can still initiate a
+    // map drag. Intercept them here before they reach the map.
+    if (timelineControl) {
+        timelineControl.addEventListener('pointerdown', (e) => e.stopPropagation());
+        // Also block touchmove so a finger-drag on the slider cannot pan the map.
+        timelineControl.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: false });
+    }
 
     // Add keyboard controls
     document.addEventListener('keydown', async (e) => {
@@ -547,21 +558,3 @@ export {
     updateDate
 };
 
-// Add CSS styles for hover effects
-if (!document.getElementById('timeline-hover-styles')) {
-    const style = document.createElement('style');
-    style.id = 'timeline-hover-styles';
-    style.textContent = `
-        .timeline-date-clickable:hover {
-            color: #007bff;
-            background-color: rgba(0, 123, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        .timeline-date-clickable {
-            transition: all 0.2s ease;
-            display: inline-block;
-        }
-    `;
-    document.head.appendChild(style);
-} 

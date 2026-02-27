@@ -75,16 +75,6 @@ header {
   font-family: 'Inter', sans-serif;
 }
 
-/* Ensure consistent font size across all pages */
-body[class*="data-access-page"] .title h1,
-body[class*="time"] .title h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-}
-
 /* Logo Container */
 .logos {
   display: flex;
@@ -152,9 +142,10 @@ body[class*="time"] .title h1 {
   padding: 0 var(--spacing-lg);
 }
 
-/* Page-specific overrides */
-body[class*="time"] .content-container {
+/* Map page uses full-width layout */
+.map-page.content-container {
   max-width: 95%;
+  padding: 20px;
 }
 
 /* Card Styling */
@@ -168,11 +159,27 @@ body[class*="time"] .content-container {
   display: flex;
   flex-direction: column;
   height: fit-content;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .data-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px var(--shadow);
+}
+
+/* Prevent transform on map card — it creates a containing block
+   that breaks position:fixed on the mobile control panel */
+.data-card:has(#map-container):hover {
+  transform: none;
+}
+
+/* Elevate map card above backdrop when mobile panel is open.
+   The panel lives inside #map (z-index:1 stacking context) so
+   without this the backdrop (z-index:1498 in body) covers it. */
+body.modal-open .data-card:has(#map-container) {
+  position: relative;
+  z-index: 1500;
 }
 
 .data-card h2 {
@@ -205,7 +212,7 @@ body[class*="time"] .content-container {
 /* Animation Grid */
 .animation-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-lg);
   margin: var(--spacing-lg) 0;
 }
@@ -398,12 +405,6 @@ footer {
 }
 
 /* Consolidated Media Queries */
-@media (max-width: 1200px) {
-  .plot-container {
-    flex: 0 0 calc(50% - 10px);
-  }
-}
-
 @media (max-width: 768px) {
   :root {
     --font-size-base: 14px;
@@ -415,17 +416,21 @@ footer {
     max-width: 100%;
   }
   
+  /* Hide logos on mobile — title only in header */
   .logos {
-    gap: var(--spacing-md);
-    flex-wrap: wrap;
+    display: none;
+  }
+
+  header {
     justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
   }
-  
-  .logos img {
-    height: 45px;
-    max-width: 100%;
+
+  .title h1 {
+    text-align: center;
+    font-size: 1.4rem;
   }
-  
+
   .navbar ul {
     gap: var(--spacing-md);
     flex-wrap: wrap;
@@ -440,21 +445,7 @@ footer {
   #map-container {
     height: 60vh;
   }
-  
-  /* .leaflet-control.custom-control {
-    width: 90vw;
-    max-width: none;
-    min-width: auto;
-    left: 0 !important;
-    right: auto !important;
-    position: absolute !important;
-  } */
-  
-  #plots {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-  }
-  
+
   .footer-container {
     flex-direction: column;
     text-align: center;
@@ -464,10 +455,6 @@ footer {
   .footer-section {
     text-align: center !important;
     min-width: 100%;
-  }
-
-  .plot-container {
-    flex: 0 0 100%;
   }
 
   .nav-header {
@@ -484,26 +471,10 @@ footer {
 }
 
 @media (max-width: 480px) {
-  header {
-    padding: var(--spacing-sm);
-    flex-direction: column;
-    gap: var(--spacing-sm);
-  }
-  
   .title h1 {
-    font-size: 1.25rem;
-    text-align: center;
+    font-size: 1.15rem;
   }
-  
-  .logos {
-    justify-content: center;
-    margin: 0;
-  }
-  
-  .logos img {
-    height: 35px;
-  }
-  
+
   .navbar {
     padding: var(--spacing-xs);
   }
@@ -527,16 +498,6 @@ footer {
   
   .data-card h2 {
     font-size: 1.25rem;
-  }
-
-  .leaflet-control.custom-control {
-    width: 45vw;
-    min-width: 160px;
-    margin: 10px 8px 10px 8px;
-    max-height: calc(50vh - 60px);
-    left: 0 !important;
-    right: auto !important;
-    position: absolute !important;
   }
 }
 
@@ -715,13 +676,15 @@ footer {
 /* Control Panel Styles */
 .leaflet-control.custom-control {
   background: white;
-  padding: 6px;
+  padding: 8px;
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-  margin: 20px 8px 10px 8px; /* 20px top, 10px bottom */
-  width: 25vw;
-  min-width: 120px;
-  max-width: 200px;
+  margin: 8px;
+  width: 280px;
+  max-height: 80vh;
+  overflow-y: auto;
+  user-select: none;
+  -webkit-user-select: none;
   display: flex;
   flex-direction: column;
   left: 0 !important;
@@ -787,41 +750,51 @@ footer {
   color: var(--text);
 }
 
-/* Media query for smaller screens */
+/* Mobile: Control panel becomes a bottom sheet */
 @media (max-width: 768px) {
   .leaflet-control.custom-control {
-    width: 35vw; /* Increase width on smaller screens */
-    min-width: 180px;
-    margin: 15px 8px 15px 8px; /* Normal margins for smaller screens */
-    max-height: calc(60vh - 60px); /* Use mobile map height (60vh) minus margins (30px each) */
+    position: fixed !important;
     left: 0 !important;
-    right: auto !important;
-    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+    max-height: 65vh !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    z-index: 1499 !important;
+    overflow-y: auto !important;
+    padding: 0 12px 20px !important;
+    pointer-events: none !important;
   }
-  
-  .control-container {
-    padding-bottom: 8px; /* Reduced internal padding */
-  }
-  
-  .source-filters, .layer-grid {
-    grid-template-columns: 1fr; /* Stack items vertically on smaller screens */
-  }
-}
 
-/* Media query for very small screens */
-@media (max-width: 480px) {
-  .leaflet-control.custom-control {
-    width: 45vw; /* Further increase width on very small screens */
-    min-width: 160px;
-    margin: 10px 8px 10px 8px; /* Normal margins for very small screens */
-    max-height: calc(50vh - 40px); /* Use small screen map height (50vh) minus margins (20px each) */
-    left: 0 !important;
-    right: auto !important;
-    position: absolute !important;
+  .leaflet-control.custom-control.mobile-open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
   }
-  
-  .control-container {
-    padding-bottom: 6px; /* Minimal internal padding */
+
+  /* Let the outer control handle scroll, not the inner container */
+  .leaflet-control.custom-control .control-container {
+    max-height: none;
+    overflow-y: visible;
+    padding: 0;
+  }
+
+  .source-filters, .layer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Widen timeline to use full map width when panel is docked at bottom.
+     right: 46px leaves clearance for Leaflet zoom controls at topright
+     (26px button + 10px Leaflet margin + 10px padding = ~46px). */
+  .timeline-control {
+    left: 10px !important;
+    right: 46px !important;
   }
 }
 
@@ -932,11 +905,11 @@ footer {
 
 /* Adjust info icon size */
 #info-icon {
-  font-size: 0.95rem;
-  margin-left: var(--spacing-xs);
+  font-size: 1.2rem;
   color: var(--secondary);
   cursor: pointer;
   transition: color var(--transition-fast);
+  flex-shrink: 0;
 }
 
 #info-icon:hover {
@@ -947,15 +920,6 @@ footer {
 .daterangepicker {
   font-size: 0.85rem !important;
 }
-
-/* Adjust select by area button */
-/* .select-button {
-  font-size: 0.85rem !important;
-  padding: var(--spacing-xs) var(--spacing-sm) !important;
-  background-color: var(--secondary);
-  color: var(--surface);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
-} */
 
 .select-button:hover {
   background-color: var(--accent);
@@ -997,16 +961,6 @@ footer {
   color: var(--text);
 }
 
-.data-card {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  padding: 20px;
-  margin-bottom: 20px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .data-list {
   list-style-type: none;
   padding-left: 0;
@@ -1024,7 +978,7 @@ footer {
 .plot-container {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  min-height: 200px;
   position: relative;
   background: white;
   border-radius: var(--radius-md);
@@ -1033,10 +987,10 @@ footer {
 
 /* Plots layout */
 #plots {
-  margin-top: 10px;
+  margin-top: 20px;
   margin-bottom: 25px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: 100%;
   height: fit-content;
@@ -1052,18 +1006,12 @@ footer {
   transform: translate(-50%, -50%) !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  #plots {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
+/* Plots go straight from 3-across to stacked — no awkward 2+1 state */
 @media (max-width: 768px) {
   #plots {
     grid-template-columns: 1fr;
   }
-  
+
   .plot-container {
     min-height: 350px;
   }
@@ -1288,32 +1236,11 @@ footer {
     }
 }
 
-/* Plot Section Styles */
-.data-card > div {
-    margin-bottom: var(--spacing-xl);
-}
-
-.data-card > div:last-child {
-    margin-bottom: 0;
-}
-
-.data-card h3 {
-    margin-bottom: var(--spacing-md);
-}
-
-.data-image {
-    margin-bottom: var(--spacing-xl);
-}
-
-.data-image:last-child {
-    margin-bottom: 0;
-}
-
 /* Timeline Control Styles */
 .timeline-control {
     position: absolute;
     top: 10px;
-    left: calc(200px + 24px);
+    left: calc(280px + 24px);
     right: 64px;
     min-width: 250px;
     max-width: none;
@@ -1323,7 +1250,6 @@ footer {
     padding: 6px 16px;
     box-sizing: border-box;
     z-index: 1001;
-    display: block;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -1345,16 +1271,17 @@ footer {
 .timeline-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 0;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
-    position: relative;
-    flex-wrap: nowrap;
 }
 
-.timeline-header #info-icon {
-    margin-left: auto;
+.timeline-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin-top: 6px;
 }
 
 .timeline-button {
@@ -1413,10 +1340,9 @@ footer {
 }
 
 .timeline-slider {
-    flex: 1 1 auto;
-    min-width: 120px;
-    max-width: none;
-    margin: 0 8px;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
     height: 6px;
     border-radius: 3px;
     background: #ddd;
@@ -1466,29 +1392,21 @@ footer {
 
 .slider-start-date,
 .slider-end-date {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: var(--text-secondary);
     white-space: nowrap;
     align-self: center;
-    margin: 0 2px;
     flex-shrink: 0;
-    min-width: 60px;
+    min-width: 55px;
     text-align: center;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-    .timeline-slider, .timeline-slider-labels {
-        min-width: 80px;
-        max-width: 220px;
-    }
-}
-
-@media (max-width: 600px) {
-    .timeline-slider, .timeline-slider-labels {
-        min-width: 60px;
-        max-width: 120px;
+/* Hide slider date labels on very small screens to prevent crowding */
+@media (max-width: 480px) {
+    .slider-start-date,
+    .slider-end-date {
+        display: none;
     }
 }
 
@@ -1594,12 +1512,97 @@ footer {
     text-align: center;
     font-size: 1rem;
     padding: 4px 8px;
-    min-width: 90px;
+    flex: 0 1 140px;
+    min-width: 85px;
     max-width: 160px;
     outline: none;
     box-shadow: none;
+    cursor: pointer;
 }
 
 body.modal-open {
   overflow: hidden;
 }
+
+/* ============================================================
+   Mobile Panel Toggle Button & Bottom Sheet Backdrop
+   ============================================================ */
+
+/* Hidden on desktop by default */
+.mobile-panel-toggle {
+  display: none;
+}
+
+.mobile-panel-toggle.hidden {
+  display: none !important;
+}
+
+.mobile-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1498;
+}
+
+.mobile-sheet-backdrop.active {
+  display: block;
+}
+
+/* Drag handle at top of bottom sheet */
+.mobile-sheet-handle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Floating toggle button on the map */
+  .mobile-panel-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1002;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 9px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    font-family: var(--font-primary);
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+  }
+
+  .mobile-panel-toggle:hover,
+  .mobile-panel-toggle:active {
+    background: var(--accent);
+    transform: translateX(-50%) translateY(-1px);
+  }
+
+  /* Sheet drag handle */
+  .mobile-sheet-handle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 6px;
+    cursor: pointer;
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .mobile-sheet-handle::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+}
+

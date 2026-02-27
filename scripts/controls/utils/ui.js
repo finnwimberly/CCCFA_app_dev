@@ -69,88 +69,87 @@ const CombinedControl = L.Control.extend({
                 <div class="collapsible-content" id="layer-content">
                     <div class="control-item">
                         <div class="collapsible-header sub-header">
-                    <label class="control-section-label">Surface Layers:</label>
-                    <i class="fas fa-chevron-down collapse-icon"></i>
-                </div>
-                <div class="collapsible-content" id="layers-content">
-                    <div class="layer-grid">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="sst-toggle">
-                            <label for="sst-toggle" class="control-label">SST</label>
+                            <label class="control-section-label">Surface Layers:</label>
+                            <i class="fas fa-chevron-down collapse-icon"></i>
                         </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="ostia-sst-toggle">
-                            <label for="ostia-sst-toggle" class="control-label">Gapfilled SST</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="ostia-anomaly-toggle">
-                            <label for="ostia-anomaly-toggle" class="control-label">SST Anomaly</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="sss-toggle">
-                            <label for="sss-toggle" class="control-label">SSS</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="chl-toggle">
-                            <label for="chl-toggle" class="control-label">CHL</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="bathymetry-toggle">
-                            <label for="bathymetry-toggle" class="control-label">Bathymetry</label>
+                        <div class="collapsible-content" id="layers-content">
+                            <div class="layer-grid">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="sst-toggle">
+                                    <label for="sst-toggle" class="control-label">SST</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="ostia-sst-toggle">
+                                    <label for="ostia-sst-toggle" class="control-label">Gapfilled SST</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="ostia-anomaly-toggle">
+                                    <label for="ostia-anomaly-toggle" class="control-label">SST Anomaly</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="sss-toggle">
+                                    <label for="sss-toggle" class="control-label">SSS</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="chl-toggle">
+                                    <label for="chl-toggle" class="control-label">CHL</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="bathymetry-toggle">
+                                    <label for="bathymetry-toggle" class="control-label">Bathymetry</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
                     <div class="control-item">
                         <div class="collapsible-header sub-header">
-                        <label class="control-section-label">Forecasts:</label>
-                        <i class="fas fa-chevron-down collapse-icon"></i>
+                            <label class="control-section-label">FishBot:</label>
+                            <i class="fas fa-chevron-down collapse-icon"></i>
+                        </div>
+                        <div class="collapsible-content" id="fishbot-content">
+                            <div class="fishbot-variables">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="fishbot-temperature-toggle">
+                                    <label for="fishbot-temperature-toggle" class="control-label">Temperature</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="fishbot-salinity-toggle">
+                                    <label for="fishbot-salinity-toggle" class="control-label">Salinity</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="fishbot-oxygen-toggle">
+                                    <label for="fishbot-oxygen-toggle" class="control-label">Dissolved Oxygen</label>
+                                </div>
+                            </div>
+                            <div class="tolerance-control">
+                                <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
+                                    <label class="control-section-label">Date Tolerance: ± <span id="tolerance-value">2</span> days</label>
+                                    <i id="tolerance-info-icon" class="fas fa-info-circle" style="color: var(--secondary); cursor: pointer; font-size: 14px;"></i>
+                                </div>
+                                <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
+                                <div class="slider-labels">
+                                    <span>0</span>
+                                    <span>8</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="control-item">
+                        <div class="collapsible-header sub-header">
+                            <label class="control-section-label">Forecasts:</label>
+                            <i class="fas fa-chevron-down collapse-icon"></i>
                         </div>
                         <div class="collapsible-content" id="forecast-content">
-                        <div class="forecast-variables">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="doppio-toggle">
-                                <label for="doppio-toggle" class="control-label">Doppio</label>
-                        </div>
-                    </div>
-
-
-                    <div class="control-item">
-                        <div class="collapsible-header sub-header">
-                    <label class="control-section-label">FishBot:</label>
-                    <i class="fas fa-chevron-down collapse-icon"></i>
-                </div>
-                <div class="collapsible-content" id="fishbot-content">
-                    <div class="fishbot-variables">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="fishbot-temperature-toggle">
-                            <label for="fishbot-temperature-toggle" class="control-label">Temperature</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="fishbot-salinity-toggle">
-                            <label for="fishbot-salinity-toggle" class="control-label">Salinity</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="fishbot-oxygen-toggle">
-                            <label for="fishbot-oxygen-toggle" class="control-label">Dissolved Oxygen</label>
-                        </div>
-                    </div>
-                    <div class="tolerance-control">
-                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
-                            <label class="control-section-label">Date Tolerance: ± <span id="tolerance-value">2</span> days</label>
-                            <i id="tolerance-info-icon" class="fas fa-info-circle" style="color: var(--secondary); cursor: pointer; font-size: 14px;"></i>
-                        </div>
-                        <input type="range" id="date-tolerance-slider" min="0" max="8" value="2" class="tolerance-slider">
-                        <div class="slider-labels">
-                            <span>0</span>
-                            <span>8</span>
+                            <div class="forecast-variables">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="doppio-toggle">
+                                    <label for="doppio-toggle" class="control-label">Doppio</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-      </div>
-            </div>
-      </div>
     `;
 
       // Add modal HTML to the document body
@@ -182,12 +181,12 @@ const CombinedControl = L.Control.extend({
 
 export function addCombinedControl() {
   map.addControl(new CombinedControl({ position: 'topleft' }));
-  // One-time style injection for control panel specific tweaks 
+
+  // One-time style injection for control panel specific tweaks not covered by styles.css
   if (!document.getElementById('combined-control-inline-styles')) {
     const style = document.createElement('style');
     style.id = 'combined-control-inline-styles';
     style.textContent = `
-      .leaflet-control.custom-control { background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,0.2); margin: 8px; width: 280px; max-height: 80vh; overflow-y: auto; -webkit-user-select: none; user-select: none; }
       .control-section { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
       .control-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
       .control-title { font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: var(--primary); text-align: center; }
@@ -202,7 +201,7 @@ export function addCombinedControl() {
       .collapse-icon { font-size: 12px; color: var(--text-secondary); transition: transform 0.2s ease; }
       .collapsible-header.collapsed .collapse-icon { transform: rotate(-90deg); }
       .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-      .collapsible-content.expanded { max-height: 500px; }
+      .collapsible-content.expanded { max-height: 2000px; }
       .control-button { width: 100%; padding: 6px 12px; margin-bottom: 6px; font-size: 12px; background-color: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s ease; -webkit-tap-highlight-color: transparent; }
       .control-button:last-child { margin-bottom: 0; }
       .control-button:hover { background-color: var(--accent); }
@@ -211,8 +210,6 @@ export function addCombinedControl() {
       .leaflet-control.custom-control::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
       .leaflet-control.custom-control::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
       .leaflet-control.custom-control::-webkit-scrollbar-thumb:hover { background: #555; }
-      @media (max-width: 768px) { .leaflet-control.custom-control { width: 240px; max-height: 70vh; } }
-      @media (max-width: 480px) { .leaflet-control.custom-control { width: 200px; max-height: 60vh; } }
       .tolerance-slider { width: 100%; height: 6px; border-radius: 3px; background: #ddd; outline: none; opacity: 0.7; transition: opacity 0.2s; margin: 8px 0 4px 0; }
       .tolerance-slider:hover { opacity: 1; }
       .tolerance-slider::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; padding: 10px; border-radius: 50%; background: var(--secondary); cursor: pointer; }
@@ -224,4 +221,64 @@ export function addCombinedControl() {
     `;
     document.head.appendChild(style);
   }
+
+  // Mobile bottom sheet behavior
+  _setupMobileBottomSheet();
+}
+
+function _setupMobileBottomSheet() {
+  // Wait a tick for Leaflet to insert the control into the DOM
+  setTimeout(() => {
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+
+    const controlEl = mapEl.querySelector('.leaflet-control.custom-control');
+    if (!controlEl) return;
+
+    // Prevent map interaction events from firing through the panel
+    L.DomEvent.disableScrollPropagation(controlEl);
+    L.DomEvent.disableClickPropagation(controlEl);
+
+    // Insert drag handle at the very top of the control
+    const handle = document.createElement('div');
+    handle.className = 'mobile-sheet-handle';
+    handle.setAttribute('aria-label', 'Close controls panel');
+    controlEl.insertBefore(handle, controlEl.firstChild);
+
+    // Create floating toggle button (shown only on mobile via CSS)
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'mobile-panel-toggle';
+    toggleBtn.innerHTML = '<i class="fas fa-sliders-h"></i> Controls';
+    toggleBtn.setAttribute('aria-label', 'Open map controls');
+    mapEl.appendChild(toggleBtn);
+
+    // Create backdrop (appended to body so it covers the whole viewport)
+    const backdrop = document.createElement('div');
+    backdrop.className = 'mobile-sheet-backdrop';
+    document.body.appendChild(backdrop);
+
+    function openPanel() {
+      if (window.innerWidth > 768) return;
+      controlEl.classList.add('mobile-open');
+      backdrop.classList.add('active');
+      toggleBtn.classList.add('hidden');
+      document.body.classList.add('modal-open');
+    }
+
+    function closePanel() {
+      controlEl.classList.remove('mobile-open');
+      backdrop.classList.remove('active');
+      toggleBtn.classList.remove('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    toggleBtn.addEventListener('click', openPanel);
+    backdrop.addEventListener('click', closePanel);
+    handle.addEventListener('click', closePanel);
+
+    // Close panel if viewport is resized above mobile breakpoint
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) closePanel();
+    });
+  }, 0);
 }
