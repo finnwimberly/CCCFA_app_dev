@@ -155,7 +155,7 @@ const CombinedControl = L.Control.extend({
       // Add modal HTML to the document body
       const modalHTML = `
         <div id="tolerance-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: var(--z-modal-backdrop);"></div>
-        <div id="tolerance-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface); padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: var(--z-modal); max-width: 400px; width: 90%;">
+git pu        <div id="tolerance-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface); padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: var(--z-modal); max-width: 400px; width: 90%;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3 style="margin: 0; color: var(--primary); font-size: 16px;">Date Tolerance</h3>
             <button id="tolerance-modal-close" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary);">&times;</button>
