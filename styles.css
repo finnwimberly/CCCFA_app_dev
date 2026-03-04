@@ -32,6 +32,18 @@
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
+
+  /* Z-Index Scale — single source of truth for stacking order.
+     Leaflet uses z-indexes up to 1000 internally (.leaflet-top),
+     so our in-map elements must start above that. */
+  --z-map: 1;
+  --z-map-controls: 1001;       /* legends, timeline — above Leaflet's 1000 */
+  --z-map-resize: 1100;         /* resize handle at bottom of map */
+  --z-mobile-toggle: 1150;      /* floating "Controls" button on mobile */
+  --z-mobile-backdrop: 1400;    /* dark overlay behind mobile panel */
+  --z-mobile-panel: 1450;       /* mobile bottom-sheet control panel */
+  --z-modal-backdrop: 2000;     /* dark overlay behind modals */
+  --z-modal: 2001;              /* modal dialogs (info, tolerance, alerts) */
 }
 
 /* Base Styles */
@@ -109,7 +121,7 @@ header {
   padding: var(--spacing-sm) var(--spacing-xl);
   /* position: sticky; */
   top: 0;
-  z-index: 1000;
+  z-index: var(--z-map-controls);
   box-shadow: 0 2px 4px var(--shadow);
 }
 
@@ -175,11 +187,11 @@ header {
 }
 
 /* Elevate map card above backdrop when mobile panel is open.
-   The panel lives inside #map (z-index:1 stacking context) so
-   without this the backdrop (z-index:1498 in body) covers it. */
+   The panel lives inside #map so without this the backdrop covers it.
+   Must stay BELOW --z-modal-backdrop so true modals still paint on top. */
 body.modal-open .data-card:has(#map-container) {
   position: relative;
-  z-index: 1500;
+  z-index: var(--z-mobile-panel);
 }
 
 .data-card h2 {
@@ -548,7 +560,10 @@ footer {
 #map {
   width: 100%;
   height: 100%;
-  z-index: 1;
+  /* No z-index here — avoids creating a stacking context that
+     would trap children (mobile panel, legends, timeline) below
+     sibling elements like .resize-handle. Leaflet's internal
+     panes use their own transform-based stacking contexts. */
 }
 
 .resize-handle {
@@ -562,7 +577,7 @@ footer {
   cursor: ns-resize;
   opacity: 0;
   transition: opacity var(--transition-fast);
-  z-index: 2000; /* ensure above map and legends */
+  z-index: var(--z-map-resize);
   pointer-events: auto;
 }
 
@@ -589,7 +604,7 @@ footer {
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
   /* box-shadow: 0 2px 4px var(--shadow); */
-  z-index: 1000;
+  z-index: var(--z-map-controls);
   min-width: 120px;
   max-width: 150px;
   height: auto;
@@ -645,7 +660,7 @@ footer {
   padding: var(--spacing-sm);
   border-radius: var(--radius-sm);
   box-shadow: 0 2px 4px var(--shadow);
-  z-index: 1000;
+  z-index: var(--z-map-controls);
   max-width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -767,7 +782,7 @@ footer {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
     transform: translateY(100%) !important;
     transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
-    z-index: 1499 !important;
+    z-index: var(--z-mobile-panel) !important;
     overflow-y: auto !important;
     padding: 0 12px 20px !important;
     pointer-events: none !important;
@@ -807,7 +822,7 @@ footer {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop);
 }
 
 #info-modal, #layer-date-modal, #tolerance-modal {
@@ -820,7 +835,7 @@ footer {
   padding: var(--spacing-lg);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 6px var(--shadow);
-  z-index: 1001;
+  z-index: var(--z-modal);
   max-width: 1000px;
   width: 90%;
 }
@@ -1249,7 +1264,7 @@ footer {
     box-shadow: 0 1px 5px rgba(0,0,0,0.2);
     padding: 6px 16px;
     box-sizing: border-box;
-    z-index: 1001;
+    z-index: var(--z-map-controls);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -1542,7 +1557,7 @@ body.modal-open {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 1498;
+  z-index: var(--z-mobile-backdrop);
 }
 
 .mobile-sheet-backdrop.active {
@@ -1564,7 +1579,7 @@ body.modal-open {
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1002;
+    z-index: var(--z-mobile-toggle);
     background: var(--secondary);
     color: white;
     border: none;
