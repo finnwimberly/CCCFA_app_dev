@@ -528,7 +528,7 @@ function showModal(message) {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    z-index: 1000;
+    z-index: var(--z-modal);
     max-width: 80%;
     text-align: center;
   `;
