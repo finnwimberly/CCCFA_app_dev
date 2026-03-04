@@ -88,7 +88,7 @@ export function getTilePath(layerType, date) {
     case 'SST':
       return `${base}/SST/tiles/${date}/{z}/{x}/{y}.png`;
     case 'SSS':
-      return `${base}/SSS/tiles_mirrored/${date}/{z}/{x}/{y}.png`;
+      return `${base}/SSS/tiles/${date}/{z}/{x}/{y}.png`;
     case 'CHL':
       return `${base}/CHL/tiles/${date}/{z}/{x}/{y}.png`;
     case 'OSTIA_SST':
@@ -102,39 +102,49 @@ export function getTilePath(layerType, date) {
   }
 }
 
-export function getRangePath(layerType, date, isLocal = true) {
-  const base = BASE_DATA_PATH;
-  switch (layerType) {
-    case 'SST':
-      return `${base}/SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
-    case 'SSS':
-      return `${base}/SSS/tiles_mirrored/${date}/sss_range_${isLocal ? 'local' : 'global'}.json`;
-    case 'CHL':
-      return `${base}/CHL/tiles/${date}/chl_range_${isLocal ? 'local' : 'global'}.json`;
-    case 'OSTIA_SST':
-      return `${base}/OSTIA_SST/tiles/${date}/sst_range_${isLocal ? 'local' : 'global'}.json`;
-    case 'OSTIA_anomaly':
-      return `${base}/OSTIA_anomaly/tiles/${date}/ssta_range_${isLocal ? 'local' : 'global'}.json`;
-    default:
-      return null;
+// Seasonal color-scale limits (NOAA fisheries calendar quarters)
+// winter: Jan–Mar, spring: Apr–Jun, summer: Jul–Sep, fall: Oct–Dec
+export const SEASONAL_LIMITS = {
+  SST:           { winter: [0, 24],      spring: [4, 26],     summer: [10, 28],    fall: [4, 26]    },
+  OSTIA_SST:     { winter: [0, 24],      spring: [4, 26],     summer: [10, 28],    fall: [4, 26]    },
+  OSTIA_anomaly: { winter: [-4, 4],      spring: [-3, 3],     summer: [-3, 3],     fall: [-4, 4]    },
+  SSS:           { winter: [30, 37],     spring: [28, 37],    summer: [29, 37],    fall: [30, 37]   },
+  CHL:           { winter: [0.05, 2.0],  spring: [0.1, 5.0],  summer: [0.05, 1.5], fall: [0.05, 2.0]},
+  DOPPIO:        { winter: [0, 12],      spring: [2, 16],     summer: [6, 20],     fall: [2, 16]    },
+};
+
+// Returns 'winter' | 'spring' | 'summer' | 'fall' from an 8-digit YYYYMMDD string
+export function getSeasonFromDate(yyyymmdd) {
+  if (!yyyymmdd || !/^\d{8}$/.test(yyyymmdd)) {
+    const m = new Date().getMonth() + 1;
+    return _seasonFromMonth(m);
   }
+  return _seasonFromMonth(parseInt(yyyymmdd.slice(4, 6), 10));
 }
 
-export function getColormapPath(layerType) {
+function _seasonFromMonth(month) {
+  if (month <= 3)  return 'winter';
+  if (month <= 6)  return 'spring';
+  if (month <= 9)  return 'summer';
+  return 'fall';
+}
+
+export function getColormapPath(layerType, date = null) {
   const base = BASE_DATA_PATH;
+  const season = date ? getSeasonFromDate(date) : 'winter';
   switch (layerType) {
     case 'SST':
-      return `${base}/SST/thermal_colormap.txt`;
+      return `${base}/SST/colormaps/sst_colormap_${season}.txt`;
     case 'SSS':
-      return `${base}/SSS/thermal_colormap.txt`;
+      return `${base}/SSS/colormaps/sss_colormap_${season}.txt`;
     case 'CHL':
-      return `${base}/CHL/thermal_colormap.txt`;
+      return `${base}/CHL/colormaps/chl_colormap_${season}.txt`;
     case 'OSTIA_SST':
-      return `${base}/OSTIA_SST/thermal_colormap.txt`;
+      return `${base}/OSTIA_SST/colormaps/sst_colormap_${season}.txt`;
     case 'OSTIA_anomaly':
-      return `${base}/OSTIA_anomaly/thermal_colormap.txt`;
+      return `${base}/OSTIA_anomaly/colormaps/ssta_colormap_${season}.txt`;
     case 'DOPPIO':
-      return `${base}/doppio/doppio_colormap_winter.txt`;
+      return `${base}/doppio/colormaps/doppio_colormap_${season}.txt`;
     default:
       return null;
   }

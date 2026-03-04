@@ -1,6 +1,6 @@
 import { map } from '../map/core.js';
 import { controlsState, layerState } from '../state.js';
-import { getTilePath, getRangePath, getColormapPath, BATHYMETRY_TILES } from '../config.js';
+import { getTilePath, getColormapPath, BATHYMETRY_TILES, SEASONAL_LIMITS, getSeasonFromDate } from '../config.js';
 
 // Define the bounds for overlays
 const sstBounds = [
@@ -151,37 +151,6 @@ function showModal(message) {
   });
 }
 
-// Helpers to create legends with different seasonal limits:
-// Accepts "YYYYMMDD" or a Date object; falls back to today's date if falsy
-function seasonFromYYYYMMDD(yyyymmdd) {
-  if (!yyyymmdd) {
-    const d = new Date();
-    return seasonFromMonth(d.getMonth() + 1);
-  }
-
-  // If caller passed a Date object accidentally
-  if (yyyymmdd instanceof Date) {
-    return seasonFromMonth(yyyymmdd.getMonth() + 1);
-  }
-
-  // Validate 8-digit YYYYMMDD
-  if (!/^\d{8}$/.test(yyyymmdd)) {
-    console.warn('seasonFromYYYYMMDD: unexpected date format, falling back to today:', yyyymmdd);
-    const d = new Date();
-    return seasonFromMonth(d.getMonth() + 1);
-  }
-
-  const month = parseInt(yyyymmdd.slice(4, 6), 10);
-  return seasonFromMonth(month);
-}
-
-function seasonFromMonth(month) {
-  // month is 1-12
-  if ([12, 1, 2].includes(month)) return "winter";
-  if ([3, 4, 5].includes(month)) return "spring";
-  if ([6, 7, 8].includes(month)) return "summer";
-  return "fall";
-}
 
 // Helper function to generate legend
 function createLegend(layerType, date) {
@@ -224,8 +193,6 @@ function createLegend(layerType, date) {
                  : layerType === 'DOPPIO' ? doppioOverlay
                  : null;
 
-  const zoomLevel = map.getZoom();
-
   // Check the selected unit system (metric or imperial)
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
 
@@ -252,104 +219,27 @@ function createLegend(layerType, date) {
     return; // Exit the function
   }
 
-  // Dynamically determine file paths based on zoom level
-  let rangeFile;
-  if (layerType === 'SST') {
-    rangeFile = zoomLevel >= 8
-      ? getRangePath(layerType, date, true)
-      : getRangePath(layerType, date, false);
-  } else if (layerType === 'SSS') {
-    rangeFile = zoomLevel >= 8
-      ? getRangePath(layerType, date, true)
-      : getRangePath(layerType, date, false);
-  } else if (layerType === 'CHL') {
-    rangeFile = zoomLevel >= 8
-      ? getRangePath(layerType, date, true)
-      : getRangePath(layerType, date, false);
-  } else if (layerType === 'OSTIA_SST') {
-    rangeFile = zoomLevel >= 8
-      ? getRangePath(layerType, date, true)
-      : getRangePath(layerType, date, false);
-  } else if (layerType === 'OSTIA_anomaly') {
-    rangeFile = zoomLevel >= 8
-      ? getRangePath(layerType, date, true)
-      : getRangePath(layerType, date, false);
-  } 
+  // Look up seasonal min/max from config and fetch the season-specific colormap
+  const season = getSeasonFromDate(date);
+  const [minValue, maxValue] = SEASONAL_LIMITS[layerType][season];
 
-  const colormapFile = getColormapPath(layerType);
-
-  // Handle DOPPIO separately: it uses a static min/max range and does not have a range file
-  // const loadLegendData = layerType === 'DOPPIO'
-  //   ? Promise.all([
-  //       fetch(colormapFile).then((res) => res.text()),
-  //       Promise.resolve({ min_SST: 1.0, max_SST: 20.0 })
-  //     ])
-  //   : Promise.all([
-  //       fetch(colormapFile).then((res) => res.text()),
-  //       fetch(rangeFile).then((res) => res.json())
-  //     ]);
-  // Handle DOPPIO separately: use season_limits.json to pick min/max for the given date
-
-  const loadLegendData = layerType === 'DOPPIO'
-  ? Promise.all([
-      fetch(colormapFile).then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch colormap');
-        return res.text();
-      }),
-      // fetch season limits and pick the season for the provided `date` param
-      fetch('../../data/doppio/season_limits.json')
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to fetch season_limits.json');
-          return res.json();
-        })
-        .then((limitsJson) => {
-          const season = seasonFromYYYYMMDD(date);
-          const seasonRange = limitsJson[season];
-          if (!seasonRange) {
-            console.warn(`season_limits.json missing season '${season}', falling back`);
-            return { min_SST: 1.0, max_SST: 20.0 };
-          }
-          return seasonRange;
-        })
-        .catch((err) => {
-          console.warn('Error loading season limits; using fallback range. Error:', err);
-          return { min_SST: 1.0, max_SST: 20.0 };
-        })
-    ])
-  : Promise.all([
-      fetch(colormapFile).then((res) => res.text()),
-      fetch(rangeFile).then((res) => res.json())
-    ]);
+  const loadLegendData = Promise.all([
+    fetch(getColormapPath(layerType, date)).then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch colormap for ${layerType} ${season}`);
+      return res.text();
+    }),
+    Promise.resolve({ min: minValue, max: maxValue }),
+  ]);
 
   loadLegendData
     .then(([colormapText, range]) => {
-      
+
       const rgbValues = colormapText.split('\n')
         .filter((line) => line.trim())
         .map((line) => line.split(' ').map(Number));
 
-      // Get min and max values
-      let minValue, maxValue;
-
-      if (layerType === 'SST') {
-        minValue = range.min_temp;
-        maxValue = range.max_temp;
-      } else if (layerType === 'SSS') {
-        minValue = range.min_SSS;
-        maxValue = range.max_SSS;
-      } else if (layerType === 'CHL') {
-        minValue = range.min_chl;
-        maxValue = range.max_chl;
-      } else if (layerType === 'OSTIA_SST') { 
-        minValue = range.min_SST;
-        maxValue = range.max_SST;
-      } else if (layerType === 'OSTIA_anomaly') {
-        minValue = range.min_SSTA;
-        maxValue = range.max_SSTA;
-      } else if (layerType === 'DOPPIO') {
-        minValue = range.min_SST;
-        maxValue = range.max_SST;
-      }
+      let minValue = range.min;
+      let maxValue = range.max;
 
       // Convert to Fahrenheit if the unit system is imperial
       if (unitSystem === 'imperial') {
