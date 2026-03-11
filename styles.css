@@ -809,6 +809,17 @@ footer {
     grid-template-columns: 1fr;
   }
 
+  /* Replace checkboxes with tappable highlighted rows on mobile */
+  .checkbox-group input[type="checkbox"] { display: none; }
+  .checkbox-group {
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .checkbox-group .control-label { font-size: 14px; }
+  .checkbox-group.selected {
+    background: rgba(44, 136, 217, 0.15);
+  }
+
   /* Widen timeline to use full map width when panel is docked at bottom.
      right: 46px leaves clearance for Leaflet zoom controls at topright
      (26px button + 10px Leaflet margin + 10px padding = ~46px). */

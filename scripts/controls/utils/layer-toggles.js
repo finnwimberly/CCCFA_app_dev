@@ -7,25 +7,29 @@ import { TOGGLE_IDS, LEGEND_IDS } from '../../config.js';
 export function setupCheckboxToggle(id, onChangeCallback) {
   const checkbox = document.getElementById(id);
   if (!checkbox) return;
+  const group = checkbox.closest('.checkbox-group');
 
-  // Prevent mousedown from bubbling up to Leaflet's
-  // disableClickPropagation handler on the parent control element.
-  // This preserves native checkbox toggle behavior on desktop.
-  // Note: we intentionally do NOT stop touchstart propagation —
-  // doing so prevents WebKit/Safari from synthesizing the click
-  // event, which breaks direct checkbox taps on mobile.
-  checkbox.addEventListener('mousedown', (e) => e.stopPropagation());
+  // Auto-sync .selected highlight on the row whenever .checked changes
+  // (covers user taps, layer exclusivity code, error-handling resets, etc.)
+  if (group) {
+    const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked');
+    Object.defineProperty(checkbox, 'checked', {
+      get() { return desc.get.call(this); },
+      set(val) { desc.set.call(this, val); group.classList.toggle('selected', val); }
+    });
+    group.classList.toggle('selected', checkbox.checked); // init pre-checked
 
-  // Native 'change' event — fires exactly once per toggle
-  checkbox.addEventListener('change', () => {
-    onChangeCallback(null, checkbox.checked);
-  });
-
-  // Also protect the associated <label> from Leaflet's mousedown interception.
-  const label = checkbox.parentElement?.querySelector(`label[for="${id}"]`);
-  if (label) {
-    label.addEventListener('mousedown', (e) => e.stopPropagation());
+    // Mobile: tap the row to toggle (checkbox is hidden via CSS)
+    group.addEventListener('click', (e) => {
+      if (window.innerWidth > 768 || e.target === checkbox) return;
+      checkbox.checked = !checkbox.checked;
+      onChangeCallback(null, checkbox.checked);
+    });
   }
+
+  // Desktop: shield checkbox from Leaflet's disableClickPropagation
+  checkbox.addEventListener('mousedown', (e) => e.stopPropagation());
+  checkbox.addEventListener('change', () => onChangeCallback(null, checkbox.checked));
 }
 
 export function hideLegendFor(type) {
