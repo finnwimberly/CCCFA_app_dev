@@ -8,25 +8,23 @@ export function setupCheckboxToggle(id, onChangeCallback) {
   const checkbox = document.getElementById(id);
   if (!checkbox) return;
 
-  // Prevent mousedown/touchstart from bubbling up to Leaflet's
+  // Prevent mousedown from bubbling up to Leaflet's
   // disableClickPropagation handler on the parent control element.
-  // This preserves native checkbox toggle behavior on all platforms
-  // (replaces the old Safari mousedown workaround that caused
-  // double-toggles on mobile touch devices).
+  // This preserves native checkbox toggle behavior on desktop.
+  // Note: we intentionally do NOT stop touchstart propagation —
+  // doing so prevents WebKit/Safari from synthesizing the click
+  // event, which breaks direct checkbox taps on mobile.
   checkbox.addEventListener('mousedown', (e) => e.stopPropagation());
-  checkbox.addEventListener('touchstart', (e) => e.stopPropagation());
 
   // Native 'change' event — fires exactly once per toggle
   checkbox.addEventListener('change', () => {
     onChangeCallback(null, checkbox.checked);
   });
 
-  // Also protect the associated <label> — clicking it triggers
-  // the linked checkbox, so its events must also be shielded.
+  // Also protect the associated <label> from Leaflet's mousedown interception.
   const label = checkbox.parentElement?.querySelector(`label[for="${id}"]`);
   if (label) {
     label.addEventListener('mousedown', (e) => e.stopPropagation());
-    label.addEventListener('touchstart', (e) => e.stopPropagation());
   }
 }
 
