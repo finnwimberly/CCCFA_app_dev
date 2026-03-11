@@ -113,13 +113,39 @@ export const SEASONAL_LIMITS = {
   DOPPIO:        { winter: [0, 12],      spring: [2, 16],     summer: [6, 20],     fall: [2, 16]    },
 };
 
-// Returns 'winter' | 'spring' | 'summer' | 'fall' from an 8-digit YYYYMMDD string
-export function getSeasonFromDate(yyyymmdd) {
-  if (!yyyymmdd || !/^\d{8}$/.test(yyyymmdd)) {
+// Returns 'winter' | 'spring' | 'summer' | 'fall'
+// Accepts YYYYMMDD (8-digit), YYYY_DDD (folder format), or YYYYDDD (7-digit DOY)
+export function getSeasonFromDate(dateStr) {
+  if (!dateStr) {
     const m = new Date().getMonth() + 1;
     return _seasonFromMonth(m);
   }
-  return _seasonFromMonth(parseInt(yyyymmdd.slice(4, 6), 10));
+
+  // YYYY_DDD  (e.g. "2025_182")
+  if (/^\d{4}_\d{1,3}$/.test(dateStr)) {
+    const [y, doy] = dateStr.split('_');
+    const d = new Date(parseInt(y, 10), 0, 1);
+    d.setDate(d.getDate() + parseInt(doy, 10) - 1);
+    return _seasonFromMonth(d.getMonth() + 1);
+  }
+
+  // YYYYMMDD  (e.g. "20250712")
+  if (/^\d{8}$/.test(dateStr)) {
+    return _seasonFromMonth(parseInt(dateStr.slice(4, 6), 10));
+  }
+
+  // YYYYDDD   (e.g. "2025182")
+  if (/^\d{7}$/.test(dateStr)) {
+    const y = parseInt(dateStr.slice(0, 4), 10);
+    const doy = parseInt(dateStr.slice(4), 10);
+    const d = new Date(y, 0, 1);
+    d.setDate(d.getDate() + doy - 1);
+    return _seasonFromMonth(d.getMonth() + 1);
+  }
+
+  // Fallback: use today's month
+  const m = new Date().getMonth() + 1;
+  return _seasonFromMonth(m);
 }
 
 function _seasonFromMonth(month) {
