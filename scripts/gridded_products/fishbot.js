@@ -433,35 +433,26 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
       // Get appropriate unit label
       const unitLabel = variableConfig[variableType].units[unitSystem];
 
-      // Layout configuration (matching other layers)
+      const mob = window.innerWidth <= 768;
       const layout = {
         title: {
           text: `${variableConfig[variableType].displayName} (${unitLabel})`,
-          font: {
-            size: 14,
-            family: 'Arial, sans-serif',
-            color: '#333'
-          }
+          font: { size: mob ? 11 : 14, family: 'Arial, sans-serif', color: '#333' }
         },
-        width: 120,
-        height: 280,
-        margin: { l: 0, r: 30, t: 40, b: 20 },
+        width: mob ? 280 : 120,
+        height: mob ? 70 : 280,
+        margin: mob ? { l: 10, r: 10, t: 25, b: 0 } : { l: 0, r: 30, t: 40, b: 20 },
         xaxis: { visible: false },
         yaxis: { visible: false },
         coloraxis: {
           colorbar: {
-            len: 0.9,
-            thickness: 20,
-            tickformat: '.1f',
-            x: 0.5,
-            xanchor: 'center',
-            y: 0.5,
-            yanchor: 'middle'
+            orientation: mob ? 'h' : 'v', len: 0.85,
+            thickness: mob ? 15 : 20, tickformat: '.1f',
+            x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
           }
         }
       };
 
-      // Legend data configuration (matching other layers)
       const legendData = {
         z: [[minValue, maxValue]],
         type: 'heatmap',
@@ -469,15 +460,10 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
         showscale: true,
         hoverinfo: 'none',
         colorbar: {
-          len: 0.9,
-          thickness: 20,
-          tickformat: '.1f',
-          x: 0.5,
-          xanchor: 'center',
-          y: 0.5,
-          yanchor: 'middle',
-          tickmode: 'linear',
-          tick0: minValue,
+          orientation: mob ? 'h' : 'v', len: 0.85,
+          thickness: mob ? 15 : 20, tickformat: '.1f',
+          x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle',
+          tickmode: 'linear', tick0: minValue,
           dtick: (maxValue - minValue) / 5
         }
       };

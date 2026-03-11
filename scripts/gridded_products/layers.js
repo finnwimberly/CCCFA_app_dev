@@ -262,53 +262,42 @@ function createLegend(layerType, date) {
         return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
       });
 
+      const mob = window.innerWidth <= 768;
       const layout = {
         title: {
-          text: layerType === 'CHL' ? 'Chl (mg/m³)' 
+          text: layerType === 'CHL' ? 'Chl (mg/m³)'
                 : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                // : layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : layerType === 'OSTIA_anomaly' ? `SSTA (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : layerType === 'DOPPIO' ? `Bottom Temp. (${unitSystem === 'imperial' ? '°F' : '°C'})`
                 : 'SSS (PSU)',
-          font: {
-            size: 14,
-            family: 'Arial, sans-serif',
-            color: '#333'
-          }
+          font: { size: mob ? 11 : 14, family: 'Arial, sans-serif', color: '#333' }
         },
-        width: 120,
-        height: 280,
-        margin: { l: 0, r: 30, t: 40, b: 20 },
+        width: mob ? 280 : 120,
+        height: mob ? 70 : 280,
+        margin: mob ? { l: 10, r: 10, t: 25, b: 0 } : { l: 0, r: 30, t: 40, b: 20 },
         xaxis: { visible: false },
         yaxis: { visible: false },
         coloraxis: {
           colorbar: {
-            len: 0.9,
-            thickness: 20,
-            tickformat: '.1f',
-            x: 0.5,
-            xanchor: 'center',
-            y: 0.5,
-            yanchor: 'middle'
+            orientation: mob ? 'h' : 'v', len: 0.85,
+            thickness: mob ? 15 : 20, tickformat: '.1f',
+            x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
           }
         }
       };
 
+      const cbConf = {
+        orientation: mob ? 'h' : 'v', len: 0.85,
+        thickness: mob ? 15 : 20, tickformat: '.1f',
+        x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
+      };
       const legendData = {
         z: [[minValue, maxValue]],
         type: 'heatmap',
         colorscale: colorscale,
         showscale: true,
         hoverinfo: 'none',
-        colorbar: {
-          len: 0.9,
-          thickness: 20,
-          tickformat: '.1f',
-          x: 0.5,
-          xanchor: 'center',
-          y: 0.5,
-          yanchor: 'middle'
-        }
+        colorbar: cbConf
       };
       
       // Apply different tick positioning for CHL log scale

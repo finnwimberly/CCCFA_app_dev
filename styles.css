@@ -640,20 +640,20 @@ footer {
   background: none !important;
 }
 
-/* Adjust legend container for mobile */
+/* Mobile: horizontal legend bar centered at bottom */
 @media (max-width: 768px) {
-  #sst-legend,
-  #sss-legend,
-  #chl-legend,
-  #ostia-sst-legend,
-  #ostia-anomaly-legend,
-  #doppio-legend,
-  #fishbot-legend {
-    min-width: 100px;
-    max-width: 130px;
-    min-height: 300px;
-    bottom: 10px;
-    right: 10px;
+  #sst-legend, #sss-legend, #chl-legend,
+  #ostia-sst-legend, #ostia-anomaly-legend,
+  #doppio-legend, #fishbot-legend {
+    left: 50%; right: auto; bottom: 4px;
+    transform: translateX(-50%);
+    min-width: 280px; max-width: 300px;
+    min-height: auto; max-height: 80px;
+  }
+  #sst-legend .plotly, #sss-legend .plotly, #chl-legend .plotly,
+  #ostia-sst-legend .plotly, #ostia-anomaly-legend .plotly,
+  #doppio-legend .plotly, #fishbot-legend .plotly {
+    max-width: 280px; max-height: 70px;
   }
 }
 
