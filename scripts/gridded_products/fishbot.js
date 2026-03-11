@@ -479,7 +479,7 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
         container.innerHTML = '';
         
         // Create the plot
-        Plotly.newPlot('fishbot-legend', [legendData], layout)
+        Plotly.newPlot('fishbot-legend', [legendData], layout, {displayModeBar: false})
           .then(() => {
             const plotElement = container.querySelector('.plotly');
             if (plotElement) {

@@ -344,7 +344,7 @@ function createLegend(layerType, date) {
         container.innerHTML = '';
         
         // Create the plot
-        Plotly.newPlot(legendId, [legendData], layout)
+        Plotly.newPlot(legendId, [legendData], layout, {displayModeBar: false})
           .then(() => {
             // Check if the plot was created
             const plotElement = container.querySelector('.plotly');
