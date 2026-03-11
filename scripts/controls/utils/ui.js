@@ -257,6 +257,21 @@ function _setupMobileBottomSheet() {
     backdrop.className = 'mobile-sheet-backdrop';
     document.body.appendChild(backdrop);
 
+    // Move panel to body on mobile so position:fixed isn't broken by
+    // ancestor overflow:hidden / transform on #map-container / .data-card
+    const originalParent = controlEl.parentElement;
+
+    function ensureMobilePlacement() {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile && controlEl.parentElement !== document.body) {
+        document.body.appendChild(controlEl);
+      } else if (!isMobile && controlEl.parentElement === document.body) {
+        originalParent.appendChild(controlEl);
+      }
+    }
+
+    ensureMobilePlacement();
+
     function openPanel() {
       if (window.innerWidth > 768) return;
       controlEl.classList.add('mobile-open');
@@ -276,9 +291,10 @@ function _setupMobileBottomSheet() {
     backdrop.addEventListener('click', closePanel);
     handle.addEventListener('click', closePanel);
 
-    // Close panel if viewport is resized above mobile breakpoint
+    // Close panel and fix placement if viewport is resized
     window.addEventListener('resize', () => {
       if (window.innerWidth > 768) closePanel();
+      ensureMobilePlacement();
     });
   }, 0);
 }

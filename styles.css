@@ -186,13 +186,8 @@ header {
   transform: none;
 }
 
-/* Elevate map card above backdrop when mobile panel is open.
-   The panel lives inside #map so without this the backdrop covers it.
-   Must stay BELOW --z-modal-backdrop so true modals still paint on top. */
-body.modal-open .data-card:has(#map-container) {
-  position: relative;
-  z-index: var(--z-mobile-panel);
-}
+/* Note: The mobile control panel is moved to document.body via JS,
+   so it no longer needs the map card to be elevated above the backdrop. */
 
 .data-card h2 {
   color: var(--primary);
@@ -422,10 +417,20 @@ footer {
     --font-size-base: 14px;
   }
   
-  .content-container {
-    padding: 0 var(--spacing-md);
+  .content-container,
+  .map-page.content-container {
+    padding: 0 var(--spacing-sm);
     width: 100%;
     max-width: 100%;
+  }
+
+  /* Disable hover transform on mobile — it creates a containing block
+     that breaks position:fixed on the mobile control panel */
+  .data-card {
+    transition: none;
+  }
+  .data-card:hover {
+    transform: none;
   }
   
   /* Hide logos on mobile — title only in header */
