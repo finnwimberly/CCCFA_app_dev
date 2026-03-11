@@ -236,9 +236,14 @@ function _setupMobileBottomSheet() {
     const controlEl = mapEl.querySelector('.leaflet-control.custom-control');
     if (!controlEl) return;
 
-    // Prevent map interaction events from firing through the panel
-    L.DomEvent.disableScrollPropagation(controlEl);
-    L.DomEvent.disableClickPropagation(controlEl);
+    // Prevent map interaction events from firing through the panel.
+    // Only needed when the panel lives inside the Leaflet map container.
+    // On mobile the panel is moved to document.body where these are
+    // unnecessary and interfere with checkbox touch handling.
+    if (window.innerWidth > 768) {
+      L.DomEvent.disableScrollPropagation(controlEl);
+      L.DomEvent.disableClickPropagation(controlEl);
+    }
 
     // Insert drag handle at the very top of the control
     const handle = document.createElement('div');
@@ -265,9 +270,18 @@ function _setupMobileBottomSheet() {
     function ensureMobilePlacement() {
       const isMobile = window.innerWidth <= 768;
       if (isMobile && controlEl.parentElement !== document.body) {
+        // Moving to body — remove Leaflet event interception so
+        // checkboxes receive native touch/click events normally.
+        try {
+          L.DomEvent.off(controlEl, 'mousedown touchstart dblclick contextmenu', L.DomEvent.stopPropagation);
+        } catch (e) { /* listeners may not have been attached yet */ }
         document.body.appendChild(controlEl);
       } else if (!isMobile && controlEl.parentElement === document.body) {
         originalParent.appendChild(controlEl);
+        // Back inside the map — re-apply Leaflet event interception
+        // to prevent clicks/scrolls from reaching the map.
+        L.DomEvent.disableScrollPropagation(controlEl);
+        L.DomEvent.disableClickPropagation(controlEl);
       }
     }
 

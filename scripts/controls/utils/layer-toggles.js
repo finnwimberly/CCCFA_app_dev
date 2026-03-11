@@ -7,16 +7,27 @@ import { TOGGLE_IDS, LEGEND_IDS } from '../../config.js';
 export function setupCheckboxToggle(id, onChangeCallback) {
   const checkbox = document.getElementById(id);
   if (!checkbox) return;
-  checkbox.addEventListener('change', (event) => {
-    onChangeCallback(event, checkbox.checked);
+
+  // Prevent mousedown/touchstart from bubbling up to Leaflet's
+  // disableClickPropagation handler on the parent control element.
+  // This preserves native checkbox toggle behavior on all platforms
+  // (replaces the old Safari mousedown workaround that caused
+  // double-toggles on mobile touch devices).
+  checkbox.addEventListener('mousedown', (e) => e.stopPropagation());
+  checkbox.addEventListener('touchstart', (e) => e.stopPropagation());
+
+  // Native 'change' event — fires exactly once per toggle
+  checkbox.addEventListener('change', () => {
+    onChangeCallback(null, checkbox.checked);
   });
-  checkbox.addEventListener('mousedown', (event) => {
-    if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
-      event.preventDefault();
-      checkbox.checked = !checkbox.checked;
-      onChangeCallback(event, checkbox.checked);
-    }
-  });
+
+  // Also protect the associated <label> — clicking it triggers
+  // the linked checkbox, so its events must also be shielded.
+  const label = checkbox.parentElement?.querySelector(`label[for="${id}"]`);
+  if (label) {
+    label.addEventListener('mousedown', (e) => e.stopPropagation());
+    label.addEventListener('touchstart', (e) => e.stopPropagation());
+  }
 }
 
 export function hideLegendFor(type) {
