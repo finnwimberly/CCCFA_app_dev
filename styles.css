@@ -645,7 +645,7 @@ footer {
   #sst-legend, #sss-legend, #chl-legend,
   #ostia-sst-legend, #ostia-anomaly-legend,
   #doppio-legend, #fishbot-legend {
-    left: 50%; right: auto; bottom: 4px;
+    left: 50%; right: auto; bottom: 64px;
     transform: translateX(-50%);
     min-width: 280px; max-width: 300px;
     min-height: auto; max-height: 80px;
