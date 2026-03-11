@@ -194,6 +194,7 @@ export function addCombinedControl() {
       .control-item { margin-bottom: 6px; }
       .control-input { width: 100%; padding: 4px 6px; font-size: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
       .checkbox-group { margin-bottom: 3px; display: flex; align-items: center; gap: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+      .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; min-width: 16px; cursor: pointer; accent-color: var(--secondary); }
       .checkbox-group input[type="checkbox"]:focus { outline: none; box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); }
       .control-label { font-size: 12px; color: var(--text-secondary); cursor: pointer; user-select: none; -webkit-user-select: none; }
       .collapsible-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 4px 0; -webkit-tap-highlight-color: transparent; }
