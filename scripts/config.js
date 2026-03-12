@@ -102,14 +102,28 @@ export function getTilePath(layerType, date) {
   }
 }
 
+// Zoom threshold where tiles switch from global to local color scale
+export const ZOOM_THRESHOLD = 8;
+
 // Seasonal color-scale limits (NOAA fisheries calendar quarters)
 // winter: Jan–Mar, spring: Apr–Jun, summer: Jul–Sep, fall: Oct–Dec
-export const SEASONAL_LIMITS = {
+// Global limits used for zoom 0 – (ZOOM_THRESHOLD-1)
+export const SEASONAL_LIMITS_GLOBAL = {
   SST:           { winter: [0, 24],      spring: [4, 26],     summer: [10, 28],    fall: [4, 26]    },
   OSTIA_SST:     { winter: [0, 24],      spring: [4, 26],     summer: [10, 28],    fall: [4, 26]    },
   OSTIA_anomaly: { winter: [-4, 4],      spring: [-3, 3],     summer: [-3, 3],     fall: [-4, 4]    },
   SSS:           { winter: [30, 37],     spring: [28, 37],    summer: [29, 37],    fall: [30, 37]   },
-  CHL:           { winter: [0.05, 2.0],  spring: [0.1, 5.0],  summer: [0.05, 1.5], fall: [0.05, 2.0]},
+  CHL:           { winter: [0.05, 3.0],  spring: [0.1, 6.0],  summer: [0.05, 5.5], fall: [0.05, 5.0]},
+  DOPPIO:        { winter: [0, 12],      spring: [2, 16],     summer: [6, 20],     fall: [2, 16]    },
+};
+
+// Local (Cape Cod) limits used for zoom ZOOM_THRESHOLD+
+export const SEASONAL_LIMITS_LOCAL = {
+  SST:           { winter: [0, 16],      spring: [4, 20],     summer: [10, 22],    fall: [4, 24]    },
+  OSTIA_SST:     { winter: [0, 16],      spring: [4, 20],     summer: [10, 22],    fall: [4, 24]    },
+  OSTIA_anomaly: { winter: [-2, 2],      spring: [-2.5, 2.5], summer: [-3, 3],     fall: [-2.5, 2.5]},
+  SSS:           { winter: [30, 34],     spring: [28, 33],    summer: [29, 35],    fall: [30, 35]   },
+  CHL:           { winter: [0.05, 2.0],  spring: [0.1, 5.0],  summer: [0.05, 4.0], fall: [0.05, 4.0]},
   DOPPIO:        { winter: [0, 12],      spring: [2, 16],     summer: [6, 20],     fall: [2, 16]    },
 };
 

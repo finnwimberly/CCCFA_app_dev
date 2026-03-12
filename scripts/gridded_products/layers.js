@@ -1,6 +1,6 @@
 import { map } from '../map/core.js';
 import { controlsState, layerState } from '../state.js';
-import { getTilePath, getColormapPath, BATHYMETRY_TILES, SEASONAL_LIMITS, getSeasonFromDate } from '../config.js';
+import { getTilePath, getColormapPath, BATHYMETRY_TILES, SEASONAL_LIMITS_GLOBAL, SEASONAL_LIMITS_LOCAL, ZOOM_THRESHOLD, getSeasonFromDate } from '../config.js';
 
 // Define the bounds for overlays
 const sstBounds = [
@@ -219,9 +219,10 @@ function createLegend(layerType, date) {
     return; // Exit the function
   }
 
-  // Look up seasonal min/max from config and fetch the season-specific colormap
+  // Look up seasonal min/max from config, switching limits at zoom threshold
   const season = getSeasonFromDate(date);
-  const [minValue, maxValue] = SEASONAL_LIMITS[layerType][season];
+  const limits = map.getZoom() >= ZOOM_THRESHOLD ? SEASONAL_LIMITS_LOCAL : SEASONAL_LIMITS_GLOBAL;
+  const [minValue, maxValue] = limits[layerType][season];
 
   const loadLegendData = Promise.all([
     fetch(getColormapPath(layerType, date)).then((res) => {
