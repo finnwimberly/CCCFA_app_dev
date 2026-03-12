@@ -1,5 +1,4 @@
 // controls/area-select.js
-// Moved to control_utils/area-select.js
 import { map } from '../../map/core.js';
 import { state } from '../../state.js';
 import { loadProfilesMetadata } from '../../profiles_and_plots/data-loading.js';
@@ -9,6 +8,11 @@ let drawingPolygon = false;
 let polygon = null;
 let points = [];
 let tempLine = null;
+let startMarker = null;
+let hintEl = null;
+let clickTimeout = null;
+
+const CLOSE_RADIUS = 15; // pixels — how close to first point triggers close
 
 export function initAreaSelection() {
   const selectButton = document.querySelector('.select-button');
@@ -18,28 +22,81 @@ export function initAreaSelection() {
     if (drawingPolygon) {
       if (points.length >= 3) finishPolygon(); else showModal("Please add at least 3 points to create a selection area.");
     } else {
-      drawingPolygon = true;
-      selectButton.textContent = 'Confirm Selection';
-      points = [];
-      map.dragging.disable();
-      map.doubleClickZoom.disable();
-      map.on('click', handleMapClick);
-      map.on('mousemove', handleMouseMove);
+      startDrawing(selectButton);
     }
   });
 }
 
+function startDrawing(button) {
+  drawingPolygon = true;
+  points = [];
+  button.textContent = 'Cancel Drawing';
+  button.style.backgroundColor = '#c0392b';
+  map.dragging.disable();
+  map.doubleClickZoom.disable();
+  map.getContainer().classList.add('drawing-mode');
+  showHint('Click to add points. Double-click or click first point to finish. Right-click to undo. Esc to cancel.');
+  map.on('click', handleMapClick);
+  map.on('mousemove', handleMouseMove);
+  map.on('contextmenu', handleRightClick);
+  document.addEventListener('keydown', handleEscape);
+}
+
 function handleMapClick(e) {
   if (!drawingPolygon) return;
+
+  // Debounce: ignore click if it's part of a double-click
+  if (clickTimeout) clearTimeout(clickTimeout);
+  clickTimeout = setTimeout(() => {
+    processClick(e);
+  }, 200);
+}
+
+function processClick(e) {
+  // Check if clicking near first point to close
+  if (points.length >= 3) {
+    const firstPt = map.latLngToContainerPoint(points[0]);
+    const clickPt = map.latLngToContainerPoint(e.latlng);
+    if (firstPt.distanceTo(clickPt) < CLOSE_RADIUS) {
+      finishPolygon();
+      return;
+    }
+  }
+
   points.push(e.latlng);
+
+  // Place start marker on first point
+  if (points.length === 1) {
+    startMarker = L.circleMarker(e.latlng, {
+      radius: 7, color: 'red', fillColor: 'white', fillOpacity: 1, weight: 2
+    }).addTo(map);
+  }
+
   updatePolygonDisplay();
 }
 
 function handleMouseMove(e) {
   if (!drawingPolygon || points.length === 0) return;
   if (tempLine) map.removeLayer(tempLine);
-  const tempPoints = [...points, e.latlng];
+  // Show line from last point through cursor back to first point
+  const tempPoints = points.length >= 3
+    ? [...points, e.latlng, points[0]]
+    : [...points, e.latlng];
   tempLine = L.polyline(tempPoints, {color: 'red', weight: 2, dashArray: '5, 5'}).addTo(map);
+}
+
+function handleRightClick(e) {
+  L.DomEvent.preventDefault(e);
+  if (!drawingPolygon || points.length === 0) return;
+  points.pop();
+  if (points.length === 0 && startMarker) { map.removeLayer(startMarker); startMarker = null; }
+  if (polygon) { map.removeLayer(polygon); polygon = null; }
+  if (tempLine) { map.removeLayer(tempLine); tempLine = null; }
+  if (points.length >= 2) updatePolygonDisplay();
+}
+
+function handleEscape(e) {
+  if (e.key === 'Escape' && drawingPolygon) cancelDrawing();
 }
 
 function updatePolygonDisplay() {
@@ -48,21 +105,61 @@ function updatePolygonDisplay() {
   polygon = L.polygon(points, {color: 'red', weight: 2, fillOpacity: 0.2}).addTo(map);
 }
 
-function finishPolygon() {
-  if (points.length < 3) return;
-  if (tempLine) { map.removeLayer(tempLine); tempLine = null; }
-  if (polygon) map.removeLayer(polygon);
-  polygon = L.polygon(points, {color: 'red', fillOpacity: 0.2}).addTo(map);
-  selectProfilesInPolygon(polygon);
+function showHint(text) {
+  removeHint();
+  hintEl = document.createElement('div');
+  hintEl.className = 'drawing-hint';
+  hintEl.textContent = text;
+  map.getContainer().appendChild(hintEl);
+}
+
+function removeHint() {
+  if (hintEl) { hintEl.remove(); hintEl = null; }
+}
+
+function cleanup() {
   drawingPolygon = false;
-  const button = document.querySelector('.select-button');
-  button.textContent = 'Selection Complete';
-  button.style.backgroundColor = '#2E8B57';
-  setTimeout(() => { button.textContent = 'Select Profiles by Area'; button.style.backgroundColor = ''; }, 1000);
+  if (clickTimeout) { clearTimeout(clickTimeout); clickTimeout = null; }
+  if (tempLine) { map.removeLayer(tempLine); tempLine = null; }
+  if (startMarker) { map.removeLayer(startMarker); startMarker = null; }
+  removeHint();
+  map.getContainer().classList.remove('drawing-mode');
   map.dragging.enable();
   map.doubleClickZoom.enable();
   map.off('click', handleMapClick);
   map.off('mousemove', handleMouseMove);
+  map.off('contextmenu', handleRightClick);
+  document.removeEventListener('keydown', handleEscape);
+
+  const button = document.querySelector('.select-button');
+  if (button) { button.textContent = 'Select Profiles by Area'; button.style.backgroundColor = ''; }
+}
+
+function cancelDrawing() {
+  if (polygon) { map.removeLayer(polygon); polygon = null; }
+  points = [];
+  cleanup();
+}
+
+function finishPolygon() {
+  if (points.length < 3) return;
+  if (clickTimeout) { clearTimeout(clickTimeout); clickTimeout = null; }
+  if (polygon) map.removeLayer(polygon);
+  polygon = L.polygon(points, {color: 'red', fillOpacity: 0.2}).addTo(map);
+  selectProfilesInPolygon(polygon);
+
+  const button = document.querySelector('.select-button');
+  if (button) { button.textContent = 'Selection Complete'; button.style.backgroundColor = '#2E8B57'; }
+
+  cleanup();
+
+  // Reset button text after brief feedback
+  setTimeout(() => {
+    const btn = document.querySelector('.select-button');
+    if (btn) { btn.textContent = 'Select Profiles by Area'; btn.style.backgroundColor = ''; }
+  }, 1000);
+
+  // Remove polygon overlay after brief display
   setTimeout(() => { if (polygon) { map.removeLayer(polygon); polygon = null; } }, 1500);
   points = [];
 }
@@ -113,5 +210,3 @@ function isMarkerInsidePolygon(markerLatLng, polygon) {
   }
   return inside;
 }
-
-

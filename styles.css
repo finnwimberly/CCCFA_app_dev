@@ -1,4 +1,36 @@
-/* Modern CSS Reset and Base Styles */
+/* ==========================================================================
+   TABLE OF CONTENTS
+   ==========================================================================
+   1. CSS Variables & Reset
+   2. Base & Typography
+   3. Header & Logos
+   4. Navigation Bar
+   5. Page Layout (Content Container, Data Cards)
+   6. Map
+      6a. Container & Resize Handle
+      6b. Control Panel (left sidebar, buttons, collapsibles)
+      6c. Timeline (slider, buttons, date display)
+      6d. Layer Legends (SST, SSS, CHL, etc.)
+      6e. Profile Legends
+      6f. Area Selection (polygon drawing mode)
+      6g. Bathymetry & Attribution
+   7. Modals & Popups
+   8. Daterangepicker Calendar
+   9. Plots
+  10. Data Pages (page navigation, maps, unit selector)
+  11. Animations
+  12. Footer
+  13. Links
+  14. Mobile Bottom Sheet & Toggle
+  15. Responsive Overrides (768px, 480px)
+  16. Browser Fixes (Safari, iOS)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. CSS VARIABLES & RESET
+   ========================================================================== */
+
 :root {
   /* Marine-themed Color System */
   --primary: #1a4b6e;      /* Deep ocean blue */
@@ -11,24 +43,24 @@
   --text-secondary: #5c6b73; /* Medium blue-gray */
   --border: #e0e0e0;      /* Light gray */
   --shadow: rgba(0, 0, 0, 0.1);
-  
+
   /* Typography */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-size-base: 16px;
   --line-height-base: 1.5;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-  
+
   /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  
+
   /* Transitions */
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
@@ -46,7 +78,16 @@
   --z-modal: 2001;              /* modal dialogs (info, tolerance, alerts) */
 }
 
-/* Base Styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+
+/* ==========================================================================
+   2. BASE & TYPOGRAPHY
+   ========================================================================== */
+
 html, body {
   height: 100%;
   margin: 0;
@@ -64,12 +105,20 @@ body {
   min-height: 100vh;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 main {
   flex: 1 0 auto;
   width: 100%;
 }
 
-/* Header Styling */
+
+/* ==========================================================================
+   3. HEADER & LOGOS
+   ========================================================================== */
+
 header {
   background-color: var(--surface);
   padding: var(--spacing-md) var(--spacing-xl);
@@ -87,7 +136,6 @@ header {
   font-family: 'Inter', sans-serif;
 }
 
-/* Logo Container */
 .logos {
   display: flex;
   align-items: center;
@@ -106,7 +154,6 @@ header {
   display: block;
 }
 
-/* Make first three logos larger */
 .logos img:not(.whoi-logo) {
   height: 75px;
 }
@@ -115,7 +162,11 @@ header {
   transform: scale(1.05);
 }
 
-/* Navigation */
+
+/* ==========================================================================
+   4. NAVIGATION BAR
+   ========================================================================== */
+
 .navbar {
   background-color: var(--primary);
   padding: var(--spacing-sm) var(--spacing-xl);
@@ -147,7 +198,11 @@ header {
   background-color: var(--accent);
 }
 
-/* Content Container */
+
+/* ==========================================================================
+   5. PAGE LAYOUT (Content Container, Data Cards)
+   ========================================================================== */
+
 .content-container {
   max-width: 1200px;
   margin: var(--spacing-xl) auto;
@@ -160,7 +215,6 @@ header {
   padding: 20px;
 }
 
-/* Card Styling */
 .data-card {
   background: var(--surface);
   border-radius: var(--radius-md);
@@ -186,8 +240,11 @@ header {
   transform: none;
 }
 
-/* Note: The mobile control panel is moved to document.body via JS,
-   so it no longer needs the map card to be elevated above the backdrop. */
+.data-card:has(#map-container) {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
 
 .data-card h2 {
   color: var(--primary);
@@ -207,7 +264,6 @@ header {
   margin-top: 0;
 }
 
-/* Data Images */
 .data-image {
   width: 100%;
   height: auto;
@@ -216,342 +272,13 @@ header {
   box-shadow: 0 2px 4px var(--shadow);
 }
 
-/* Animation Grid */
-.animation-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-lg);
-  margin: var(--spacing-lg) 0;
-}
 
-.animation-container {
-  background: var(--surface);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  box-shadow: 0 2px 4px var(--shadow);
-}
+/* ==========================================================================
+   6. MAP
+   ========================================================================== */
 
-.animation-canvas {
-  width: 100%;
-  aspect-ratio: 4/3;
-  background: var(--background);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
+/* ---------- 6a. Container & Resize Handle ---------- */
 
-.animation-label {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-top: var(--spacing-sm);
-  font-weight: 500;
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  margin: var(--spacing-sm) 0;
-}
-
-.control-button, .small-button, .select-button {
-  background-color: var(--secondary);
-  color: var(--surface);
-  border: none;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  width: 100%;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
-  margin-top: 2px;
-}
-
-.control-button:hover, .small-button:hover, .select-button:hover {
-  background-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-.control-button:active, .small-button:active, .select-button:active {
-  transform: translateY(0);
-}
-
-/* Remove the !important flags and specific button styles */
-.small-button {
-  margin-top: 4px;
-}
-
-/* Collapsible Sections */
-.collapsible-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 4px 6px;
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
-  margin-bottom: 2px;
-}
-
-.collapsible-header:hover {
-  background-color: var(--background);
-}
-
-.collapse-icon {
-  color: var(--secondary);
-  transition: transform var(--transition-normal);
-}
-
-.collapsible-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height var(--transition-normal) ease-out;
-  padding: 2px 0;
-}
-
-.collapsible-content.expanded {
-  max-height: 2000px;
-}
-
-/* Footer */
-footer {
-  background-color: var(--primary);
-  color: var(--surface);
-  padding: var(--spacing-lg);
-  margin-top: var(--spacing-xl);
-  font-family: 'Inter', sans-serif;
-  flex-shrink: 0;
-}
-
-.footer-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--spacing-lg);
-}
-
-.footer-section {
-  flex: 1;
-  min-width: 200px;
-}
-
-.footer-section.left {
-  text-align: left;
-}
-
-.footer-section.center {
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--surface);
-  opacity: 1;
-}
-
-.footer-section.right {
-  text-align: right;
-}
-
-.footer-section a {
-  color: var(--surface);
-  text-decoration: none;
-  opacity: 0.88;
-  transition: opacity var(--transition-fast);
-  display: inline-block;
-}
-
-/* Text link specific styles */
-.footer-section a:not(:has(img)) {
-  border-bottom: 1px solid transparent;
-  transition: opacity var(--transition-fast), border-bottom var(--transition-fast);
-}
-
-.footer-section a:not(:has(img)):hover {
-  opacity: 1;
-  border-bottom: 1px solid var(--surface);
-}
-
-/* Image specific styles */
-.footer-section img {
-  max-height: 40px;
-  width: auto;
-  margin: 0 var(--spacing-xs);
-  vertical-align: middle;
-  filter: brightness(0) invert(1); /* Make logos white */
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
-  opacity: 0.88;
-}
-
-.footer-section img:hover {
-  transform: scale(1.08);
-  opacity: 1;
-}
-
-/* Safari-specific fixes */
-@supports (-webkit-touch-callout: none) {
-  /* Fix for Safari height issues */
-  #map-container {
-    height: -webkit-fill-available;
-  }
-  
-  /* Fix for Safari flexbox issues */
-  .logos {
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-    align-items: center;
-  }
-  
-  /* Fix for Safari transform issues */
-  .logos a:hover {
-    -webkit-transform: scale(1.05);
-    transform: scale(1.05);
-  }
-}
-
-/* Consolidated Media Queries */
-@media (max-width: 768px) {
-  :root {
-    --font-size-base: 14px;
-  }
-  
-  .content-container,
-  .map-page.content-container {
-    padding: 0 var(--spacing-sm);
-    width: 100%;
-    max-width: 100%;
-  }
-
-  /* Disable hover transform on mobile — it creates a containing block
-     that breaks position:fixed on the mobile control panel */
-  .data-card {
-    transition: none;
-  }
-  .data-card:hover {
-    transform: none;
-  }
-  
-  /* Hide logos on mobile — title only in header */
-  .logos {
-    display: none;
-  }
-
-  header {
-    justify-content: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .title h1 {
-    text-align: center;
-    font-size: 1.4rem;
-  }
-
-  .navbar ul {
-    gap: var(--spacing-md);
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .navbar a {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.9rem;
-  }
-  
-  #map-container {
-    height: 60vh;
-  }
-
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
-    gap: var(--spacing-md);
-  }
-  
-  .footer-section {
-    text-align: center !important;
-    min-width: 100%;
-  }
-
-  .nav-header {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .nav-content a {
-    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-lg);
-  }
-
-  .plot-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .title h1 {
-    font-size: 1.15rem;
-  }
-
-  .navbar {
-    padding: var(--spacing-xs);
-  }
-  
-  .navbar ul {
-    gap: var(--spacing-xs);
-  }
-  
-  .navbar a {
-    font-size: 0.8rem;
-    padding: var(--spacing-xs);
-  }
-  
-  #map-container {
-    height: 50vh;
-  }
-  
-  .data-card {
-    padding: var(--spacing-md);
-  }
-  
-  .data-card h2 {
-    font-size: 1.25rem;
-  }
-}
-
-/* Fix for iOS Safari 100vh issue */
-@supports (-webkit-touch-callout: none) {
-  #map-container {
-    height: calc(100vh - 200px);
-    min-height: 300px;
-  }
-}
-
-/* Ensure proper box sizing */
-*, *::before, *::after {
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-}
-
-/* Fix for Safari flexbox gap */
-@supports not (gap: 1rem) {
-  .logos {
-    margin: -0.5rem;
-  }
-  
-  .logos a {
-    margin: 0.5rem;
-  }
-  
-  .navbar ul {
-    margin: -0.5rem;
-  }
-  
-  .navbar li {
-    margin: 0.5rem;
-  }
-}
-
-/* Map Container Styles */
 #map-container {
   position: relative;
   width: 100%;
@@ -594,106 +321,8 @@ footer {
   opacity: 1 !important;
 }
 
-/* Layer Legend Styles */
-#sst-legend,
-#sss-legend,
-#chl-legend,
-#ostia-sst-legend,
-#ostia-anomaly-legend,
-#doppio-legend,
-#fishbot-legend {
-  position: absolute;
-  bottom: 0px;
-  right: 2px;
-  background: var(--surface);
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  /* box-shadow: 0 2px 4px var(--shadow); */
-  z-index: var(--z-map-controls);
-  min-width: 120px;
-  max-width: 150px;
-  height: auto;
-  min-height: 250px;
-  max-height: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+/* ---------- 6b. Control Panel (left sidebar, buttons, collapsibles) ---------- */
 
-/* Ensure the Plotly container respects the legend bounds */
-#sst-legend .plotly,
-#sss-legend .plotly,
-#chl-legend .plotly,
-#ostia-sst-legend .plotly,
-#ostia-anomaly-legend .plotly,
-#doppio-legend .plotly,
-#fishbot-legend .plotly {
-  width: 100%; /* Ensure it scales with the parent */
-  max-width: 120px; /* Constrain to legend width */
-  height: 100%; /* Ensure it scales with the parent */
-  max-height: 280px; /* Constrain to legend height */
-  overflow: hidden; /* Prevent content overflow */
-  margin: 0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  background: none !important;
-}
-
-/* Mobile: horizontal legend bar centered at bottom */
-@media (max-width: 768px) {
-  #sst-legend, #sss-legend, #chl-legend,
-  #ostia-sst-legend, #ostia-anomaly-legend,
-  #doppio-legend, #fishbot-legend {
-    left: 50%; right: auto; bottom: 64px;
-    transform: translateX(-50%);
-    min-width: 280px; max-width: 300px;
-    min-height: auto; max-height: 80px;
-  }
-  #sst-legend .plotly, #sss-legend .plotly, #chl-legend .plotly,
-  #ostia-sst-legend .plotly, #ostia-anomaly-legend .plotly,
-  #doppio-legend .plotly, #fishbot-legend .plotly {
-    max-width: 280px; max-height: 70px;
-  }
-}
-
-/* Profile Legend Styles */
-#profile-legend-container {
-  position: relative;
-  margin-top: var(--spacing-lg);
-  background: var(--surface);
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 2px 4px var(--shadow);
-  z-index: var(--z-map-controls);
-  max-width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--spacing-sm);
-}
-
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  margin: 0;
-  background: var(--surface);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 1px 2px var(--shadow);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.color-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-/* Control Panel Styles */
 .leaflet-control.custom-control {
   background: white;
   padding: 8px;
@@ -716,7 +345,7 @@ footer {
   width: 100%;
   flex: 1 1 auto;
   overflow-y: auto;
-  max-height: calc(80vh - 30px); /* 20px top + 10px bottom */
+  max-height: calc(80vh - 30px);
   padding: 10px 0;
 }
 
@@ -770,66 +399,441 @@ footer {
   color: var(--text);
 }
 
-/* Mobile: Control panel becomes a bottom sheet */
-@media (max-width: 768px) {
-  .leaflet-control.custom-control {
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    top: auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: unset !important;
-    max-height: 65vh !important;
-    margin: 0 !important;
-    border-radius: 16px 16px 0 0 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
-    transform: translateY(100%) !important;
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
-    z-index: var(--z-mobile-panel) !important;
-    overflow-y: auto !important;
-    padding: 0 12px 20px !important;
-    pointer-events: none !important;
-  }
-
-  .leaflet-control.custom-control.mobile-open {
-    transform: translateY(0) !important;
-    pointer-events: auto !important;
-  }
-
-  /* Let the outer control handle scroll, not the inner container */
-  .leaflet-control.custom-control .control-container {
-    max-height: none;
-    overflow-y: visible;
-    padding: 0;
-  }
-
-  .source-filters, .layer-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* Replace checkboxes with tappable highlighted rows on mobile */
-  .checkbox-group input[type="checkbox"] { display: none; }
-  .checkbox-group {
-    padding: 8px 12px;
-    border-radius: 6px;
-  }
-  .checkbox-group .control-label { font-size: 14px; }
-  .checkbox-group.selected {
-    background: rgba(44, 136, 217, 0.15);
-  }
-
-  /* Widen timeline to use full map width when panel is docked at bottom.
-     right: 46px leaves clearance for Leaflet zoom controls at topright
-     (26px button + 10px Leaflet margin + 10px padding = ~46px). */
-  .timeline-control {
-    left: 10px !important;
-    right: 46px !important;
-  }
+/* Buttons */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
 }
 
-/* Info Modal Styles */
+.control-button, .small-button, .select-button {
+  background-color: var(--secondary);
+  color: var(--surface);
+  border: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  margin-top: 2px;
+}
+
+.control-button:hover, .small-button:hover, .select-button:hover {
+  background-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.control-button:active, .small-button:active, .select-button:active {
+  transform: translateY(0);
+}
+
+.small-button {
+  margin-top: 4px;
+}
+
+/* Collapsible sections */
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 6px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+  margin-bottom: 2px;
+}
+
+.collapsible-header:hover {
+  background-color: var(--background);
+}
+
+.collapse-icon {
+  color: var(--secondary);
+  transition: transform var(--transition-normal);
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal) ease-out;
+  padding: 2px 0;
+}
+
+.collapsible-content.expanded {
+  max-height: 2000px;
+}
+
+/* Info icon (in control panel header) */
+#info-icon {
+  font-size: 1.2rem;
+  color: var(--secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+#info-icon:hover {
+  color: var(--accent);
+}
+
+/* Combined control layout */
+.combined-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  border-radius: 8px;
+  padding: 4px 15px;
+  margin-top: 4px;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+/* ---------- 6c. Timeline (slider, buttons, date display) ---------- */
+
+.timeline-control {
+  position: absolute;
+  top: 10px;
+  left: calc(280px + 24px);
+  right: 64px;
+  min-width: 250px;
+  max-width: none;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  padding: 6px 16px;
+  box-sizing: border-box;
+  z-index: var(--z-map-controls);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 6px;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.timeline-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.timeline-button {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 1px 2px var(--shadow);
+  outline: none;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.timeline-button:hover {
+  background-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.timeline-button:active {
+  transform: translateY(0);
+}
+
+.timeline-button i {
+  color: white;
+  font-size: 1rem;
+}
+
+.timeline-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 90px;
+  text-align: center;
+  padding: 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.timeline-date-input {
+  color: var(--primary);
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1rem;
+  padding: 4px 8px;
+  flex: 0 1 140px;
+  min-width: 85px;
+  max-width: 160px;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+/* Slider */
+.timeline-slider-container {
+  margin-top: 8px;
+  padding: 0 6px;
+}
+
+.timeline-slider {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  align-self: center;
+}
+
+.timeline-slider:hover {
+  opacity: 1;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--secondary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.timeline-slider::-webkit-slider-thumb:hover {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+
+.timeline-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--secondary);
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.timeline-slider::-moz-range-thumb:hover {
+  background: var(--accent);
+  transform: scale(1.1);
+}
+
+.slider-start-date,
+.slider-end-date {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  align-self: center;
+  flex-shrink: 0;
+  min-width: 55px;
+  text-align: center;
+}
+
+/* ---------- 6d. Layer Legends (SST, SSS, CHL, etc.) ---------- */
+
+#sst-legend,
+#sss-legend,
+#chl-legend,
+#ostia-sst-legend,
+#ostia-anomaly-legend,
+#doppio-legend,
+#fishbot-legend {
+  position: absolute;
+  bottom: 0px;
+  right: 2px;
+  background: var(--surface);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  z-index: var(--z-map-controls);
+  min-width: 120px;
+  max-width: 150px;
+  height: auto;
+  min-height: 250px;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#sst-legend .plotly,
+#sss-legend .plotly,
+#chl-legend .plotly,
+#ostia-sst-legend .plotly,
+#ostia-anomaly-legend .plotly,
+#doppio-legend .plotly,
+#fishbot-legend .plotly {
+  width: 100%;
+  max-width: 120px;
+  height: 100%;
+  max-height: 280px;
+  overflow: hidden;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* ---------- 6e. Profile Legends ---------- */
+
+#profile-legend-container {
+  position: relative;
+  margin-top: var(--spacing-lg);
+  background: var(--surface);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 4px var(--shadow);
+  z-index: var(--z-map-controls);
+  max-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+  background: var(--surface);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 2px var(--shadow);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ---------- 6f. Area Selection (polygon drawing mode) ---------- */
+
+.drawing-mode { cursor: crosshair !important; }
+.drawing-mode * { cursor: crosshair !important; }
+
+.drawing-hint {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  z-index: 1100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---------- 6g. Bathymetry & Attribution ---------- */
+
+.leaflet-tile-pane .bathymetryLayer {
+  z-index: 1000 !important;
+}
+
+.leaflet-layer.bathymetryLayer {
+  z-index: 1000 !important;
+}
+
+#map-attribution-container {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: left;
+  border: none;
+}
+
+#map-attribution-container a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+#map-attribution-container a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+#map-attribution-container .leaflet-control-attribution {
+  background: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  position: static !important;
+  display: block !important;
+  visibility: visible !important;
+  white-space: normal !important;
+  max-width: none !important;
+  width: auto !important;
+}
+
+
+/* ==========================================================================
+   7. MODALS & POPUPS
+   ========================================================================== */
+
 #info-overlay, #layer-date-overlay, #tolerance-overlay {
   display: none;
   position: fixed;
@@ -870,7 +874,58 @@ footer {
   margin-bottom: var(--spacing-md);
 }
 
-/* Consolidated Color Block Styles */
+/* Layer date popup (Leaflet popup override) */
+.layer-date-popup .leaflet-popup-content-wrapper {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px var(--shadow);
+  padding: var(--spacing-lg);
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+}
+
+.layer-date-popup .leaflet-popup-tip {
+  background: var(--surface);
+}
+
+.layer-date-popup .leaflet-popup-close-button {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+}
+
+.layer-date-popup .leaflet-popup-close-button:hover {
+  color: var(--text);
+}
+
+
+/* ==========================================================================
+   8. DATERANGEPICKER CALENDAR
+   ========================================================================== */
+
+.daterangepicker {
+  font-size: 0.85rem !important;
+}
+
+.daterangepicker .calendar-table td {
+  position: relative;
+}
+
+.daterangepicker .calendar-table td.active,
+.daterangepicker .calendar-table td.in-range,
+.daterangepicker .calendar-table td.available {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Color blocks for data availability */
 .color-block {
   display: inline-block;
   width: 20px;
@@ -903,7 +958,7 @@ footer {
   pointer-events: none;
 }
 
-/* Highlight Classes */
+/* Highlight classes for calendar day colors */
 .highlight-all { background-color: #4CAF50; }
 .highlight-all-no-sst { background-color: #4CAF50; }
 .highlight-all-no-sss { background-color: #FFC107; }
@@ -912,7 +967,7 @@ footer {
 .highlight-ostia-only { background-color: #FF9800; }
 .highlight-doppio-only { background-color: #2196F3; }
 
-/* Show stripe for specific classes */
+/* Show stripe for classes that include chlorophyll */
 .highlight-all::after,
 .highlight-all-no-chloro::after,
 .highlight-all-sst::after,
@@ -922,7 +977,7 @@ footer {
   display: block;
 }
 
-/* Hide stripe for other classes */
+/* Hide stripe for classes without chlorophyll */
 .highlight-all-no-sst::after,
 .highlight-all-no-sss-sst::after,
 .highlight-ostia-only::after,
@@ -934,133 +989,7 @@ footer {
   display: none;
 }
 
-/* Adjust info icon size */
-#info-icon {
-  font-size: 1.2rem;
-  color: var(--secondary);
-  cursor: pointer;
-  transition: color var(--transition-fast);
-  flex-shrink: 0;
-}
-
-#info-icon:hover {
-  color: var(--accent);
-}
-
-/* Adjust date range picker container */
-.daterangepicker {
-  font-size: 0.85rem !important;
-}
-
-.select-button:hover {
-  background-color: var(--accent);
-  transform: translateY(-1px);
-}
-
-.select-button:active {
-  transform: translateY(0);
-}
-
-/* Layer Date Popup Styles */
-.layer-date-popup .leaflet-popup-content-wrapper {
-  background: var(--surface);
-  color: var(--text);
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 6px var(--shadow);
-  padding: var(--spacing-lg);
-  font-size: 0.9rem;
-  text-align: center;
-  max-width: 500px;
-  width: 90%;
-}
-
-.layer-date-popup .leaflet-popup-tip {
-  background: var(--surface);
-}
-
-.layer-date-popup .leaflet-popup-close-button {
-  position: absolute;
-  top: var(--spacing-sm);
-  right: var(--spacing-sm);
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--text-secondary);
-  padding: 4px 8px;
-}
-
-.layer-date-popup .leaflet-popup-close-button:hover {
-  color: var(--text);
-}
-
-.data-list {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.data-list li {
-  margin-bottom: 15px;
-}
-
-.emoji {
-  font-size: 1.2em;
-  margin-right: 5px;
-}
-
-.plot-container {
-  width: 100%;
-  height: 100%;
-  min-height: 200px;
-  position: relative;
-  background: white;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-/* Plots layout */
-#plots {
-  margin-top: 20px;
-  margin-bottom: 25px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  width: 100%;
-  height: fit-content;
-}
-
-/* Ensure plots fill their containers */
-.plot-container .js-plotly-plot {
-  width: 100% !important;
-  height: 100% !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-}
-
-/* Plots go straight from 3-across to stacked — no awkward 2+1 state */
-@media (max-width: 768px) {
-  #plots {
-    grid-template-columns: 1fr;
-  }
-
-  .plot-container {
-    min-height: 350px;
-  }
-}
-
-/* Daterangepicker calendar styles */
-.daterangepicker .calendar-table td {
-  position: relative;
-}
-
-.daterangepicker .calendar-table td.active,
-.daterangepicker .calendar-table td.in-range,
-.daterangepicker .calendar-table td.available {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Apply stripe indicator to colored dates */
+/* Stripe overlay on calendar dates */
 .daterangepicker .calendar-table td[class*="highlight-"] {
   position: relative;
   overflow: hidden;
@@ -1087,14 +1016,12 @@ footer {
   pointer-events: none;
 }
 
-/* Only show stripe for specific classes */
 .daterangepicker .calendar-table td.highlight-all::after,
 .daterangepicker .calendar-table td.highlight-all-no-sss::after,
 .daterangepicker .calendar-table td.highlight-all-sst::after {
   display: block;
 }
 
-/* Hide stripe for other classes */
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
 .daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
 .daterangepicker .calendar-table td.highlight-ostia-only::after {
@@ -1107,414 +1034,323 @@ footer {
   z-index: 2;
 }
 
-/* Navigation and Content Styles */
-.page-nav {
-    background: var(--surface);
-    border-radius: var(--radius-md);
-    box-shadow: 0 2px 4px var(--shadow);
-    margin-bottom: var(--spacing-lg);
-    overflow: hidden;
-}
 
-.nav-section {
-    border-bottom: 1px solid var(--border);
-}
+/* ==========================================================================
+   9. PLOTS
+   ========================================================================== */
 
-.nav-section:last-child {
-    border-bottom: none;
-}
-
-.nav-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
-    cursor: pointer;
-    transition: background-color var(--transition-fast);
-}
-
-.nav-header:hover {
-    background: var(--background);
-}
-
-.nav-header h3 {
-    margin: 0;
-    color: var(--primary);
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-.nav-header i {
-    color: var(--text-secondary);
-    transition: transform var(--transition-normal);
-}
-
-.nav-section.active .nav-header i {
-    transform: rotate(180deg);
-}
-
-.nav-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--transition-normal) ease-out;
-    background: var(--background);
-}
-
-.nav-section.active .nav-content {
-    max-height: 200px;
-}
-
-.nav-content a {
-    display: block;
-    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-xl);
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: all var(--transition-fast);
-    font-size: 0.95rem;
-}
-
-.nav-content a:hover {
-    color: var(--primary);
-    background: var(--surface);
-}
-
-.nav-content a.active {
-    color: var(--primary);
-    background: var(--surface);
-    font-weight: 500;
-}
-
-.nav-title {
-    color: var(--primary);
-    font-size: 1.2rem;
-    font-weight: 750;
-    padding: var(--spacing-md) var(--spacing-lg);
-    margin: 0;
-    border-bottom: 1px solid var(--border);
-}
-
-/* Map and Plot Styles */
-.map-container {
-    margin: 0 0 var(--spacing-lg) 0;
-}
-
-.map-wrapper {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.region-map {
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-md);
-    box-shadow: 0 2px 4px var(--shadow);
-}
-
-.caption {
-    margin: 0 0 var(--spacing-lg) 0;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    text-align: left;
-    line-height: 1.4;
-    max-width: 100%;
-}
-
-.plot-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-    margin: 0;
+#plots {
+  margin-top: 20px;
+  margin-bottom: 25px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+  height: fit-content;
 }
 
 .plot-container {
-    margin: 0;
-    height: 400px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  position: relative;
+  background: white;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-/* Unit Selector Styles (consolidated and centered) */
+.plot-container .js-plotly-plot {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+
+/* ==========================================================================
+   10. DATA PAGES (page navigation, maps, unit selector)
+   ========================================================================== */
+
+.page-nav {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 4px var(--shadow);
+  margin-bottom: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.nav-section {
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-section:last-child {
+  border-bottom: none;
+}
+
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.nav-header:hover {
+  background: var(--background);
+}
+
+.nav-header h3 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.nav-header i {
+  color: var(--text-secondary);
+  transition: transform var(--transition-normal);
+}
+
+.nav-section.active .nav-header i {
+  transform: rotate(180deg);
+}
+
+.nav-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal) ease-out;
+  background: var(--background);
+}
+
+.nav-section.active .nav-content {
+  max-height: 200px;
+}
+
+.nav-content a {
+  display: block;
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-xl);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  font-size: 0.95rem;
+}
+
+.nav-content a:hover {
+  color: var(--primary);
+  background: var(--surface);
+}
+
+.nav-content a.active {
+  color: var(--primary);
+  background: var(--surface);
+  font-weight: 500;
+}
+
+.nav-title {
+  color: var(--primary);
+  font-size: 1.2rem;
+  font-weight: 750;
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Data page map containers */
+.map-container {
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.map-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.region-map {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+.caption {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: left;
+  line-height: 1.4;
+  max-width: 100%;
+}
+
+/* Data page plot grid (2-column) */
+.plot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+  margin: 0;
+}
+
+/* Data page plot container override (fixed height for embedded plots) */
+.plot-grid .plot-container,
+.data-card .plot-container {
+  margin: 0;
+  height: 400px;
+}
+
+/* Unit selector (temperature, salinity toggles) */
 .unit-selector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .unit-selector label {
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin: 8px 5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 8px 5px;
 }
 
 .unit-selector input[type="radio"] {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
-/* Media Queries */
-@media (max-width: 768px) {
-    .nav-header {
-        padding: var(--spacing-sm) var(--spacing-md);
-    }
-
-    .nav-content a {
-        padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-lg);
-    }
-
-    .plot-grid {
-        grid-template-columns: 1fr;
-    }
+/* Data list (used on data description pages) */
+.data-list {
+  list-style-type: none;
+  padding-left: 0;
 }
 
-/* Timeline Control Styles */
-.timeline-control {
-    position: absolute;
-    top: 10px;
-    left: calc(280px + 24px);
-    right: 64px;
-    min-width: 250px;
-    max-width: none;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-    padding: 6px 16px;
-    box-sizing: border-box;
-    z-index: var(--z-map-controls);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+.data-list li {
+  margin-bottom: 15px;
 }
 
-.timeline-container {
-    display: flex;
-    flex-direction: column;
+.emoji {
+  font-size: 1.2em;
+  margin-right: 5px;
 }
 
-.timeline-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 0 6px;
+
+/* ==========================================================================
+   11. ANIMATIONS
+   ========================================================================== */
+
+.animation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
 }
 
-.timeline-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
+.animation-container {
+  background: var(--surface);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 4px var(--shadow);
 }
 
-.timeline-slider-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    margin-top: 6px;
+.animation-canvas {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
-.timeline-button {
-    background: var(--secondary);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    font-family: inherit;
-    font-size: 1rem;
-    font-weight: 500;
-    box-shadow: 0 1px 2px var(--shadow);
-    outline: none;
-    margin: 0 2px;
-    flex-shrink: 0;
-}
-
-.timeline-button:hover {
-    background-color: var(--accent);
-    transform: translateY(-1px);
-}
-
-.timeline-button:active {
-    transform: translateY(0);
-}
-
-.timeline-button i {
-    color: white;
-    font-size: 1rem;
-}
-
-.timeline-date {
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-primary);
-    min-width: 90px;
-    text-align: center;
-    padding: 4px 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    flex-shrink: 0;
-}
-
-/* Timeline Slider Styles */
-.timeline-slider-container {
-    margin-top: 8px;
-    padding: 0 6px;
-}
-
-.timeline-slider {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-    height: 6px;
-    border-radius: 3px;
-    background: #ddd;
-    outline: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    align-self: center;
-}
-
-.timeline-slider:hover {
-    opacity: 1;
-}
-
-.timeline-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--secondary);
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
-}
-
-.timeline-slider::-webkit-slider-thumb:hover {
-    background: var(--accent);
-    transform: scale(1.1);
-}
-
-.timeline-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--secondary);
-    cursor: pointer;
-    border: 2px solid white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
-}
-
-.timeline-slider::-moz-range-thumb:hover {
-    background: var(--accent);
-    transform: scale(1.1);
-}
-
-.slider-start-date,
-.slider-end-date {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    align-self: center;
-    flex-shrink: 0;
-    min-width: 55px;
-    text-align: center;
-}
-
-/* Hide slider date labels on very small screens to prevent crowding */
-@media (max-width: 480px) {
-    .slider-start-date,
-    .slider-end-date {
-        display: none;
-    }
-}
-
-/* Update the data-card containing the map to handle the controls */
-.data-card:has(#map-container) {
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 0;
-}
-
-/* Combined Control Styles */
-.combined-control {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: white;
-    border-radius: 8px;
-    padding: 4px 15px;
-    margin-top: 4px;
-    box-sizing: border-box;
-    gap: 10px;
-}
-
-/* Ensure bathymetry tiles are always on top */
-.leaflet-tile-pane .bathymetryLayer {
-  z-index: 1000 !important;
-}
-
-.leaflet-layer.bathymetryLayer {
-  z-index: 1000 !important;
-}
-
-/* Map Attribution Container */
-#map-attribution-container {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-top: 8px;
-  margin-bottom: 0;
-  font-size: 11px;
+.animation-label {
+  text-align: center;
   color: var(--text-secondary);
+  margin-top: var(--spacing-sm);
+  font-weight: 500;
+}
+
+
+/* ==========================================================================
+   12. FOOTER
+   ========================================================================== */
+
+footer {
+  background-color: var(--primary);
+  color: var(--surface);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+}
+
+.footer-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-section.left {
   text-align: left;
-  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
-  border: none;
 }
 
-#map-attribution-container a {
-  color: var(--text-secondary);
+.footer-section.center {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--surface);
+  opacity: 1;
+}
+
+.footer-section.right {
+  text-align: right;
+}
+
+.footer-section a {
+  color: var(--surface);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  opacity: 0.88;
+  transition: opacity var(--transition-fast);
+  display: inline-block;
 }
 
-#map-attribution-container a:hover {
-  color: var(--primary);
-  text-decoration: underline;
+.footer-section a:not(:has(img)) {
+  border-bottom: 1px solid transparent;
+  transition: opacity var(--transition-fast), border-bottom var(--transition-fast);
 }
 
-/* Style the Leaflet attribution control when it's in our custom container */
-#map-attribution-container .leaflet-control-attribution {
-  background: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-  font-size: inherit !important;
-  color: inherit !important;
-  position: static !important;
-  display: block !important;
-  visibility: visible !important;
-  white-space: normal !important;
-  max-width: none !important;
-  width: auto !important;
+.footer-section a:not(:has(img)):hover {
+  opacity: 1;
+  border-bottom: 1px solid var(--surface);
 }
 
-/* Scoped hyperlink styles for main content area */
+.footer-section img {
+  max-height: 40px;
+  width: auto;
+  margin: 0 var(--spacing-xs);
+  vertical-align: middle;
+  filter: brightness(0) invert(1);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  opacity: 0.88;
+}
+
+.footer-section img:hover {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+
+/* ==========================================================================
+   13. LINKS
+   ========================================================================== */
+
 .content-container a {
-  color: #0074d9; /* Blue */
+  color: #0074d9;
   text-decoration: none;
   font-weight: normal;
   transition: color 0.2s, font-weight 0.2s;
@@ -1522,44 +1358,23 @@ footer {
 
 .content-container a:hover,
 .content-container a:focus {
-  color: #0056b3; /* Slightly darker blue on hover */
+  color: #0056b3;
   font-weight: bold;
   text-decoration: none;
 }
 
 .content-container a:visited {
-  color: #0074d9; /* Keep visited links blue */
+  color: #0074d9;
   text-decoration: none;
   font-weight: normal;
 }
 
-.timeline-date-input {
-    color: var(--primary);
-    font-weight: 600;
-    font-family: 'Inter', sans-serif;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    text-align: center;
-    font-size: 1rem;
-    padding: 4px 8px;
-    flex: 0 1 140px;
-    min-width: 85px;
-    max-width: 160px;
-    outline: none;
-    box-shadow: none;
-    cursor: pointer;
-}
 
-body.modal-open {
-  overflow: hidden;
-}
+/* ==========================================================================
+   14. MOBILE BOTTOM SHEET & TOGGLE
+   ========================================================================== */
 
-/* ============================================================
-   Mobile Panel Toggle Button & Bottom Sheet Backdrop
-   ============================================================ */
-
-/* Hidden on desktop by default */
+/* Hidden on desktop */
 .mobile-panel-toggle {
   display: none;
 }
@@ -1580,13 +1395,169 @@ body.modal-open {
   display: block;
 }
 
-/* Drag handle at top of bottom sheet */
 .mobile-sheet-handle {
   display: none;
 }
 
+
+/* ==========================================================================
+   15. RESPONSIVE OVERRIDES
+   ========================================================================== */
+
+/* ---------- Tablet / Small Desktop (max-width: 768px) ---------- */
+
 @media (max-width: 768px) {
-  /* Floating toggle button on the map */
+
+  /* Base */
+  :root {
+    --font-size-base: 14px;
+  }
+
+  /* Layout */
+  .content-container,
+  .map-page.content-container {
+    padding: 0 var(--spacing-sm);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Cards — disable hover transform (breaks position:fixed) */
+  .data-card {
+    transition: none;
+  }
+  .data-card:hover {
+    transform: none;
+  }
+
+  /* Header */
+  .logos {
+    display: none;
+  }
+  header {
+    justify-content: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  .title h1 {
+    text-align: center;
+    font-size: 1.4rem;
+  }
+
+  /* Navbar */
+  .navbar ul {
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .navbar a {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.9rem;
+  }
+
+  /* Map */
+  #map-container {
+    height: 60vh;
+  }
+
+  /* Control panel → bottom sheet */
+  .leaflet-control.custom-control {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset !important;
+    max-height: 65vh !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    z-index: var(--z-mobile-panel) !important;
+    overflow-y: auto !important;
+    padding: 0 12px 20px !important;
+    pointer-events: none !important;
+  }
+  .leaflet-control.custom-control.mobile-open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+  .leaflet-control.custom-control .control-container {
+    max-height: none;
+    overflow-y: visible;
+    padding: 0;
+  }
+  .source-filters, .layer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tappable checkbox rows (replace small checkboxes) */
+  .checkbox-group input[type="checkbox"] { display: none; }
+  .checkbox-group {
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .checkbox-group .control-label { font-size: 14px; }
+  .checkbox-group.selected {
+    background: rgba(44, 136, 217, 0.15);
+  }
+
+  /* Hide polygon area-select on mobile (impractical with touch) */
+  .select-button { display: none; }
+
+  /* Timeline — full width */
+  .timeline-control {
+    left: 10px !important;
+    right: 46px !important;
+  }
+
+  /* Layer legends — horizontal bar at bottom */
+  #sst-legend, #sss-legend, #chl-legend,
+  #ostia-sst-legend, #ostia-anomaly-legend,
+  #doppio-legend, #fishbot-legend {
+    left: 50%; right: auto; bottom: 64px;
+    transform: translateX(-50%);
+    min-width: 280px; max-width: 300px;
+    min-height: auto; max-height: 80px;
+  }
+  #sst-legend .plotly, #sss-legend .plotly, #chl-legend .plotly,
+  #ostia-sst-legend .plotly, #ostia-anomaly-legend .plotly,
+  #doppio-legend .plotly, #fishbot-legend .plotly {
+    max-width: 280px; max-height: 70px;
+  }
+
+  /* Plots — single column */
+  #plots {
+    grid-template-columns: 1fr;
+  }
+  .plot-container {
+    min-height: 350px;
+  }
+
+  /* Data page navigation */
+  .nav-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  .nav-content a {
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-sm) var(--spacing-lg);
+  }
+  .plot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Footer */
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+  .footer-section {
+    text-align: center !important;
+    min-width: 100%;
+  }
+
+  /* Mobile panel toggle button */
   .mobile-panel-toggle {
     display: flex;
     align-items: center;
@@ -1609,14 +1580,13 @@ body.modal-open {
     white-space: nowrap;
     transition: background-color var(--transition-fast), transform var(--transition-fast);
   }
-
   .mobile-panel-toggle:hover,
   .mobile-panel-toggle:active {
     background: var(--accent);
     transform: translateX(-50%) translateY(-1px);
   }
 
-  /* Sheet drag handle */
+  /* Bottom sheet drag handle */
   .mobile-sheet-handle {
     display: flex;
     justify-content: center;
@@ -1626,7 +1596,6 @@ body.modal-open {
     width: 100%;
     flex-shrink: 0;
   }
-
   .mobile-sheet-handle::before {
     content: '';
     display: block;
@@ -1637,3 +1606,77 @@ body.modal-open {
   }
 }
 
+/* ---------- Phone (max-width: 480px) ---------- */
+
+@media (max-width: 480px) {
+  .title h1 {
+    font-size: 1.15rem;
+  }
+
+  .navbar {
+    padding: var(--spacing-xs);
+  }
+  .navbar ul {
+    gap: var(--spacing-xs);
+  }
+  .navbar a {
+    font-size: 0.8rem;
+    padding: var(--spacing-xs);
+  }
+
+  #map-container {
+    height: 50vh;
+  }
+
+  .data-card {
+    padding: var(--spacing-md);
+  }
+  .data-card h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Hide slider date labels to prevent crowding */
+  .slider-start-date,
+  .slider-end-date {
+    display: none;
+  }
+}
+
+
+/* ==========================================================================
+   16. BROWSER FIXES (Safari, iOS)
+   ========================================================================== */
+
+@supports (-webkit-touch-callout: none) {
+  #map-container {
+    height: -webkit-fill-available;
+    min-height: 300px;
+  }
+
+  .logos {
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+  }
+
+  .logos a:hover {
+    -webkit-transform: scale(1.05);
+    transform: scale(1.05);
+  }
+}
+
+/* Fallback for browsers without gap support */
+@supports not (gap: 1rem) {
+  .logos {
+    margin: -0.5rem;
+  }
+  .logos a {
+    margin: 0.5rem;
+  }
+  .navbar ul {
+    margin: -0.5rem;
+  }
+  .navbar li {
+    margin: 0.5rem;
+  }
+}
