@@ -15,7 +15,7 @@ export const DATE_FILES = {
   OSTIA_SST: `${BASE_DATA_PATH}/OSTIA_SST/sst_dates.txt`,
   OSTIA_anomaly: `${BASE_DATA_PATH}/OSTIA_anomaly/ssta_dates.txt`,
   DOPPIO: `${BASE_DATA_PATH}/doppio/doppio_dates.txt`,
-  fishbot: `${BASE_DATA_PATH}/OSTIA_anomaly/ssta_dates.txt` // placeholder for highlight consistency
+  fishbot: `${BASE_DATA_PATH}/FIShBOT/fishbot_dates.txt`
 };
 
 // Toggle element IDs per layer

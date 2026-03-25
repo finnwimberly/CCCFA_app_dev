@@ -190,6 +190,7 @@ async function fetchAvailableDates() {
     const ostiaSstDatesPath = DATE_FILES.OSTIA_SST;
     const doppioDatesPath = DATE_FILES.DOPPIO;
     const ostiaAnomalyDatesPath = DATE_FILES.OSTIA_anomaly;
+    const fishbotDatesPath = DATE_FILES.fishbot;
 
     const allDateArrays = await Promise.all([
         fetchLayerDates(sstDatesPath),
@@ -197,12 +198,13 @@ async function fetchAvailableDates() {
         fetchLayerDates(chloroDatesPath),
         fetchLayerDates(ostiaSstDatesPath),
         fetchLayerDates(doppioDatesPath),
-        fetchLayerDates(ostiaAnomalyDatesPath)
+        fetchLayerDates(ostiaAnomalyDatesPath),
+        fetchLayerDates(fishbotDatesPath)
     ]);
 
     const allDatesSet = new Set(allDateArrays.flat());
     const uniqueDates = Array.from(allDatesSet);
-    
+
     // Dates are in YYYYDDD format, so a simple string sort is correct.
     return uniqueDates.sort();
 }
