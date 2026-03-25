@@ -457,6 +457,7 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
         colorscale: colorscale,
         showscale: true,
         hoverinfo: 'none',
+        opacity: 0,
         colorbar: {
           orientation: mob ? 'h' : 'v', len: 0.85,
           thickness: mob ? 15 : 20, tickformat: '.1f',

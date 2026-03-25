@@ -297,7 +297,8 @@ function createLegend(layerType, date) {
         colorscale: colorscale,
         showscale: true,
         hoverinfo: 'none',
-        colorbar: cbConf
+        colorbar: cbConf,
+        opacity: 0
       };
       
       // Apply different tick positioning for CHL log scale
