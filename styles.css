@@ -967,24 +967,24 @@ header {
 .highlight-ostia-only { background-color: #FF9800; }
 .highlight-doppio-only { background-color: #2196F3; }
 
-/* Show stripe for classes that include chlorophyll */
-.highlight-all::after,
-.highlight-all-no-chloro::after,
-.highlight-all-sst::after,
-.daterangepicker .calendar-table td.highlight-all::after,
-.daterangepicker .calendar-table td.highlight-all-no-chloro::after,
-.daterangepicker .calendar-table td.highlight-all-sst::after {
-  display: block;
-}
-
-/* Hide stripe for classes without chlorophyll */
+/* Show stripe for classes WITHOUT HR SST (stripe = no HR SST) */
 .highlight-all-no-sst::after,
 .highlight-all-no-sss-sst::after,
 .highlight-ostia-only::after,
-.highlight-doppio-only::after,
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
 .daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
-.daterangepicker .calendar-table td.highlight-ostia-only::after,
+.daterangepicker .calendar-table td.highlight-ostia-only::after {
+  display: block;
+}
+
+/* Hide stripe for classes WITH HR SST and non-OSTIA classes */
+.highlight-all::after,
+.highlight-all-no-sss::after,
+.highlight-all-sst::after,
+.highlight-doppio-only::after,
+.daterangepicker .calendar-table td.highlight-all::after,
+.daterangepicker .calendar-table td.highlight-all-no-sss::after,
+.daterangepicker .calendar-table td.highlight-all-sst::after,
 .daterangepicker .calendar-table td.highlight-doppio-only::after {
   display: none;
 }
@@ -1016,15 +1016,15 @@ header {
   pointer-events: none;
 }
 
-.daterangepicker .calendar-table td.highlight-all::after,
-.daterangepicker .calendar-table td.highlight-all-no-sss::after,
-.daterangepicker .calendar-table td.highlight-all-sst::after {
-  display: block;
-}
-
 .daterangepicker .calendar-table td.highlight-all-no-sst::after,
 .daterangepicker .calendar-table td.highlight-all-no-sss-sst::after,
 .daterangepicker .calendar-table td.highlight-ostia-only::after {
+  display: block;
+}
+
+.daterangepicker .calendar-table td.highlight-all::after,
+.daterangepicker .calendar-table td.highlight-all-no-sss::after,
+.daterangepicker .calendar-table td.highlight-all-sst::after {
   display: none;
 }
 

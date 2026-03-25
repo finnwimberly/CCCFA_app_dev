@@ -215,8 +215,8 @@ const infoModal = `
     <h4>Layer Selection Color Scheme</h4>
     <p class="modal-subtitle">
       To view data availability by day, click on the date box to the left of the timeline. 
-      The color of each date on the calendar drop-down indicates which data layers are available. A diagonal stripe indicates 
-      that high-resolution SST data is available for that date. Date selection can be done via the calendar or slider. 
+      The color of each date on the calendar drop-down indicates which data layers are available. A diagonal stripe indicates
+      that high-resolution SST data is NOT available for that date. Date selection can be done via the calendar or slider.
       The selected date can be changed with the arrows. If a surface layer is selected, the arrows jump to the next/previous 
       available date for that layer. Otherwise, they change the date by one day.
     </p>
