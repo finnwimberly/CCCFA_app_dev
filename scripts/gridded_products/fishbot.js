@@ -97,8 +97,8 @@ async function getVariableColor(value, variableType) {
     // Normalize value to 0-1 range
     const normalized = Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue)));
     
-    // Map to colormap index
-    const colorIndex = Math.round(normalized * (colormap.length - 1));
+    // Map to colormap index (skip index 0 which is transparent)
+    const colorIndex = 1 + Math.round(normalized * (colormap.length - 2));
     const color = colormap[colorIndex];
     
     return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
@@ -421,13 +421,11 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
         maxValue = variableConfig[variableType].convertToImperial(maxValue);
       }
 
-      // Create colorscale (matching other layer format)
-      const colorscale = rgbValues.map((rgb, i) => {
+      // Create colorscale — skip index 0 (transparent placeholder)
+      const validColors = rgbValues.slice(1);
+      const colorscale = validColors.map((rgb, i) => {
         const [index, r, g, b, a] = rgb;
-        if (i === 0 || i === rgbValues.length - 1) {
-          return [i / (rgbValues.length - 1), 'rgba(255, 255, 255, 0)'];
-        }
-        return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
+        return [i / (validColors.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
       });
 
       // Get appropriate unit label

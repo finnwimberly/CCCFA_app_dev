@@ -255,12 +255,11 @@ function createLegend(layerType, date) {
         }
       }
 
-      const colorscale = rgbValues.map((rgb, i) => {
-        const [index, r, g, b, a] = rgb; // Ensure we use all 5 columns (including alpha)
-        if (i === 0 || i === rgbValues.length - 1) {
-          return [i / (rgbValues.length - 1), 'rgba(255, 255, 255, 0)'];
-        }
-        return [i / (rgbValues.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
+      // Skip index 0 (transparent placeholder) for legend colorscale
+      const validColors = rgbValues.slice(1);
+      const colorscale = validColors.map((rgb, i) => {
+        const [index, r, g, b, a] = rgb;
+        return [i / (validColors.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
       });
 
       const mob = window.innerWidth <= 768;
