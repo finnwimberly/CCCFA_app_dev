@@ -1,5 +1,5 @@
 import { map } from '../map/core.js';
-import { FISHBOT_DATA } from '../config.js';
+import { FISHBOT_DATA, FISHBOT_SEASONAL_LIMITS, getSeasonFromDate } from '../config.js';
 
 // Global variables
 let fishbotData = [];
@@ -17,7 +17,7 @@ const variableConfig = {
     displayName: 'Temperature',
     units: { metric: '°C', imperial: '°F' },
     convertToImperial: (value) => (value * 9/5) + 32,
-    range: { min: 4, max: 26.5 }
+    range: { min: 0, max: 29 }
   },
   oxygen: {
     colormapFile: FISHBOT_DATA.COLORMAPS.oxygen,
@@ -36,6 +36,17 @@ const variableConfig = {
     range: { min: 28, max: 36 }
   }
 };
+
+// Get seasonal min/max for a fishbot variable, falling back to the full range
+function getSeasonalRange(variableType) {
+  const season = getSeasonFromDate(currentLayerDate);
+  const seasonalLimits = FISHBOT_SEASONAL_LIMITS[variableType];
+  if (seasonalLimits && seasonalLimits[season]) {
+    const [min, max] = seasonalLimits[season];
+    return { min, max };
+  }
+  return variableConfig[variableType].range;
+}
 
 // Function to get value for display based on variable type and unit system
 function getValueForDisplay(value, variableType) {
@@ -91,10 +102,10 @@ async function getVariableColor(value, variableType) {
       return `rgb(${r}, 0, ${b})`;
     }
     
-    // Use range from variable configuration
-    const { min: minValue, max: maxValue } = variableConfig[variableType].range;
-    
-    // Normalize value to 0-1 range
+    // Use seasonal range for better color differentiation
+    const { min: minValue, max: maxValue } = getSeasonalRange(variableType);
+
+    // Normalize value to 0-1 range (clamped to seasonal window)
     const normalized = Math.max(0, Math.min(1, (value - minValue) / (maxValue - minValue)));
     
     // Map to colormap index (skip index 0 which is transparent)
@@ -412,8 +423,8 @@ function createFishbotLegend(layerDate, variableType = 'temperature') {
         .filter((line) => line.trim())
         .map((line) => line.split(' ').map(Number));
 
-      // Use range from variable configuration
-      let { min: minValue, max: maxValue } = variableConfig[variableType].range;
+      // Use seasonal range for legend
+      let { min: minValue, max: maxValue } = getSeasonalRange(variableType);
 
       // Convert to appropriate units if needed
       if (unitSystem === 'imperial') {

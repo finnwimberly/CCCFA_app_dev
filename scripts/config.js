@@ -117,6 +117,14 @@ export const SEASONAL_LIMITS_GLOBAL = {
   DOPPIO:        { winter: [0, 12],      spring: [2, 16],     summer: [6, 20],     fall: [2, 16]    },
 };
 
+// FishBot bottom-variable seasonal limits
+// Full colormap range is 0–29 °C for temperature, but each season uses a tighter window
+export const FISHBOT_SEASONAL_LIMITS = {
+  temperature: { winter: [2, 18],  spring: [2, 20],  summer: [6, 28],  fall: [4, 28]  },
+  oxygen:      { winter: [2, 12],  spring: [2, 12],  summer: [2, 12],  fall: [2, 12]  },
+  salinity:    { winter: [28, 36], spring: [28, 36], summer: [28, 36], fall: [28, 36] },
+};
+
 // Local (Cape Cod) limits used for zoom ZOOM_THRESHOLD+
 export const SEASONAL_LIMITS_LOCAL = {
   SST:           { winter: [0, 16],      spring: [4, 20],     summer: [10, 22],    fall: [4, 24]    },
