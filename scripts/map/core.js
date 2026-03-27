@@ -30,7 +30,7 @@ if (attributionContainer) {
   });
   attribution.addAttribution('Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri');
   attribution.addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
-  attribution.addAttribution(' | <strong>Data Layers:</strong>');
+  // attribution.addAttribution(' | <strong>Data Layers:</strong>');
   attribution.addTo(map);
   const attributionElement = attribution.getContainer();
   attributionContainer.appendChild(attributionElement);
