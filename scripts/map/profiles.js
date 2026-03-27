@@ -36,7 +36,7 @@ function loadProfiles(startDate, endDate, selectedSources = []) {
   if (!emoltClusterGroup) {
     emoltClusterGroup = L.markerClusterGroup({
       maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
+      spiderfyOnMaxZoom: false,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       disableClusteringAtZoom: 10
@@ -471,9 +471,6 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
 // Add a function to set up the zoom handler
 function setupZoomHandler() {
   map.on('zoomend', function() {
-    // Skip icon updates while a cluster is spidered — setIcon() breaks spider positioning
-    if (emoltClusterGroup && emoltClusterGroup._spiderfied) return;
-
     const zoomLevel = map.getZoom();
     // Update all EMOLT markers based on new zoom level
     Object.entries(state.markers).forEach(([id, markerInfo]) => {
