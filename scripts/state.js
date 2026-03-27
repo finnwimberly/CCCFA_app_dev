@@ -20,3 +20,17 @@ export const controlsState = {
         fishbot: []
     }
 };
+
+// Simple pub/sub for cross-module events (avoids window coupling and load-order issues)
+const _listeners = {};
+
+export function on(event, callback) {
+    if (!_listeners[event]) _listeners[event] = [];
+    _listeners[event].push(callback);
+}
+
+export function emit(event, data) {
+    if (_listeners[event]) {
+        _listeners[event].forEach(cb => cb(data));
+    }
+}

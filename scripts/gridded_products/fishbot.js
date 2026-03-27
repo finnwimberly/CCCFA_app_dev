@@ -1,6 +1,7 @@
 import { map } from '../map/core.js';
 import { FISHBOT_DATA, FISHBOT_SEASONAL_LIMITS, getSeasonFromDate } from '../config.js';
 import { createColorbarLegend } from './legend.js';
+import { on } from '../state.js';
 
 // Global variables
 let fishbotData = [];
@@ -519,10 +520,8 @@ document.querySelectorAll('input[name="unit"]').forEach((radio) => {
   radio.addEventListener('change', updateFishbotUnits);
 });
 
-// Expose function to global window for cross-module access
-if (typeof window !== 'undefined') {
-  window.updateFishbotForDate = updateFishbotForDate;
-}
+// Subscribe to date changes from layers.js via state event bus
+on('dateChange', updateFishbotForDate);
 
 // Export functions for use in other modules
 export { 

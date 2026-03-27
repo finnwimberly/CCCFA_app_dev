@@ -1,5 +1,5 @@
 import { map } from '../map/core.js';
-import { controlsState, layerState } from '../state.js';
+import { controlsState, layerState, emit } from '../state.js';
 import { getTilePath, getColormapPath, BATHYMETRY_TILES, SEASONAL_LIMITS_GLOBAL, SEASONAL_LIMITS_LOCAL, ZOOM_THRESHOLD, getSeasonFromDate } from '../config.js';
 import { createColorbarLegend } from './legend.js';
 
@@ -296,10 +296,8 @@ function updateLayerPaths(date) {
     createLegend('DOPPIO', date);
   }
 
-  // Update fishbot layer if it's active (using dynamic import to avoid circular dependency)
-  if (typeof window !== 'undefined' && window.updateFishbotForDate) {
-    window.updateFishbotForDate(date);
-  }
+  // Notify fishbot (and any other subscribers) of date change via state event bus
+  emit('dateChange', date);
 }
 
 map.on('zoomend', () => {
