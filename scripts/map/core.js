@@ -4,7 +4,7 @@
 const map = L.map('map', {
   center: [41.65, -70.2962], // Center on Cape Cod
   zoom: 7,                   // Initial zoom level
-  maxZoom: 10,               // Cap zoom to match data layer tile limits
+  maxZoom: 11,              
   crs: L.CRS.EPSG3857,       // Use standard Web Mercator CRS
   scrollWheelZoom: false,    // Disable zooming with scroll wheel
   zoomControl: false,        // Disable default zoom controls (we'll add them manually)
