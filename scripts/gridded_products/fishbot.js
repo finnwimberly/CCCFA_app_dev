@@ -1,5 +1,6 @@
 import { map } from '../map/core.js';
 import { FISHBOT_DATA, FISHBOT_SEASONAL_LIMITS, getSeasonFromDate } from '../config.js';
+import { createColorbarLegend } from './legend.js';
 
 // Global variables
 let fishbotData = [];
@@ -373,149 +374,32 @@ async function createFishbotLayer(layerDate, tolerance = 2, variableType = 'temp
 
 // Function to create professional Plotly-based legend (matching other layers)
 function createFishbotLegend(layerDate, variableType = 'temperature') {
-  const legendContainer = document.getElementById('fishbot-legend');
-  if (!legendContainer) {
-    console.error('Fishbot legend container not found');
-    return;
-  }
-  
-  // Hide other legends (matching other layer behavior)
-  const allLegendContainers = document.querySelectorAll('[id$="-legend"]');
-  allLegendContainers.forEach(container => {
-    if (container.id !== 'fishbot-legend') {
-      container.style.display = 'none';
-      container.innerHTML = '';
-      container.style.background = 'none';
-      container.style.border = 'none';
-      container.style.boxShadow = 'none';
-      container.style.padding = '0';
-      container.style.margin = '0';
-    }
-  });
-
-  // Set up legend container styling (matching other layers)
-  legendContainer.style.background = 'white';
-  legendContainer.style.border = '1px solid #ddd';
-  legendContainer.style.borderRadius = '4px';
-  legendContainer.style.padding = '10px';
-  legendContainer.style.margin = '10px';
-  legendContainer.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-  legendContainer.style.display = 'block';
-
-  // Check if a valid date is provided
   if (!layerDate) {
-    legendContainer.style.display = 'none';
+    const legendContainer = document.getElementById('fishbot-legend');
+    if (legendContainer) legendContainer.style.display = 'none';
     return;
   }
 
-  // Get current unit system
   const unitSystem = document.querySelector('input[name="unit"]:checked').value;
-  
-  // Use colormap file for the current variable
-  const colormapFile = variableConfig[variableType].colormapFile;
 
-  // Fetch colormap data
-  fetch(colormapFile)
-    .then((res) => res.text())
-    .then((colormapText) => {
-      
-      const rgbValues = colormapText.split('\n')
-        .filter((line) => line.trim())
-        .map((line) => line.split(' ').map(Number));
+  // Use seasonal range for legend
+  let { min: minValue, max: maxValue } = getSeasonalRange(variableType);
 
-      // Use seasonal range for legend
-      let { min: minValue, max: maxValue } = getSeasonalRange(variableType);
+  // Convert to appropriate units if needed
+  if (unitSystem === 'imperial') {
+    minValue = variableConfig[variableType].convertToImperial(minValue);
+    maxValue = variableConfig[variableType].convertToImperial(maxValue);
+  }
 
-      // Convert to appropriate units if needed
-      if (unitSystem === 'imperial') {
-        minValue = variableConfig[variableType].convertToImperial(minValue);
-        maxValue = variableConfig[variableType].convertToImperial(maxValue);
-      }
+  const unitLabel = variableConfig[variableType].units[unitSystem];
 
-      // Create colorscale — skip index 0 (transparent placeholder)
-      const validColors = rgbValues.slice(1);
-      const colorscale = validColors.map((rgb, i) => {
-        const [index, r, g, b, a] = rgb;
-        return [i / (validColors.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
-      });
-
-      // Get appropriate unit label
-      const unitLabel = variableConfig[variableType].units[unitSystem];
-
-      const mob = window.innerWidth <= 768;
-      const layout = {
-        title: {
-          text: `${variableConfig[variableType].displayName} (${unitLabel})`,
-          font: { size: mob ? 11 : 14, family: 'Arial, sans-serif', color: '#333' }
-        },
-        width: mob ? 280 : 120,
-        height: mob ? 70 : 280,
-        margin: mob ? { l: 10, r: 10, t: 25, b: 0 } : { l: 0, r: 30, t: 40, b: 20 },
-        xaxis: { visible: false },
-        yaxis: { visible: false },
-        coloraxis: {
-          colorbar: {
-            orientation: mob ? 'h' : 'v', len: 0.85,
-            thickness: mob ? 15 : 20, tickformat: '.1f',
-            x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
-          }
-        }
-      };
-
-      const legendData = {
-        z: [[minValue, maxValue]],
-        type: 'heatmap',
-        colorscale: colorscale,
-        showscale: true,
-        hoverinfo: 'none',
-        opacity: 0,
-        colorbar: {
-          orientation: mob ? 'h' : 'v', len: 0.85,
-          thickness: mob ? 15 : 20, tickformat: '.1f',
-          x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle',
-          tickmode: 'linear', tick0: minValue,
-          dtick: (maxValue - minValue) / 5
-        }
-      };
-
-      // Create the Plotly plot (matching other layer approach)
-      try {
-        const container = document.getElementById('fishbot-legend');
-        if (!container) {
-          throw new Error('FishBot legend container not found');
-        }
-        
-        // Clear any existing content
-        container.innerHTML = '';
-        
-        // Create the plot
-        Plotly.newPlot('fishbot-legend', [legendData], layout, {displayModeBar: false})
-          .then(() => {
-            const plotElement = container.querySelector('.plotly');
-            if (plotElement) {
-              console.log(`FishBot ${variableConfig[variableType].displayName} legend created successfully`);
-            } else {
-              console.error('Plot element not found in fishbot legend container');
-            }
-          })
-          .catch(err => {
-            console.error(`Error creating FishBot ${variableConfig[variableType].displayName} Plotly plot:`, err);
-          });
-        
-        // Ensure legend container is visible
-        legendContainer.style.display = 'block';
-        
-      } catch (err) {
-        console.error(`Error in FishBot ${variableConfig[variableType].displayName} legend creation process:`, err);
-      }
-    })
-    .catch((err) => {
-      console.error(`Error loading FishBot ${variableConfig[variableType].displayName} legend data:`, err);
-      // Hide the legend container on error
-      legendContainer.style.display = 'none';
-    });
-
-
+  createColorbarLegend({
+    legendId: 'fishbot-legend',
+    colormapUrl: variableConfig[variableType].colormapFile,
+    minValue,
+    maxValue,
+    title: `${variableConfig[variableType].displayName} (${unitLabel})`
+  });
 }
 
 // Function to toggle fishbot layer

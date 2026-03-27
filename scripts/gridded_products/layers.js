@@ -1,6 +1,7 @@
 import { map } from '../map/core.js';
 import { controlsState, layerState } from '../state.js';
 import { getTilePath, getColormapPath, BATHYMETRY_TILES, SEASONAL_LIMITS_GLOBAL, SEASONAL_LIMITS_LOCAL, ZOOM_THRESHOLD, getSeasonFromDate } from '../config.js';
+import { createColorbarLegend } from './legend.js';
 
 // Define the bounds for overlays
 const sstBounds = [
@@ -154,228 +155,88 @@ function showModal(message) {
 
 // Helper function to generate legend
 function createLegend(layerType, date) {
-  // Get the legend container element
   const legendId = `${layerType.toLowerCase().replace('_', '-')}-legend`;
   console.log(`Creating legend for ${layerType}`);
-  
-  const legendContainer = document.getElementById(legendId);
-  
-  // Hide all other legend containers first and remove their styling
-  const allLegendContainers = document.querySelectorAll('[id$="-legend"]');
-  allLegendContainers.forEach(container => {
-    if (container.id !== legendId) {
-      container.style.display = 'none';
-      container.innerHTML = ''; // Clear their contents
-      container.style.background = 'none';
-      container.style.border = 'none';
-      container.style.boxShadow = 'none';
-      container.style.padding = '0';
-      container.style.margin = '0';
-    }
-  });
-
-  // Reset the current container's styling before creating new content
-  if (legendContainer) {
-    legendContainer.style.background = 'white';
-    legendContainer.style.border = '1px solid #ddd';
-    legendContainer.style.borderRadius = '4px';
-    legendContainer.style.padding = '10px';
-    legendContainer.style.margin = '10px';
-    legendContainer.style.boxShadow = '0 2px 4px rgba(0,0,0,0)';
-  }
 
   // Determine the active overlay layer
-  const overlay = layerType === 'SST' ? sstOverlay 
-                 : layerType === 'SSS' ? sssOverlay 
+  const overlay = layerType === 'SST' ? sstOverlay
+                 : layerType === 'SSS' ? sssOverlay
                  : layerType === 'CHL' ? chlOverlay
                  : layerType === 'OSTIA_SST' ? ostiaSstOverlay
                  : layerType === 'OSTIA_anomaly' ? ostiaAnomalyOverlay
                  : layerType === 'DOPPIO' ? doppioOverlay
                  : null;
 
-  // Check the selected unit system (metric or imperial)
-  const unitSystem = document.querySelector('input[name="unit"]:checked').value;
-
   // Check if a valid date is provided
   if (!date) {
-    // Uncheck the layer toggle box
     const checkbox = document.getElementById(`${layerType.toLowerCase().replace('_', '-')}-toggle`);
-    if (checkbox) {
-      checkbox.checked = false; // Uncheck the checkbox
-    }
+    if (checkbox) checkbox.checked = false;
 
-    // Hide the legend container
-    if (legendContainer) {
-      legendContainer.style.display = 'none';
-    }
+    const legendContainer = document.getElementById(legendId);
+    if (legendContainer) legendContainer.style.display = 'none';
 
-    // Remove the layer from the map
-    if (map.hasLayer(overlay)) {
-      map.removeLayer(overlay); // Ensure the layer is not selected
-    }
+    if (map.hasLayer(overlay)) map.removeLayer(overlay);
 
-    // Show the modal message
     showModal("Please select a date for the layer first.");
-    return; // Exit the function
+    return;
   }
+
+  // Check the selected unit system (metric or imperial)
+  const unitSystem = document.querySelector('input[name="unit"]:checked').value;
 
   // Look up seasonal min/max from config, switching limits at zoom threshold
   const season = getSeasonFromDate(date);
   const limits = map.getZoom() >= ZOOM_THRESHOLD ? SEASONAL_LIMITS_LOCAL : SEASONAL_LIMITS_GLOBAL;
-  const [minValue, maxValue] = limits[layerType][season];
+  let [minValue, maxValue] = limits[layerType][season];
 
-  const loadLegendData = Promise.all([
-    fetch(getColormapPath(layerType, date)).then((res) => {
-      if (!res.ok) throw new Error(`Failed to fetch colormap for ${layerType} ${season}`);
-      return res.text();
-    }),
-    Promise.resolve({ min: minValue, max: maxValue }),
-  ]);
+  // Convert to imperial units if needed
+  if (unitSystem === 'imperial') {
+    if (layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO') {
+      minValue = (minValue * 9) / 5 + 32;
+      maxValue = (maxValue * 9) / 5 + 32;
+    } else if (layerType === 'OSTIA_anomaly') {
+      minValue = minValue * 1.8;
+      maxValue = maxValue * 1.8;
+    }
+  }
 
-  loadLegendData
-    .then(([colormapText, range]) => {
+  // Build title
+  const title = layerType === 'CHL' ? 'Chl (mg/m³)'
+    : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
+    : layerType === 'OSTIA_anomaly' ? `SSTA (${unitSystem === 'imperial' ? '°F' : '°C'})`
+    : layerType === 'DOPPIO' ? `Bottom Temp. (${unitSystem === 'imperial' ? '°F' : '°C'})`
+    : 'SSS (PSU)';
 
-      const rgbValues = colormapText.split('\n')
-        .filter((line) => line.trim())
-        .map((line) => line.split(' ').map(Number));
+  // Build tick config — CHL uses log-scale ticks
+  let tickOverride = null;
+  if (layerType === 'CHL') {
+    const numTicks = 6;
+    const logMin = Math.log10(minValue);
+    const logMax = Math.log10(maxValue);
 
-      let minValue = range.min;
-      let maxValue = range.max;
+    const logValues = Array.from({ length: numTicks }, (_, i) =>
+      Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin))
+    );
 
-      // Convert to Fahrenheit if the unit system is imperial
-      if (unitSystem === 'imperial') {
-        if (layerType === 'SST' || layerType === 'OSTIA_SST' || layerType === 'DOPPIO') {
-          // For absolute temperatures, convert using the full formula
-          minValue = (minValue * 9) / 5 + 32;
-          maxValue = (maxValue * 9) / 5 + 32;
-        } else if (layerType === 'OSTIA_anomaly') {
-          // For anomalies, just multiply by 1.8 (no offset needed)
-          minValue = minValue * 1.8;
-          maxValue = maxValue * 1.8;
-        }
-      }
+    const tickPositions = logValues.map(v =>
+      minValue + ((Math.log10(v) - logMin) / (logMax - logMin)) * (maxValue - minValue)
+    );
 
-      // Skip index 0 (transparent placeholder) for legend colorscale
-      const validColors = rgbValues.slice(1);
-      const colorscale = validColors.map((rgb, i) => {
-        const [index, r, g, b, a] = rgb;
-        return [i / (validColors.length - 1), `rgba(${r}, ${g}, ${b}, ${a / 255})`];
-      });
+    tickOverride = {
+      tickmode: 'array',
+      tickvals: tickPositions,
+      ticktext: logValues.map(t => t.toPrecision(2))
+    };
+  }
 
-      const mob = window.innerWidth <= 768;
-      const layout = {
-        title: {
-          text: layerType === 'CHL' ? 'Chl (mg/m³)'
-                : layerType === 'SST' || layerType === 'OSTIA_SST' ? `SST (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                : layerType === 'OSTIA_anomaly' ? `SSTA (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                : layerType === 'DOPPIO' ? `Bottom Temp. (${unitSystem === 'imperial' ? '°F' : '°C'})`
-                : 'SSS (PSU)',
-          font: { size: mob ? 11 : 14, family: 'Arial, sans-serif', color: '#333' }
-        },
-        width: mob ? 280 : 120,
-        height: mob ? 70 : 280,
-        margin: mob ? { l: 10, r: 10, t: 25, b: 0 } : { l: 0, r: 30, t: 40, b: 20 },
-        xaxis: { visible: false },
-        yaxis: { visible: false },
-        coloraxis: {
-          colorbar: {
-            orientation: mob ? 'h' : 'v', len: 0.85,
-            thickness: mob ? 15 : 20, tickformat: '.1f',
-            x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
-          }
-        }
-      };
-
-      const cbConf = {
-        orientation: mob ? 'h' : 'v', len: 0.85,
-        thickness: mob ? 15 : 20, tickformat: '.1f',
-        x: 0.5, xanchor: 'center', y: 0.5, yanchor: 'middle'
-      };
-      const legendData = {
-        z: [[minValue, maxValue]],
-        type: 'heatmap',
-        colorscale: colorscale,
-        showscale: true,
-        hoverinfo: 'none',
-        colorbar: cbConf,
-        opacity: 0
-      };
-      
-      // Apply different tick positioning for CHL log scale
-      if (layerType === 'CHL') {
-        const numTicks = 6;  // Number of tick marks
-        const logMin = Math.log10(minValue);
-        const logMax = Math.log10(maxValue);
-    
-        // Step 1: Generate log-scaled values for labels
-        const logValues = Array.from({ length: numTicks }, (_, i) =>
-            Math.pow(10, logMin + (i / (numTicks - 1)) * (logMax - logMin))
-        );
-    
-        // Step 2: Map log values to linear positions (0 to 1) for colorbar
-        // const tickPositions = logValues.map(v => (Math.log10(v) - logMin) / (logMax - logMin));
-        const minColorbar = 1;  // Min of scaled data
-        const maxColorbar = 255;  // Max of scaled data
-        const tickPositions = logValues.map(v =>
-          minValue + ((Math.log10(v) - logMin) / (logMax - logMin)) * (maxValue - minValue)
-        );
-
-        // Step 3: Assign tick positions & labels
-        legendData.colorbar.tickmode = 'array';
-        legendData.colorbar.tickvals = tickPositions;  // Linear positions
-        legendData.colorbar.ticktext = logValues.map(t => t.toPrecision(2)); // Logarithmic labels
-    
-      }   else {
-        // Default linear tick mode for SST & SSS
-        legendData.colorbar.tickmode = 'linear';
-        legendData.colorbar.tick0 = minValue;
-        legendData.colorbar.dtick = (maxValue - minValue) / 5;
-      }
-      
-      // Plot legend with updated settings
-      
-      try {
-        // First check if the container exists and is empty
-        const container = document.getElementById(legendId);
-        if (!container) {
-          throw new Error(`Legend container ${legendId} not found`);
-        }
-        
-        // Clear any existing content
-        container.innerHTML = '';
-        
-        // Create the plot
-        Plotly.newPlot(legendId, [legendData], layout, {displayModeBar: false})
-          .then(() => {
-            // Check if the plot was created
-            const plotElement = container.querySelector('.plotly');
-            if (plotElement) {
-            } else {
-              console.error(`Plot element not found in container ${legendId}`);
-            }
-          })
-          .catch(err => {
-            console.error(`Error creating Plotly plot:`, err);
-            // Log the container's content after the error
-          });
-        
-        // Ensure legend container is visible
-        if (legendContainer) {
-          legendContainer.style.display = 'block';
-        } else {
-          console.error(`Legend container ${legendId} not found!`);
-        }
-      } catch (err) {
-        console.error(`Error in legend creation process:`, err);
-      }
-    })
-    .catch((err) => {
-      console.error(`Error loading ${layerType} legend data:`, err);
-      // Hide the legend container on error
-      if (legendContainer) {
-        legendContainer.style.display = 'none';
-      }
-    });
+  createColorbarLegend({
+    legendId,
+    colormapUrl: getColormapPath(layerType, date),
+    minValue,
+    maxValue,
+    title,
+    tickOverride
+  });
 
   console.log(`Creating legend for ${layerType} with date: ${date}`);
 }
